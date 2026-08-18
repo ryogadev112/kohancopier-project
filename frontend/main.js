@@ -1,94 +1,53 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const orderForm = document.getElementById('orderForm');
-  const fileInput = document.getElementById('pdfFile');
-  const btnSubmit = document.getElementById('btnSubmit');
-  const errorMsg = document.getElementById('errorMsg');
-  const resultCard = document.getElementById('resultCard');
-  const fileNameDisplay = document.getElementById('fileNameDisplay');
-  const btnWhatsapp = document.getElementById('btnWhatsapp');
+const NOMOR_WA_ADMIN = "6288218475220";
 
-  // Silakan sesuaikan nomor WhatsApp toko kamu (format 62)
-  const NO_WA_TOKO = '6281234567890'; 
-
-  fileInput.addEventListener('change', function() {
-    if (this.files && this.files[0]) {
-      fileNameDisplay.innerText = 'File dipilih: ' + this.files[0].name;
-    } else {
-      fileNameDisplay.innerText = '';
-    }
-  });
-
-  orderForm.addEventListener('submit', async (e) => {
+document.getElementById('orderForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
-    if (!fileInput.files[0]) {
-      alert('Silakan pilih file PDF terlebih dahulu!');
-      return;
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Mengunggah & Memproses...';
     }
 
-    const paperSize = document.getElementById('paperSize').value;
-    const printMode = document.querySelector('input[name="printMode"]:checked').value;
-    const bindingOption = document.getElementById('bindingOption').value;
-
-    errorMsg.style.display = 'none';
-    resultCard.classList.remove('active');
-    btnWhatsapp.style.display = 'none';
-    btnSubmit.disabled = true;
-    btnSubmit.innerText = 'Sedang Menganalisis & Menghitung...';
-
-    const formData = new FormData();
-    formData.append('pdfFile', fileInput.files[0]);
-    formData.append('paperSize', paperSize);
-    formData.append('printMode', printMode);
-    formData.append('bindingOption', bindingOption);
+    const formData = new FormData(this);
 
     try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      });
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        });
 
-      const data = await response.json();
+        const result = await response.json();
 
-      if (data.status === 'success') {
-        document.getElementById('resOrderId').innerText = data.orderId;
-        document.getElementById('resPages').innerText = data.totalPages + ' Halaman';
-        document.getElementById('resPrintDetail').innerText = `${data.details.paperSize} (${data.details.printMode === 'bw' ? 'Hitam-Putih' : 'Warna'})`;
-        document.getElementById('resPrintCost').innerText = 'Rp ' + data.details.printCost.toLocaleString('id-ID');
-        document.getElementById('resBindingCost').innerText = 'Rp ' + data.details.bindingCost.toLocaleString('id-ID');
-        document.getElementById('resPrice').innerText = 'Rp ' + data.totalPrice.toLocaleString('id-ID');
+        if (response.ok && result.success) {
+            const orderId = result.orderId || "KC-" + Date.now();
+            const nama = formData.get('nama') || '';
+            const jumlahHalaman = formData.get('jumlahHalaman') || '-';
+            const jenisCetak = formData.get('jenisCetak') || '-';
 
-        // Format pesan WhatsApp
-        const formatMode = data.details.printMode === 'bw' ? 'Hitam-Putih' : 'Warna';
-        const formatJilid = data.details.bindingOption === 'none' ? 'Tanpa Jilid' : data.details.bindingOption;
+            const pesanWA = `Halo Admin KohanCopier,\n\nSaya telah membuat pesanan cetak dokumen baru:` +
+                `\n- *ID Pesanan:* ${orderId}` +
+                `\n- *Nama:* ${nama}` +
+                `\n- *Jumlah Halaman:* ${jumlahHalaman}` +
+                `\n- *Jenis Cetak:* ${jenisCetak}` +
+                `\n\nMohon dicek dan diproses. Terima kasih!`;
 
-        const pesanWA = `Halo KohanCopier, saya ingin konfirmasi pesanan cetak:
+            const urlWA = `https://wa.me/${NOMOR_WA_ADMIN}?text=${encodeURIComponent(pesanWA)}`;
 
-📄 *ID Pesanan:* ${data.orderId}
-📁 *Nama File:* ${fileInput.files[0].name}
-📃 *Jumlah Halaman:* ${data.totalPages} Halaman
-📏 *Ukuran Kertas:* ${data.details.paperSize}
-🎨 *Mode Cetak:* ${formatMode}
-📚 *Jilid:* ${formatJilid}
-💰 *Total Biaya:* Rp ${data.totalPrice.toLocaleString('id-ID')}
-
-Mohon diproses, terima kasih!`;
-
-        const waUrl = `https://wa.me/${NO_WA_TOKO}?text=${encodeURIComponent(pesanWA)}`;
-        btnWhatsapp.href = waUrl;
-        btnWhatsapp.style.display = 'block';
-
-        resultCard.classList.add('active');
-      } else {
-        throw new Error(data.message || 'Gagal memproses pesanan');
-      }
-
-    } catch (err) {
-      errorMsg.innerText = 'Error: ' + err.message;
-      errorMsg.style.display = 'block';
+            alert(`Pesanan Berhasil! ID Pesanan Anda: ${orderId}\nAnda akan diarahkan ke WhatsApp untuk konfirmasi.`);
+            
+            window.open(urlWA, '_blank');
+            this.reset();
+        } else {
+            alert('Gagal mengirim pesanan: ' + (result.message || 'Terjadi kesalahan pada server.'));
+        }
+    } catch (error) {
+        console.error('Error submit order:', error);
+        alert('Terjadi kesalahan koneksi saat mengirim data ke server.');
     } finally {
-      btnSubmit.disabled = false;
-      btnSubmit.innerText = 'Hitung Total & Pesan';
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Kirim Pesanan';
+        }
     }
-  });
 });

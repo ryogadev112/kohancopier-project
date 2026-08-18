@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KohanCopier - Layanan Cetak Online</title>
-    <!-- Memanggil file CSS terpisah -->
+    <title>KohanCopier - Jasa Cetak Online Cepat & Praktis</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="container">
-        <div class="header">
-            <h1>Cetak Dokumen Online</h1>
-            <p>Unggah file PDF kamu & konfirmasi pesanan via WhatsApp</p>
+    <div class="card-box">
+        <div class="brand-header">
+            <div class="logo-icon">🖨️</div>
+            <h1>KohanCopier</h1>
+            <p>Cetak dokumen PDF tanpa ribet, langsung kirim ke WhatsApp!</p>
         </div>
 
         <form id="orderForm" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="nama">Nama Lengkap</label>
-                <input type="text" id="nama" name="nama" placeholder="Contoh: Budi Santoso" required>
+                <input type="text" id="nama" name="nama" placeholder="Masukkan nama kamu..." required>
             </div>
 
             <div class="form-group">
@@ -26,30 +26,36 @@
                 <input type="tel" id="phone" name="phone" placeholder="Contoh: 08123456789" required>
             </div>
 
-            <div class="form-group">
-                <label for="jumlahHalaman">Jumlah Halaman</label>
-                <input type="number" id="jumlahHalaman" name="jumlahHalaman" min="1" value="1" required>
+            <div class="form-row">
+                <div class="form-group half">
+                    <label for="jumlahHalaman">Jumlah Halaman</label>
+                    <input type="number" id="jumlahHalaman" name="jumlahHalaman" min="1" value="1" required>
+                </div>
+
+                <div class="form-group half">
+                    <label for="jenisCetak">Jenis Cetak</label>
+                    <select id="jenisCetak" name="jenisCetak">
+                        <option value="Hitam Putih">Hitam Putih</option>
+                        <option value="Warna">Warna</option>
+                    </select>
+                </div>
             </div>
 
             <div class="form-group">
-                <label for="jenisCetak">Jenis Cetak</label>
-                <select id="jenisCetak" name="jenisCetak">
-                    <option value="Hitam Putih">Hitam Putih</option>
-                    <option value="Warna">Warna</option>
-                </select>
+                <label for="catatan">Catatan / Instruksi Khusus</label>
+                <textarea id="catatan" name="catatan" rows="3" placeholder="Contoh: Jilid klip, cetak bolak-balik, dll. (Opsional)"></textarea>
             </div>
 
             <div class="form-group">
-                <label for="catatan">Catatan Tambahan (Opsional)</label>
-                <textarea id="catatan" name="catatan" placeholder="Contoh: Jilid klip, cetak bolak-balik, dll."></textarea>
+                <label for="file">Upload Dokumen (PDF)</label>
+                <div class="file-input-wrapper">
+                    <input type="file" id="file" name="file" accept=".pdf" required>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="file">Unggah File Dokumen (PDF)</label>
-                <input type="file" id="file" name="file" accept=".pdf" required>
-            </div>
-
-            <button type="submit" id="submitBtn" class="btn-primary">Kirim Pesanan</button>
+            <button type="submit" id="submitBtn" class="btn-primary">
+                <span>🚀 Kirim Pesanan Sekarang</span>
+            </button>
         </form>
     </div>
 

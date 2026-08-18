@@ -4,17 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KohanCopier - Layanan Cetak Online</title>
+    <!-- Memanggil file CSS terpisah -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <div class="container">
-        <h1>Pemesanan Cetak Dokumen</h1>
-        <p>Unggah file PDF kamu dan konfirmasi pesanan via WhatsApp.</p>
-        
+        <div class="header">
+            <h1>Cetak Dokumen Online</h1>
+            <p>Unggah file PDF kamu & konfirmasi pesanan via WhatsApp</p>
+        </div>
+
         <form id="orderForm" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="nama">Nama Lengkap</label>
-                <input type="text" id="nama" name="nama" placeholder="Masukkan nama kamu" required>
+                <input type="text" id="nama" name="nama" placeholder="Contoh: Budi Santoso" required>
             </div>
 
             <div class="form-group">
@@ -36,16 +40,16 @@
             </div>
 
             <div class="form-group">
-                <label for="catatan">Catatan Tambahan</label>
-                <textarea id="catatan" name="catatan" placeholder="Keterangan tambahan (opsional)"></textarea>
+                <label for="catatan">Catatan Tambahan (Opsional)</label>
+                <textarea id="catatan" name="catatan" placeholder="Contoh: Jilid klip, cetak bolak-balik, dll."></textarea>
             </div>
 
             <div class="form-group">
-                <label for="file">Unggah File (PDF)</label>
+                <label for="file">Unggah File Dokumen (PDF)</label>
                 <input type="file" id="file" name="file" accept=".pdf" required>
             </div>
 
-            <button type="submit" id="submitBtn">Kirim Pesanan</button>
+            <button type="submit" id="submitBtn" class="btn-primary">Kirim Pesanan</button>
         </form>
     </div>
 

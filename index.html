@@ -8,57 +8,100 @@
 </head>
 <body>
 
-    <div class="card-box">
-        <div class="brand-header">
-            <div class="logo-icon">🖨️</div>
-            <h1>KohanCopier</h1>
-            <p>Cetak dokumen PDF tanpa ribet, langsung kirim ke WhatsApp!</p>
-        </div>
-
-        <form id="orderForm" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="nama">Nama Lengkap</label>
-                <input type="text" id="nama" name="nama" placeholder="Masukkan nama kamu..." required>
-            </div>
-
-            <div class="form-group">
-                <label for="phone">Nomor WhatsApp</label>
-                <input type="tel" id="phone" name="phone" placeholder="Contoh: 08123456789" required>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group half">
-                    <label for="jumlahHalaman">Jumlah Halaman</label>
-                    <input type="number" id="jumlahHalaman" name="jumlahHalaman" min="1" value="1" required>
+    <div class="main-wrapper">
+        <!-- Bagian 1: Perkenalan & Keunggulan -->
+        <section class="hero-section">
+            <div class="hero-icon">🖨️</div>
+            <h1>Selamat Datang di <span>KohanCopier</span></h1>
+            <p>Solusi cetak dokumen PDF online anti ribet. Kirim file dari rumah, ambil atau tunggu pesanan dikirim langsung ke lokasi kamu!</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Proses Cepat</h3>
+                    <p>Pesanan langsung diproses setelah konfirmasi via WhatsApp.</p>
                 </div>
-
-                <div class="form-group half">
-                    <label for="jenisCetak">Jenis Cetak</label>
-                    <select id="jenisCetak" name="jenisCetak">
-                        <option value="Hitam Putih">Hitam Putih</option>
-                        <option value="Warna">Warna</option>
-                    </select>
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>Harga Terjangkau</h3>
+                    <p>Cetak hitam putih & warna dengan harga mahasiswa/pelajar.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Serba Digital</h3>
+                    <p>Tidak perlu antre, cukup upload file PDF kamu di sini.</p>
                 </div>
             </div>
+        </section>
 
-            <div class="form-group">
-                <label for="catatan">Catatan / Instruksi Khusus</label>
-                <textarea id="catatan" name="catatan" rows="3" placeholder="Contoh: Jilid klip, cetak bolak-balik, dll. (Opsional)"></textarea>
+        <!-- Bagian 2: Form Upload File & Pemesanan -->
+        <section class="card-box" id="order-section">
+            <div class="section-title">
+                <h2>📄 Form Pemesanan Cetak</h2>
+                <p>Isi data dan upload file PDF kamu di bawah ini</p>
             </div>
 
-            <div class="form-group">
-                <label for="file">Upload Dokumen (PDF)</label>
-                <div class="file-input-wrapper">
+            <form id="orderForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="nama">Nama Lengkap</label>
+                    <input type="text" id="nama" name="nama" placeholder="Masukkan nama kamu..." required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Nomor WhatsApp</label>
+                    <input type="tel" id="phone" name="phone" placeholder="Contoh: 08123456789" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="jumlahHalaman">Jumlah Halaman</label>
+                        <input type="number" id="jumlahHalaman" name="jumlahHalaman" min="1" value="1" required>
+                    </div>
+
+                    <div class="form-group half">
+                        <label for="jenisCetak">Jenis Cetak</label>
+                        <select id="jenisCetak" name="jenisCetak">
+                            <option value="Hitam Putih">Hitam Putih</option>
+                            <option value="Warna">Warna</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="catatan">Catatan / Catatan Khusus</label>
+                    <textarea id="catatan" name="catatan" rows="3" placeholder="Contoh: Jilid klip, cetak bolak-balik, dll. (Opsional)"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="file">Upload Dokumen (PDF)</label>
                     <input type="file" id="file" name="file" accept=".pdf" required>
                 </div>
+
+                <button type="submit" id="submitBtn" class="btn-primary">
+                    <span>🚀 Kirim Pesanan via WhatsApp</span>
+                </button>
+            </form>
+        </section>
+
+        <!-- Bagian 3: Lacak Pesanan -->
+        <section class="card-box track-box" id="track-section">
+            <div class="section-title">
+                <h2>🔍 Lacak Status Pesanan</h2>
+                <p>Masukkan ID Pesanan kamu untuk melihat status pengerjaan</p>
             </div>
 
-            <button type="submit" id="submitBtn" class="btn-primary">
-                <span>🚀 Kirim Pesanan Sekarang</span>
-            </button>
-        </form>
+            <form id="trackForm">
+                <div class="form-group">
+                    <input type="text" id="orderIdInput" placeholder="Contoh ID: KC-1700000000000" required>
+                </div>
+                <button type="submit" class="btn-secondary">Cari Pesanan</button>
+            </form>
+
+            <div id="trackResult"></div>
+        </section>
     </div>
 
     <script src="main.js"></script>
+    <script src="track.js"></script>
 </body>
 </html>

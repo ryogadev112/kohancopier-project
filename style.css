@@ -8,44 +8,107 @@
 body {
     background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
     min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
+    padding: 40px 20px;
     color: #2d3748;
 }
 
+.main-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Section 1: Hero & Keunggulan */
+.hero-section {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    padding: 40px 20px;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+}
+
+.hero-icon {
+    font-size: 50px;
+    margin-bottom: 10px;
+}
+
+.hero-section h1 {
+    font-size: 32px;
+    color: #1a202c;
+    margin-bottom: 10px;
+}
+
+.hero-section h1 span {
+    color: #3182ce;
+}
+
+.hero-section p {
+    font-size: 16px;
+    color: #4a5568;
+    max-width: 600px;
+    margin: 0 auto 30px auto;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.feature-card {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+.feature-icon {
+    font-size: 30px;
+    margin-bottom: 8px;
+}
+
+.feature-card h3 {
+    font-size: 16px;
+    margin-bottom: 6px;
+    color: #2d3748;
+}
+
+.feature-card p {
+    font-size: 13px;
+    color: #718096;
+    margin-bottom: 0;
+}
+
+/* Card Box (Form & Track) */
 .card-box {
     background: #ffffff;
     width: 100%;
-    max-width: 480px;
-    padding: 32px 28px;
+    padding: 35px;
     border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-.brand-header {
+.section-title {
     text-align: center;
     margin-bottom: 24px;
 }
 
-.brand-header .logo-icon {
-    font-size: 42px;
-    margin-bottom: 8px;
-}
-
-.brand-header h1 {
-    font-size: 26px;
+.section-title h2 {
+    font-size: 22px;
     color: #1a202c;
-    font-weight: 700;
+    margin-bottom: 6px;
 }
 
-.brand-header p {
+.section-title p {
     font-size: 14px;
     color: #718096;
-    margin-top: 4px;
 }
 
+/* Input Forms */
 .form-group {
     margin-bottom: 18px;
 }
@@ -65,8 +128,6 @@ body {
     font-size: 13px;
     font-weight: 600;
     color: #4a5568;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
 .form-group input, 
@@ -90,10 +151,6 @@ body {
     box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
 }
 
-.form-group textarea {
-    resize: vertical;
-}
-
 .btn-primary {
     width: 100%;
     padding: 14px;
@@ -106,7 +163,6 @@ body {
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
     transition: transform 0.1s ease, box-shadow 0.2s ease;
-    margin-top: 10px;
 }
 
 .btn-primary:hover {
@@ -114,6 +170,19 @@ body {
     box-shadow: 0 6px 16px rgba(49, 130, 206, 0.4);
 }
 
-.btn-primary:active {
-    transform: translateY(0);
+.btn-secondary {
+    width: 100%;
+    padding: 12px;
+    background-color: #4a5568;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-secondary:hover {
+    background-color: #2d3748;
 }

@@ -34,10 +34,17 @@ document.getElementById('orderForm')?.addEventListener('submit', async function(
 
             const urlWA = `https://wa.me/${NOMOR_WA_ADMIN}?text=${encodeURIComponent(pesanWA)}`;
 
-            alert(`Pesanan Berhasil! ID Pesanan Anda: ${orderId}\nAnda akan diarahkan ke WhatsApp.`);
+            alert(`Pesanan Berhasil!\nID Pesanan Anda: ${orderId}\n\nAnda akan diarahkan ke WhatsApp untuk konfirmasi.`);
             
             window.open(urlWA, '_blank');
             this.reset();
+            
+            // Reset tampilan drag & drop
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+            const dropZone = document.getElementById('dropZone');
+            if (fileNameDisplay) fileNameDisplay.textContent = 'Belum ada file dipilih';
+            if (dropZone) dropZone.classList.remove('has-file');
+
         } else {
             alert('Gagal mengirim pesanan: ' + (result.message || 'Terjadi kesalahan pada server.'));
         }
@@ -47,7 +54,7 @@ document.getElementById('orderForm')?.addEventListener('submit', async function(
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerText = 'Kirim Pesanan';
+            submitBtn.innerHTML = '<span>🚀 Kirim Pesanan Sekarang</span>';
         }
     }
 });

@@ -3,48 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KohanCopier - Jasa Cetak Online Cepat & Praktis</title>
+    <title>KohanCopier - Cetak Dokumen Online Cepat & Praktis</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="main-wrapper">
-        <!-- Bagian 1: Perkenalan & Keunggulan -->
+    <!-- Header Navigation -->
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="brand-logo">
+                <span class="logo-icon">🖨️</span>
+                <span class="logo-text">Kohan<span>Copier</span></span>
+            </div>
+            <div class="store-badge">
+                <span class="pulse-dot"></span> Buka Hari Ini
+            </div>
+        </div>
+    </header>
+
+    <main class="main-wrapper">
+        <!-- Hero Section -->
         <section class="hero-section">
-            <div class="hero-icon">🖨️</div>
-            <h1>Selamat Datang di <span>KohanCopier</span></h1>
-            <p>Solusi cetak dokumen PDF online anti ribet. Kirim file dari rumah, ambil atau tunggu pesanan dikirim langsung ke lokasi kamu!</p>
-            
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h3>Proses Cepat</h3>
-                    <p>Pesanan langsung diproses setelah konfirmasi via WhatsApp.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">💰</div>
-                    <h3>Harga Terjangkau</h3>
-                    <p>Cetak hitam putih & warna dengan harga mahasiswa/pelajar.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📱</div>
-                    <h3>Serba Digital</h3>
-                    <p>Tidak perlu antre, cukup upload file PDF kamu di sini.</p>
-                </div>
+            <div class="hero-tag">⚡ Layanan Print PDF Online #1</div>
+            <h1>Cetak Dokumen Tanpa Antre, Kirim Langsung via WhatsApp</h1>
+            <p>Unggah berkas PDF kamu, tentukan spesifikasi cetak, dan ambil atau terima dokumen dengan cepat dan rapi.</p>
+        </section>
+
+        <!-- Cara Kerja (Steps) -->
+        <section class="steps-grid">
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <h3>Unggah File</h3>
+                <p>Pilih atau tarik dokumen PDF yang ingin dicetak.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <h3>Atur Opsi</h3>
+                <p>Tentukan jumlah halaman & jenis warna.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <h3>Kirim WA</h3>
+                <p>Konfirmasi otomatis & dokumen siap diproses.</p>
             </div>
         </section>
 
-        <!-- Bagian 2: Form Upload File & Pemesanan -->
+        <!-- Form Pemesanan Utam -->
         <section class="card-box" id="order-section">
-            <div class="section-title">
+            <div class="section-header">
                 <h2>📄 Form Pemesanan Cetak</h2>
-                <p>Isi data dan upload file PDF kamu di bawah ini</p>
+                <p>Lengkapi data di bawah ini untuk memulai pesanan</p>
             </div>
 
             <form id="orderForm" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="nama">Nama Lengkap</label>
-                    <input type="text" id="nama" name="nama" placeholder="Masukkan nama kamu..." required>
+                    <input type="text" id="nama" name="nama" placeholder="Contoh: Ahmad Rizky" required>
                 </div>
 
                 <div class="form-group">
@@ -61,47 +75,66 @@
                     <div class="form-group half">
                         <label for="jenisCetak">Jenis Cetak</label>
                         <select id="jenisCetak" name="jenisCetak">
-                            <option value="Hitam Putih">Hitam Putih</option>
-                            <option value="Warna">Warna</option>
+                            <option value="Hitam Putih">Hitam Putih (B&W)</option>
+                            <option value="Warna">Warna (Color)</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="catatan">Catatan / Catatan Khusus</label>
-                    <textarea id="catatan" name="catatan" rows="3" placeholder="Contoh: Jilid klip, cetak bolak-balik, dll. (Opsional)"></textarea>
+                    <textarea id="catatan" name="catatan" rows="3" placeholder="Contoh: Jilid klip, cetak bolak-balik, kertas A4 80gr..."></textarea>
                 </div>
 
+                <!-- Custom Drag & Drop File Upload Area -->
                 <div class="form-group">
-                    <label for="file">Upload Dokumen (PDF)</label>
-                    <input type="file" id="file" name="file" accept=".pdf" required>
+                    <label>File Dokumen (PDF)</label>
+                    <div class="drop-zone" id="dropZone">
+                        <div class="drop-icon">📑</div>
+                        <p class="drop-text"><strong>Klik untuk pilih file</strong> atau seret PDF ke sini</p>
+                        <span class="file-name-display" id="fileNameDisplay">Belum ada file dipilih</span>
+                        <input type="file" id="file" name="file" accept=".pdf" class="file-input-hidden" required>
+                    </div>
                 </div>
 
                 <button type="submit" id="submitBtn" class="btn-primary">
-                    <span>🚀 Kirim Pesanan via WhatsApp</span>
+                    <span>🚀 Kirim Pesanan Sekarang</span>
                 </button>
             </form>
         </section>
 
-        <!-- Bagian 3: Lacak Pesanan -->
-        <section class="card-box track-box" id="track-section">
-            <div class="section-title">
+        <!-- Section Lacak Pesanan -->
+        <section class="card-box track-box">
+            <div class="section-header">
                 <h2>🔍 Lacak Status Pesanan</h2>
-                <p>Masukkan ID Pesanan kamu untuk melihat status pengerjaan</p>
+                <p>Cek progres pengerjaan pesanan kamu di sini</p>
             </div>
 
-            <form id="trackForm">
-                <div class="form-group">
-                    <input type="text" id="orderIdInput" placeholder="Contoh ID: KC-1700000000000" required>
-                </div>
-                <button type="submit" class="btn-secondary">Cari Pesanan</button>
+            <form id="trackForm" class="track-form-inline">
+                <input type="text" id="orderIdInput" placeholder="Masukkan ID Pesanan (Contoh: KC-17000...)" required>
+                <button type="submit" class="btn-secondary">Cari</button>
             </form>
 
             <div id="trackResult"></div>
         </section>
-    </div>
+    </main>
 
     <script src="main.js"></script>
     <script src="track.js"></script>
+    <script>
+        // Visual handler untuk Custom Drag & Drop Input
+        const fileInput = document.getElementById('file');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const dropZone = document.getElementById('dropZone');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.textContent = '📄 ' + fileInput.files[0].name;
+                dropZone.classList.add('has-file');
+            }
+        });
+    </script>
 </body>
 </html>

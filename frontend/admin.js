@@ -5,6 +5,7 @@ document.getElementById('loginForm')?.addEventListener('submit', async function(
     const passwordInput = document.getElementById('password').value;
 
     try {
+        // Memanggil endpoint backend
         const res = await fetch('/api/admin/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -14,49 +15,24 @@ document.getElementById('loginForm')?.addEventListener('submit', async function(
         const data = await res.json();
 
         if (res.ok && data.success) {
-            localStorage.setItem('adminToken', data.token);
             alert('Login Berhasil!');
-            document.getElementById('loginSection').style.display = 'none';
-            document.getElementById('dashboardSection').style.display = 'block';
-            loadOrders();
+            
+            // Sembunyikan form login & tampilkan dashboard
+            const loginSection = document.getElementById('loginSection');
+            const dashboardSection = document.getElementById('dashboardSection');
+            
+            if (loginSection) loginSection.style.display = 'none';
+            if (dashboardSection) dashboardSection.style.display = 'block';
+
+            // Muat data pesanan
+            if (typeof loadOrders === 'function') {
+                loadOrders();
+            }
         } else {
-            alert(data.message || 'Login gagal!');
+            alert(data.message || 'Username atau Password salah!');
         }
     } catch (err) {
-        console.error(err);
-        alert('Gagal menghubungkan ke server.');
+        console.error('Login error:', err);
+        alert('Gagal menghubungkan ke server. Pastikan jaringan stabil.');
     }
 });
-
-async function loadOrders() {
-    try {
-        const res = await fetch('/api/orders');
-        const orders = await res.json();
-        
-        const tableBody = document.getElementById('ordersTableBody');
-        if (!tableBody) return;
-        
-        tableBody.innerHTML = '';
-        
-        if (orders.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Belum ada pesanan.</td></tr>';
-            return;
-        }
-
-        orders.forEach(order => {
-            const row = `
-                <tr>
-                    <td>${order.id}</td>
-                    <td>${order.nama}</td>
-                    <td>${order.phone}</td>
-                    <td>${order.jumlahHalaman} (${order.jenisCetak})</td>
-                    <td>${order.status}</td>
-                    <td>${order.file}</td>
-                </tr>
-            `;
-            tableBody.innerHTML += row;
-        });
-    } catch (err) {
-        console.error('Error loading orders:', err);
-    }
-}

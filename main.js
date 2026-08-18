@@ -6,30 +6,48 @@ document.getElementById('orderForm')?.addEventListener('submit', async function(
     const submitBtn = document.getElementById('submitBtn');
     if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerText = 'Mengunggah...';
+        submitBtn.innerText = 'Mengirim Pesanan...';
     }
 
-    const formData = new FormData(this);
+    const nama = document.getElementById('nama')?.value.trim() || '';
+    const phone = document.getElementById('phone')?.value.trim() || '';
+    const jumlahHalaman = document.getElementById('jumlahHalaman')?.value || '1';
+    const jenisCetak = document.getElementById('jenisCetak')?.value || 'Hitam Putih';
+    const catatan = document.getElementById('catatan')?.value.trim() || '-';
+    const fileInput = document.getElementById('file');
+    const fileName = fileInput && fileInput.files.length > 0 ? fileInput.files[0].name : 'Tidak Ada File';
+
+    const payload = {
+        nama,
+        phone,
+        jumlahHalaman,
+        jenisCetak,
+        catatan,
+        fileName
+    };
 
     try {
         const response = await fetch('/api/upload', {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
         });
 
         const result = await response.json();
 
         if (response.ok && result.success) {
             const orderId = result.orderId || "KC-" + Date.now();
-            const nama = formData.get('nama') || '';
-            const jumlahHalaman = formData.get('jumlahHalaman') || '-';
-            const jenisCetak = formData.get('jenisCetak') || '-';
 
             const pesanWA = `Halo Admin KohanCopier,\n\nSaya telah membuat pesanan cetak dokumen baru:` +
                 `\n- *ID Pesanan:* ${orderId}` +
                 `\n- *Nama:* ${nama}` +
+                `\n- *No WA:* ${phone}` +
                 `\n- *Jumlah Halaman:* ${jumlahHalaman}` +
                 `\n- *Jenis Cetak:* ${jenisCetak}` +
+                `\n- *Nama File:* ${fileName}` +
+                `\n- *Catatan:* ${catatan}` +
                 `\n\nMohon dicek dan diproses. Terima kasih!`;
 
             const urlWA = `https://wa.me/${NOMOR_WA_ADMIN}?text=${encodeURIComponent(pesanWA)}`;
@@ -39,18 +57,18 @@ document.getElementById('orderForm')?.addEventListener('submit', async function(
             window.open(urlWA, '_blank');
             this.reset();
             
-            // Reset tampilan drag & drop
+            // Reset tampilan visual file
             const fileNameDisplay = document.getElementById('fileNameDisplay');
             const dropZone = document.getElementById('dropZone');
             if (fileNameDisplay) fileNameDisplay.textContent = 'Belum ada file dipilih';
             if (dropZone) dropZone.classList.remove('has-file');
 
         } else {
-            alert('Gagal mengirim pesanan: ' + (result.message || 'Terjadi kesalahan pada server.'));
+            alert('Gagal mengirim pesanan: ' + (result.message || 'Terjadi kesalahan server.'));
         }
     } catch (error) {
         console.error('Error submit order:', error);
-        alert('Terjadi kesalahan koneksi saat mengirim data.');
+        alert('Terjadi kesalahan koneksi saat mengirim data. Pastikan koneksi internet stabil.');
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;

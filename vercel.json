@@ -1,10 +1,6 @@
 {
-  "version": 2,
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/backend/server.js" },
     { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/admin.html", "destination": "/admin.html" },
-    { "source": "/track", "destination": "/track.html" },
-    { "source": "/track.html", "destination": "/track.html" }
+    { "source": "/track", "destination": "/track.html" }
   ]
 }

@@ -1,57 +1,42 @@
 const express = require('express');
-const multer = require('multer');
 const cors = require('cors');
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const upload = multer({ dest: '/tmp/' });
-
+// Database dummy sementara (tersimpan di memory serverless)
 let orders = [];
 
-app.post('/api/upload', upload.single('file'), (req, res) => {
-    try {
-        const { nama, phone, jumlahHalaman, jenisCetak, catatan } = req.body;
-        const orderId = 'KC-' + Date.now();
-
-        const newOrder = {
-            id: orderId,
-            nama: nama || 'Tanpa Nama',
-            phone: phone || '-',
-            jumlahHalaman: jumlahHalaman || 1,
-            jenisCetak: jenisCetak || 'Hitam Putih',
-            catatan: catatan || '-',
-            file: req.file ? req.file.originalname : 'Tidak Ada File',
-            status: 'Pending',
-            createdAt: new Date()
-        };
-
-        orders.push(newOrder);
-
-        return res.status(200).json({
-            success: true,
-            orderId: orderId,
-            message: 'Pesanan berhasil dibuat!'
-        });
-    } catch (error) {
-        return res.status(500).json({ success: false, message: error.message });
-    }
-});
-
+// Endpoint Login Admin
 app.post('/api/admin/login', (req, res) => {
-    const { username, password } = req.body;
-    if (username === 'admin' && password === 'admin123') {
-        return res.status(200).json({ success: true, token: 'secret-token-123' });
+    try {
+        const { username, password } = req.body || {};
+        
+        if (username === 'admin' && password === 'admin123') {
+            return res.status(200).json({ 
+                success: true, 
+                message: 'Login Berhasil!' 
+            });
+        }
+        
+        return res.status(401).json({ 
+            success: false, 
+            message: 'Username atau Password salah!' 
+        });
+    } catch (err) {
+        return res.status(500).json({ success: false, message: 'Server Error' });
     }
-    return res.status(401).json({ success: false, message: 'Username atau Password Salah!' });
 });
 
+// Endpoint Ambil Daftar Pesanan
 app.get('/api/orders', (req, res) => {
     res.status(200).json(orders);
 });
 
+// Endpoint Lacak Pesanan
 app.get('/api/orders/:id', (req, res) => {
     const order = orders.find(o => o.id === req.params.id);
     if (order) {
@@ -61,6 +46,7 @@ app.get('/api/orders/:id', (req, res) => {
     }
 });
 
+// Export Express app untuk Vercel Serverless Function
 module.exports = app;
 
 if (process.env.NODE_ENV !== 'production') {

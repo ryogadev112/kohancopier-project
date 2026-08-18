@@ -1,30 +1,25 @@
-document.getElementById('trackForm')?.addEventListener('submit', async function(e) {
-    e.preventDefault();
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lacak Pesanan - KohanCopier</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Lacak Pesanan Anda</h1>
+        <form id="trackForm">
+            <div class="form-group">
+                <label for="orderIdInput">Masukkan ID Pesanan</label>
+                <input type="text" id="orderIdInput" placeholder="Contoh: KC-1700000000000" required>
+            </div>
+            <button type="submit" class="btn-primary">Cari Pesanan</button>
+        </form>
 
-    const orderId = document.getElementById('orderIdInput').value.trim();
-    const resultDiv = document.getElementById('trackResult');
+        <div id="trackResult"></div>
+    </div>
 
-    if (!orderId) return;
-
-    try {
-        const res = await fetch(`/api/orders/${orderId}`);
-        const data = await res.json();
-
-        if (res.ok && data.success) {
-            const order = data.order;
-            resultDiv.innerHTML = `
-                <div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px; margin-top: 15px;">
-                    <h3>Status Pesanan: <span style="color: blue;">${order.status}</span></h3>
-                    <p><strong>ID:</strong> ${order.id}</p>
-                    <p><strong>Nama:</strong> ${order.nama}</p>
-                    <p><strong>Detail:</strong> ${order.jumlahHalaman} Halaman (${order.jenisCetak})</p>
-                </div>
-            `;
-        } else {
-            resultDiv.innerHTML = `<p style="color: red;">${data.message || 'Pesanan tidak ditemukan.'}</p>`;
-        }
-    } catch (err) {
-        console.error(err);
-        alert('Gagal mengambil data dari server.');
-    }
-});
+    <script src="track.js"></script>
+</body>
+</html>

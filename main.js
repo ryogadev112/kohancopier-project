@@ -1,12 +1,12 @@
 const NOMOR_WA_ADMIN = "6288218475220";
 
-document.getElementById('orderForm').addEventListener('submit', async function(e) {
+document.getElementById('orderForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
 
     const submitBtn = document.getElementById('submitBtn');
     if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerText = 'Mengunggah & Memproses...';
+        submitBtn.innerText = 'Mengunggah...';
     }
 
     const formData = new FormData(this);
@@ -34,7 +34,7 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
 
             const urlWA = `https://wa.me/${NOMOR_WA_ADMIN}?text=${encodeURIComponent(pesanWA)}`;
 
-            alert(`Pesanan Berhasil! ID Pesanan Anda: ${orderId}\nAnda akan diarahkan ke WhatsApp untuk konfirmasi.`);
+            alert(`Pesanan Berhasil! ID Pesanan Anda: ${orderId}\nAnda akan diarahkan ke WhatsApp.`);
             
             window.open(urlWA, '_blank');
             this.reset();
@@ -43,7 +43,7 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
         }
     } catch (error) {
         console.error('Error submit order:', error);
-        alert('Terjadi kesalahan koneksi saat mengirim data ke server.');
+        alert('Terjadi kesalahan koneksi saat mengirim data.');
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;

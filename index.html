@@ -1,10 +1,54 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta http-equiv="refresh" content="0; url=/frontend/index.html">
-    <title>KohanCopier</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KohanCopier - Layanan Cetak Online</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <p>Mengarahkan ke halaman utama...</p>
+    <div class="container">
+        <h1>Pemesanan Cetak Dokumen</h1>
+        <p>Unggah file PDF kamu dan konfirmasi pesanan via WhatsApp.</p>
+        
+        <form id="orderForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="nama">Nama Lengkap</label>
+                <input type="text" id="nama" name="nama" placeholder="Masukkan nama kamu" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Nomor WhatsApp</label>
+                <input type="tel" id="phone" name="phone" placeholder="Contoh: 08123456789" required>
+            </div>
+
+            <div class="form-group">
+                <label for="jumlahHalaman">Jumlah Halaman</label>
+                <input type="number" id="jumlahHalaman" name="jumlahHalaman" min="1" value="1" required>
+            </div>
+
+            <div class="form-group">
+                <label for="jenisCetak">Jenis Cetak</label>
+                <select id="jenisCetak" name="jenisCetak">
+                    <option value="Hitam Putih">Hitam Putih</option>
+                    <option value="Warna">Warna</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="catatan">Catatan Tambahan</label>
+                <textarea id="catatan" name="catatan" placeholder="Keterangan tambahan (opsional)"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="file">Unggah File (PDF)</label>
+                <input type="file" id="file" name="file" accept=".pdf" required>
+            </div>
+
+            <button type="submit" id="submitBtn">Kirim Pesanan</button>
+        </form>
+    </div>
+
+    <script src="main.js"></script>
 </body>
 </html>

@@ -8,27 +8,31 @@ document.addEventListener('DOMContentLoaded', () => {
             const usernameInput = document.getElementById('username').value;
             const passwordInput = document.getElementById('password').value;
 
-            // Verifikasi Admin sederhana
-            if (usernameInput === 'admin' && passwordInput === 'admin123') {
-                alert('Login Berhasil!');
-                
-                // Sembunyikan Form Login & Tampilkan Dashboard
-                const loginSection = document.getElementById('loginSection');
-                const dashboardSection = document.getElementById('dashboardSection');
+            try {
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: usernameInput, password: passwordInput })
+                });
 
-                if (loginSection) loginSection.style.display = 'none';
-                if (dashboardSection) dashboardSection.style.display = 'block';
+                const data = await res.json();
 
-                // Muat daftar pesanan
-                loadOrders();
-            } else {
-                alert('Username atau Password salah!');
+                if (res.ok && data.success) {
+                    alert('Login Berhasil!');
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('dashboardSection').style.display = 'block';
+                    loadOrders();
+                } else {
+                    alert(data.message || 'Username atau Password salah!');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Gagal terhubung ke server.');
             }
         });
     }
 });
 
-// Fungsi memuat data pesanan
 async function loadOrders() {
     try {
         const res = await fetch('/api/orders');
@@ -50,7 +54,7 @@ async function loadOrders() {
                     <td>${order.id}</td>
                     <td>${order.nama}</td>
                     <td>${order.phone}</td>
-                    <td>${order.jumlahHalaman} halaman (${order.jenisCetak})</td>
+                    <td>${order.jumlahHalaman} Halaman (${order.jenisCetak})</td>
                     <td><b style="color: green;">${order.status}</b></td>
                     <td>${order.file}</td>
                 </tr>

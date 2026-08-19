@@ -1,7 +1,6 @@
 const NOMOR_WA_ADMIN = "6288218475220";
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbygZAOIByubAG6QRE7aG8NkWCkUhvNIOVC3XAb0p5BL4FAlTbsE48HUmCkM-UNYF6XVgg/exec";
 
-document.getElementById('orderForm')?.addEventListener('submit', function(e) {
+document.getElementById('orderForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
 
     const submitBtn = document.getElementById('submitBtn');
@@ -31,16 +30,12 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
             catatan: catatan
         };
 
-        // 1. Pengiriman data background paling aman menggunakan sendBeacon / Image
-        const params = new URLSearchParams(payload).toString();
-        const fullUrl = `${GOOGLE_SCRIPT_URL}?${params}`;
-
-        if (navigator.sendBeacon) {
-            navigator.sendBeacon(fullUrl);
-        } else {
-            const img = new Image();
-            img.src = fullUrl;
-        }
+        // 1. Kirim data ke API Vercel internal (Pasti berhasil & bebas CORS)
+        await fetch('/api/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
 
         // 2. Isi data Pop-up Modal
         const elOrderId = document.getElementById('modalOrderId');
@@ -57,13 +52,13 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
         const modal = document.getElementById('orderModal');
         if (modal) modal.style.display = 'flex';
 
-        // 4. Reset Tombol Utam
+        // 4. Reset Tombol Utama
         if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<span>🚀 Kirim Pesanan Sekarang</span>';
         }
 
-        // 5. Set Link WhatsApp
+        // 5. Siapkan Link WhatsApp
         const pesanWA = `Halo Admin KohanCopier,\n\nSaya telah membuat pesanan cetak dokumen baru:` +
             `\n- *ID Pesanan:* ${orderId}` +
             `\n- *Nama:* ${nama}` +

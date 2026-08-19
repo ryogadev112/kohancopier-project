@@ -1,11 +1,12 @@
 const NOMOR_WA_ADMIN = "6288218475220";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyotw4ez7OI14rmdQVuHsdBGHx3t1z4WcLnSGWNF17yXMQ3FJzsv1HZWUWRFlXFS84Psg/exec";
 
-document.getElementById('orderForm')?.addEventListener('submit', async function(e) {
+document.getElementById('orderForm')?.addEventListener('submit', function(e) {
     e.preventDefault();
 
     const submitBtn = document.getElementById('submitBtn');
     
-    // 1. Tampilkan animasi spinner & teks loading
+    // 1. Tampilkan animasi spinner & kunci tombol
     if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = `<span class="btn-loading"><span class="spinner"></span> <span>Memproses Pesanan...</span></span>`;
@@ -32,11 +33,11 @@ document.getElementById('orderForm')?.addEventListener('submit', async function(
             catatan: catatan
         };
 
-        // 2. Kirim data ke Vercel Backend Proxy dan tunggu hingga tersimpan di Sheets
-        await fetch('/api/orders', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+        // 2. Kirim data langsung ke Google Sheets (Direct Fetch no-cors)
+        const params = new URLSearchParams(payload).toString();
+        fetch(`${GOOGLE_SCRIPT_URL}?${params}`, {
+            method: 'GET',
+            mode: 'no-cors'
         });
 
         // 3. Masukkan data ke Modal Detail Pesanan
@@ -50,16 +51,18 @@ document.getElementById('orderForm')?.addEventListener('submit', async function(
         if (elFile) elFile.innerText = fileName;
         if (elDetail) elDetail.innerText = `${jumlahHalaman} Halaman (${jenisCetak})`;
 
-        // 4. Buka Modal Pop-up & Reset Tombol
-        const modal = document.getElementById('orderModal');
-        if (modal) modal.style.display = 'flex';
+        // 4. Beri jeda 500ms lalu tampilkan Modal Pop-up
+        setTimeout(() => {
+            const modal = document.getElementById('orderModal');
+            if (modal) modal.style.display = 'flex';
 
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<span>🚀 Kirim Pesanan Sekarang</span>';
-        }
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>🚀 Kirim Pesanan Sekarang</span>';
+            }
+        }, 500);
 
-        // 5. Siapkan Pesan & Link WhatsApp
+        // 5. Siapkan Link WhatsApp
         const pesanWA = `Halo Admin KohanCopier,\n\nSaya telah membuat pesanan cetak dokumen baru:` +
             `\n- *ID Pesanan:* ${orderId}` +
             `\n- *Nama:* ${nama}` +
@@ -81,7 +84,7 @@ document.getElementById('orderForm')?.addEventListener('submit', async function(
 
     } catch (error) {
         console.error("Error processing form:", error);
-        alert("Terjadi kesalahan saat memproses pesanan. Silakan coba lagi.");
+        alert("Terjadi kesalahan. Silakan coba lagi.");
         if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<span>🚀 Kirim Pesanan Sekarang</span>';

@@ -6,7 +6,7 @@ document.getElementById('orderForm')?.addEventListener('submit', async function(
     const submitBtn = document.getElementById('submitBtn');
     if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerText = 'Mengirim Pesanan...';
+        submitBtn.innerText = 'Menyimpan & Mengirim...';
     }
 
     const nama = document.getElementById('nama')?.value.trim() || '';
@@ -26,17 +26,18 @@ document.getElementById('orderForm')?.addEventListener('submit', async function(
         jumlahHalaman,
         jenisCetak,
         catatan,
-        fileName,
-        createdAt: new Date().toISOString()
+        fileName
     };
 
     try {
-        // Simpan data ke database API
-        await fetch('/api/orders', {
+        // Tunggu hingga simpan ke Google Sheets benar-benar selesai
+        const res = await fetch('/api/orders', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
+
+        await res.json();
 
         // Buat Pesan WA
         const pesanWA = `Halo Admin KohanCopier,\n\nSaya telah membuat pesanan cetak dokumen baru:` +
@@ -51,23 +52,15 @@ document.getElementById('orderForm')?.addEventListener('submit', async function(
 
         const urlWA = `https://wa.me/${NOMOR_WA_ADMIN}?text=${encodeURIComponent(pesanWA)}`;
 
-        // Buka WhatsApp
-        window.open(urlWA, '_blank');
-        this.reset();
-
-        // Reset tampilan file
-        const fileNameDisplay = document.getElementById('fileNameDisplay');
-        const dropZone = document.getElementById('dropZone');
-        if (fileNameDisplay) fileNameDisplay.textContent = 'Belum ada file dipilih';
-        if (dropZone) dropZone.classList.remove('has-file');
+        // Arahkan ke WhatsApp
+        window.location.href = urlWA;
 
     } catch (error) {
         console.error('Error submit order:', error);
-        alert('Terjadi kesalahan koneksi saat mengirim data.');
-    } finally {
+        alert('Gagal menyimpan pesanan. Silakan coba lagi.');
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<span>🚀 Kirim Pesanan Sekarang</span>';
+            submitBtn.innerText = '🚀 Kirim Pesanan Sekarang';
         }
     }
 });

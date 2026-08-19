@@ -12,18 +12,19 @@ module.exports = async (req, res) => {
     try {
         // SIMPAN PESANAN BARU KE GOOGLE SHEETS
         if (req.method === 'POST') {
-            await fetch(GOOGLE_SCRIPT_URL, {
+            const resp = await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(req.body)
+                body: JSON.stringify(req.body),
+                redirect: 'follow'
             });
-            return res.status(200).json({ success: true, message: 'Pesanan tersimpan ke Google Sheets!' });
+            return res.status(200).json({ success: true, message: 'Tersimpan ke Google Sheets!' });
         }
 
         // BACA DATA PESANAN DARI GOOGLE SHEETS
         if (req.method === 'GET') {
             const { id } = req.query;
-            const response = await fetch(GOOGLE_SCRIPT_URL);
+            const response = await fetch(GOOGLE_SCRIPT_URL, { redirect: 'follow' });
             const data = await response.json();
             const orders = data.orders || [];
 

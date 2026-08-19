@@ -11,25 +11,17 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const res = await fetch('/api/admin-login', {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json' 
-                    },
-                    body: JSON.stringify({ 
-                        username: usernameInput, 
-                        password: passwordInput 
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: usernameInput, password: passwordInput })
                 });
 
                 const data = await res.json();
 
                 if (res.ok && data.success) {
                     alert('Login Berhasil!');
-                    
-                    const loginSec = document.getElementById('loginSection');
-                    const dashSec = document.getElementById('dashboardSection');
-                    
-                    if (loginSec) loginSec.style.display = 'none';
-                    if (dashSec) dashSec.style.display = 'block';
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('dashboardSection').style.display = 'block';
+                    loadOrders(); // Muat data pesanan
                 } else {
                     alert(data.message || 'Username atau Password salah!');
                 }
@@ -40,3 +32,37 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+async function loadOrders() {
+    try {
+        const res = await fetch('/api/orders');
+        const data = await res.json();
+        
+        const tableBody = document.getElementById('ordersTableBody');
+        if (!tableBody) return;
+        
+        tableBody.innerHTML = '';
+        
+        if (!data.orders || data.orders.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Belum ada pesanan masuk.</td></tr>';
+            return;
+        }
+
+        // Tampilkan pesanan terbaru di paling atas (.reverse)
+        data.orders.slice().reverse().forEach(order => {
+            const row = `
+                <tr>
+                    <td><b>${order.id}</b></td>
+                    <td>${order.nama}</td>
+                    <td><a href="https://wa.me/${order.phone}" target="_blank" style="color: #2563eb;">${order.phone}</a></td>
+                    <td>${order.jumlahHalaman} Hal (${order.jenisCetak})</td>
+                    <td><span class="status-badge">Pending</span></td>
+                    <td>${order.fileName}</td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
+    } catch (err) {
+        console.error('Error loading orders:', err);
+    }
+}

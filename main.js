@@ -17,58 +17,53 @@ document.getElementById('orderForm')?.addEventListener('submit', async function(
     const fileInput = document.getElementById('file');
     const fileName = fileInput && fileInput.files.length > 0 ? fileInput.files[0].name : 'Tidak Ada File';
 
+    const orderId = 'KC-' + Date.now();
+
     const payload = {
+        id: orderId,
         nama,
         phone,
         jumlahHalaman,
         jenisCetak,
         catatan,
-        fileName
+        fileName,
+        createdAt: new Date().toISOString()
     };
 
     try {
-        const response = await fetch('/api/upload', {
+        // Simpan data ke database API
+        await fetch('/api/orders', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
-        const result = await response.json();
+        // Buat Pesan WA
+        const pesanWA = `Halo Admin KohanCopier,\n\nSaya telah membuat pesanan cetak dokumen baru:` +
+            `\n- *ID Pesanan:* ${orderId}` +
+            `\n- *Nama:* ${nama}` +
+            `\n- *No WA:* ${phone}` +
+            `\n- *Jumlah Halaman:* ${jumlahHalaman}` +
+            `\n- *Jenis Cetak:* ${jenisCetak}` +
+            `\n- *Nama File:* ${fileName}` +
+            `\n- *Catatan:* ${catatan}` +
+            `\n\nMohon dicek dan diproses. Terima kasih!`;
 
-        if (response.ok && result.success) {
-            const orderId = result.orderId || "KC-" + Date.now();
+        const urlWA = `https://wa.me/${NOMOR_WA_ADMIN}?text=${encodeURIComponent(pesanWA)}`;
 
-            const pesanWA = `Halo Admin KohanCopier,\n\nSaya telah membuat pesanan cetak dokumen baru:` +
-                `\n- *ID Pesanan:* ${orderId}` +
-                `\n- *Nama:* ${nama}` +
-                `\n- *No WA:* ${phone}` +
-                `\n- *Jumlah Halaman:* ${jumlahHalaman}` +
-                `\n- *Jenis Cetak:* ${jenisCetak}` +
-                `\n- *Nama File:* ${fileName}` +
-                `\n- *Catatan:* ${catatan}` +
-                `\n\nMohon dicek dan diproses. Terima kasih!`;
+        // Buka WhatsApp
+        window.open(urlWA, '_blank');
+        this.reset();
 
-            const urlWA = `https://wa.me/${NOMOR_WA_ADMIN}?text=${encodeURIComponent(pesanWA)}`;
+        // Reset tampilan file
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const dropZone = document.getElementById('dropZone');
+        if (fileNameDisplay) fileNameDisplay.textContent = 'Belum ada file dipilih';
+        if (dropZone) dropZone.classList.remove('has-file');
 
-            alert(`Pesanan Berhasil!\nID Pesanan Anda: ${orderId}\n\nAnda akan diarahkan ke WhatsApp untuk konfirmasi.`);
-            
-            window.open(urlWA, '_blank');
-            this.reset();
-            
-            // Reset tampilan visual file
-            const fileNameDisplay = document.getElementById('fileNameDisplay');
-            const dropZone = document.getElementById('dropZone');
-            if (fileNameDisplay) fileNameDisplay.textContent = 'Belum ada file dipilih';
-            if (dropZone) dropZone.classList.remove('has-file');
-
-        } else {
-            alert('Gagal mengirim pesanan: ' + (result.message || 'Terjadi kesalahan server.'));
-        }
     } catch (error) {
         console.error('Error submit order:', error);
-        alert('Terjadi kesalahan koneksi saat mengirim data. Pastikan koneksi internet stabil.');
+        alert('Terjadi kesalahan koneksi saat mengirim data.');
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;

@@ -21,21 +21,6 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
 
         const orderId = 'KC-' + Date.now();
 
-        // 1. BUAT IFRAME & FORM TERSEMBUNYI (Bypass CORS 100% Berhasil)
-        let iframe = document.getElementById('hidden_iframe');
-        if (!iframe) {
-            iframe = document.createElement('iframe');
-            iframe.name = 'hidden_iframe';
-            iframe.id = 'hidden_iframe';
-            iframe.style.display = 'none';
-            document.body.appendChild(iframe);
-        }
-
-        const hiddenForm = document.createElement('form');
-        hiddenForm.method = 'GET';
-        hiddenForm.action = GOOGLE_SCRIPT_URL;
-        hiddenForm.target = 'hidden_iframe';
-
         const payload = {
             id: orderId,
             nama: nama,
@@ -46,19 +31,18 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
             catatan: catatan
         };
 
-        for (const key in payload) {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = key;
-            input.value = payload[key];
-            hiddenForm.appendChild(input);
+        // 1. Pengiriman data background paling aman menggunakan sendBeacon / Image
+        const params = new URLSearchParams(payload).toString();
+        const fullUrl = `${GOOGLE_SCRIPT_URL}?${params}`;
+
+        if (navigator.sendBeacon) {
+            navigator.sendBeacon(fullUrl);
+        } else {
+            const img = new Image();
+            img.src = fullUrl;
         }
 
-        document.body.appendChild(hiddenForm);
-        hiddenForm.submit();
-        setTimeout(() => document.body.removeChild(hiddenForm), 1000);
-
-        // 2. Isi Data ke Pop-up Modal
+        // 2. Isi data Pop-up Modal
         const elOrderId = document.getElementById('modalOrderId');
         const elNama = document.getElementById('modalNama');
         const elFile = document.getElementById('modalFile');
@@ -69,19 +53,17 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
         if (elFile) elFile.innerText = fileName;
         if (elDetail) elDetail.innerText = `${jumlahHalaman} Halaman (${jenisCetak})`;
 
-        // 3. Tampilkan Modal Pop-up
+        // 3. Tampilkan Pop-up Modal
         const modal = document.getElementById('orderModal');
-        if (modal) {
-            modal.style.display = 'flex';
-        }
+        if (modal) modal.style.display = 'flex';
 
-        // 4. Reset Tombol Utama
+        // 4. Reset Tombol Utam
         if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<span>🚀 Kirim Pesanan Sekarang</span>';
         }
 
-        // 5. Siapkan Pesan WhatsApp
+        // 5. Set Link WhatsApp
         const pesanWA = `Halo Admin KohanCopier,\n\nSaya telah membuat pesanan cetak dokumen baru:` +
             `\n- *ID Pesanan:* ${orderId}` +
             `\n- *Nama:* ${nama}` +

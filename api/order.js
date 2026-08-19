@@ -1,7 +1,6 @@
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbygZAOIByubAG6QRE7aG8NkWCkUhvNIOVC3XAb0p5BL4FAlTbsE48HUmCkM-UNYF6XVgg/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyotw4ez7OI14rmdQVuHsdBGHx3t1z4WcLnSGWNF17yXMQ3FJzsv1HZWUWRFlXFS84Psg/exec";
 
 module.exports = async (req, res) => {
-    // Header CORS Lengkap
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -11,12 +10,10 @@ module.exports = async (req, res) => {
     }
 
     try {
-        // 1. SIMPAN PESANAN (Kirim dari Vercel Server -> Google Apps Script)
         if (req.method === 'POST') {
             const data = req.body || {};
             const params = new URLSearchParams(data).toString();
 
-            // Panggilan Server-to-Server (Bypass blokir browser 100%)
             await fetch(`${GOOGLE_SCRIPT_URL}?${params}`, {
                 method: 'GET',
                 redirect: 'follow'
@@ -25,7 +22,6 @@ module.exports = async (req, res) => {
             return res.status(200).json({ success: true, message: 'Berhasil tersimpan ke Google Sheets!' });
         }
 
-        // 2. BACA PESANAN (Untuk Admin / Track)
         if (req.method === 'GET') {
             const { id } = req.query;
             const response = await fetch(GOOGLE_SCRIPT_URL, { redirect: 'follow' });

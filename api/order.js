@@ -1,6 +1,6 @@
-let orderMemory = [];
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbygZAOIByubAG6QRE7aG8NkWCkUhvNIOVC3XAb0p5BL4FAlTbsE48HUmCkM-UNYF6XVgg/exec";
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -10,28 +10,32 @@ module.exports = (req, res) => {
     }
 
     try {
-        // SIMPAN PESANAN BARU
+        // SIMPAN PESANAN BARU KE GOOGLE SHEETS
         if (req.method === 'POST') {
-            const newOrder = req.body;
-            if (newOrder && newOrder.id) {
-                orderMemory.unshift(newOrder);
-            }
-            return res.status(200).json({ success: true, orders: orderMemory });
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(req.body)
+            });
+            return res.status(200).json({ success: true, message: 'Pesanan tersimpan ke Google Sheets!' });
         }
 
-        // BACA DATA PESANAN (Admin & Track)
+        // BACA DATA PESANAN DARI GOOGLE SHEETS
         if (req.method === 'GET') {
             const { id } = req.query;
+            const response = await fetch(GOOGLE_SCRIPT_URL);
+            const data = await response.json();
+            const orders = data.orders || [];
+
             if (id) {
-                const found = orderMemory.find(o => o.id === id);
-                return res.status(200).json({ success: true, order: found });
+                const found = orders.find(o => o.id === id);
+                return res.status(200).json({ success: !!found, order: found });
             }
-            return res.status(200).json({ success: true, orders: orderMemory });
+
+            return res.status(200).json({ success: true, orders: orders });
         }
-    } catch (err) {
-        // Selalu kembalikan respon sukses dengan array kosong jika terjadi kesalahan
+    } catch (error) {
+        console.error("Error connected to Google Sheets:", error);
         return res.status(200).json({ success: true, orders: [] });
     }
-
-    return res.status(405).json({ message: 'Method Not Allowed' });
 };

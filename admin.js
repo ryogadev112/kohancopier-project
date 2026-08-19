@@ -42,7 +42,6 @@ async function loadOrders() {
     }
 
     try {
-        // Ambil data langsung dari Google Apps Script tanpa lewat Vercel Serverless
         const res = await fetch(GOOGLE_SCRIPT_URL);
         const data = await res.json();
 
@@ -54,7 +53,6 @@ async function loadOrders() {
             return;
         }
 
-        // Tampilkan pesanan terbaru di paling atas
         data.orders.slice().reverse().forEach(order => {
             const row = `
                 <tr>
@@ -71,7 +69,7 @@ async function loadOrders() {
     } catch (err) {
         console.error('Error loading orders:', err);
         if (tableBody) {
-            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#ef4444;">Gagal mengambil data dari Google Sheets. Silakan klik "Refresh Data".</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#ef4444;">Gagal mengambil data. Klik "Refresh Data".</td></tr>';
         }
     }
 }

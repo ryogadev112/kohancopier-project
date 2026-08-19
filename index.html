@@ -15,9 +15,6 @@
                 <span class="logo-icon">🖨️</span>
                 <span class="logo-text">Kohan<span>Copier</span></span>
             </div>
-            <div class="store-badge">
-                <span class="pulse-dot"></span> buka hari ini
-            </div>
         </div>
     </header>
 
@@ -29,33 +26,14 @@
             <p>Unggah berkas PDF kamu, tentukan spesifikasi cetak, dan ambil atau terima dokumen dengan cepat dan rapi.</p>
         </section>
 
-        <!-- Cara Kerja (Steps) -->
-        <section class="steps-grid">
-            <div class="step-card">
-                <div class="step-num">1</div>
-                <h3>Unggah File</h3>
-                <p>Pilih atau tarik dokumen PDF yang ingin dicetak.</p>
-            </div>
-            <div class="step-card">
-                <div class="step-num">2</div>
-                <h3>Atur Opsi</h3>
-                <p>Tentukan jumlah halaman & jenis warna.</p>
-            </div>
-            <div class="step-card">
-                <div class="step-num">3</div>
-                <h3>Kirim WA</h3>
-                <p>Konfirmasi otomatis & dokumen siap diproses.</p>
-            </div>
-        </section>
-
-        <!-- Form Pemesanan Utam -->
+        <!-- Form Pemesanan Utama -->
         <section class="card-box" id="order-section">
             <div class="section-header">
                 <h2>📄 Form Pemesanan Cetak</h2>
                 <p>Lengkapi data di bawah ini untuk memulai pesanan</p>
             </div>
 
-            <form id="orderForm" enctype="multipart/form-data">
+            <form id="orderForm">
                 <div class="form-group">
                     <label for="nama">Nama Lengkap</label>
                     <input type="text" id="nama" name="nama" placeholder="Contoh: Ahmad Rizky" required>
@@ -82,11 +60,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="catatan">Catatan / Catatan Khusus</label>
-                    <textarea id="catatan" name="catatan" rows="3" placeholder="Contoh: Jilid klip, cetak bolak-balik, kertas A4 80gr..."></textarea>
+                    <label for="catatan">Catatan Khusus</label>
+                    <textarea id="catatan" name="catatan" rows="3" placeholder="Contoh: Jilid klip, cetak bolak-balik..."></textarea>
                 </div>
 
-                <!-- Custom Drag & Drop File Upload Area -->
                 <div class="form-group">
                     <label>File Dokumen (PDF)</label>
                     <div class="drop-zone" id="dropZone">
@@ -111,7 +88,7 @@
             </div>
 
             <form id="trackForm" class="track-form-inline">
-                <input type="text" id="orderIdInput" placeholder="Masukkan ID Pesanan (Contoh: KC-17000...)" required>
+                <input type="text" id="orderIdInput" placeholder="Masukkan ID Pesanan (Contoh: KC-178...)" required>
                 <button type="submit" class="btn-secondary">Cari</button>
             </form>
 
@@ -119,16 +96,53 @@
         </section>
     </main>
 
+    <!-- Modal Detail Pesanan & Pembayaran -->
+    <div id="orderModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center; padding: 20px;">
+        <div style="background: #ffffff; max-width: 480px; width: 100%; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); max-height: 90vh; overflow-y: auto;">
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <span style="font-size: 40px;">🎉</span>
+                <h2 style="font-size: 20px; color: #1e293b; margin-top: 8px;">Detail & Pembayaran Pesanan</h2>
+                <p style="font-size: 13px; color: #64748b;">Pesanan kamu telah dicatat. Silakan lakukan pembayaran & lanjut ke WhatsApp.</p>
+            </div>
+
+            <!-- Ringkasan Detail -->
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; font-size: 14px; margin-bottom: 16px; line-height: 1.6;">
+                <p><strong>ID Pesanan:</strong> <span id="modalOrderId" style="color: #2563eb; font-weight: bold;">-</span></p>
+                <p><strong>Nama:</strong> <span id="modalNama">-</span></p>
+                <p><strong>Dokumen:</strong> <span id="modalFile">-</span></p>
+                <p><strong>Spesifikasi:</strong> <span id="modalDetail">-</span></p>
+                <p><strong>Status Pembayaran:</strong> <span style="background: #fef3c7; color: #d97706; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: bold;">Belum Dibayar / Pending</span></p>
+            </div>
+
+            <!-- Area QRIS / Bank Transfer -->
+            <div style="text-align: center; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 16px; margin-bottom: 20px; background: #fafafa;">
+                <p style="font-size: 13px; font-weight: bold; color: #334155; margin-bottom: 8px;">Scan QRIS Untuk Pembayaran</p>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=KohanCopierPayment" alt="QRIS Payment" style="width: 160px; height: 160px; border-radius: 8px; border: 1px solid #ddd;">
+                <p style="font-size: 12px; color: #64748b; margin-top: 8px;">Scan via GoPay, OVO, Dana, ShopeePay & M-Banking</p>
+                <div style="margin-top: 10px; font-size: 12px; color: #475569; background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                    <b>Transfer BCA:</b> 1234567890 a.n KohanCopier
+                </div>
+            </div>
+
+            <!-- Tombol Aksi -->
+            <button id="btnGoToWA" style="width: 100%; background: #25d366; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span>📱 Lanjut ke WhatsApp</span>
+            </button>
+            <button onclick="document.getElementById('orderModal').style.display='none'" style="width: 100%; background: transparent; color: #64748b; border: none; padding: 8px; font-size: 13px; cursor: pointer;">
+                Tutup Window
+            </button>
+        </div>
+    </div>
+
     <script src="main.js"></script>
     <script src="track.js"></script>
     <script>
-        // Visual handler untuk Custom Drag & Drop Input
         const fileInput = document.getElementById('file');
         const fileNameDisplay = document.getElementById('fileNameDisplay');
         const dropZone = document.getElementById('dropZone');
 
         dropZone.addEventListener('click', () => fileInput.click());
-
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length > 0) {
                 fileNameDisplay.textContent = '📄 ' + fileInput.files[0].name;

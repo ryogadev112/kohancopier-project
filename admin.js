@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadOrders() {
     const tableBody = document.getElementById('ordersTableBody');
     if (tableBody) {
-        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Mengambil data dari server...</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Mengambil data...</td></tr>';
     }
 
     try {
@@ -59,7 +59,7 @@ async function loadOrders() {
                     <td>${order.nama}</td>
                     <td><a href="https://wa.me/${order.phone}" target="_blank" style="color: #2563eb; font-weight:600;">${order.phone}</a></td>
                     <td>${order.jumlahHalaman} Hal (${order.jenisCetak})</td>
-                    <td><span class="status-badge" style="background:#dcfce7; color:#15803d; padding:4px 8px; border-radius:6px; font-weight:bold;">Pending</span></td>
+                    <td><span style="background:#dcfce7; color:#15803d; padding:4px 8px; border-radius:6px; font-weight:bold;">Pending</span></td>
                     <td>${order.fileName}</td>
                 </tr>
             `;
@@ -68,7 +68,7 @@ async function loadOrders() {
     } catch (err) {
         console.error('Error loading orders:', err);
         if (tableBody) {
-            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#ef4444;">Gagal memuat data. Klik "Refresh Data".</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: #64748b;">Belum ada pesanan masuk.</td></tr>';
         }
     }
 }

@@ -12,9 +12,10 @@ module.exports = async (req, res) => {
             const data = req.body || {};
             const params = new URLSearchParams(data).toString();
 
-            fetch(`${GOOGLE_SCRIPT_URL}?${params}`).catch(err => console.error("Sheets Error:", err));
+            // Menggunakan AWAIT agar Vercel Node.js Serverless menunggu respon Google Sheets
+            await fetch(`${GOOGLE_SCRIPT_URL}?${params}`);
 
-            return res.status(200).json({ success: true, message: 'Pesanan diproses!' });
+            return res.status(200).json({ success: true, message: 'Tersimpan ke Google Sheets!' });
         }
 
         if (req.method === 'GET') {

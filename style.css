@@ -204,26 +204,27 @@ input:focus, select:focus, textarea:focus {
     gap: 10px;
 }
 
-/* Animasi Loading Spinner */
+/* Animasi Loading Spinner (Diperbaiki) */
 .spinner {
-    display: inline-block;
-    width: 18px;
-    height: 18px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top-color: #ffffff;
-    animation: spin 0.8s linear infinite;
+    display: inline-block !important;
+    width: 18px !important;
+    height: 18px !important;
+    border: 3px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 50% !important;
+    border-top-color: #ffffff !important;
+    animation: spin 0.8s linear infinite !important;
     vertical-align: middle;
-    margin-right: 8px;
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .btn-loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    width: 100%;
 }

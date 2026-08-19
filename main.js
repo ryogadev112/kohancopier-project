@@ -21,6 +21,21 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
 
         const orderId = 'KC-' + Date.now();
 
+        // 1. BUAT IFRAME & FORM TERSEMBUNYI (Bypass CORS 100% Berhasil)
+        let iframe = document.getElementById('hidden_iframe');
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.name = 'hidden_iframe';
+            iframe.id = 'hidden_iframe';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+        }
+
+        const hiddenForm = document.createElement('form');
+        hiddenForm.method = 'GET';
+        hiddenForm.action = GOOGLE_SCRIPT_URL;
+        hiddenForm.target = 'hidden_iframe';
+
         const payload = {
             id: orderId,
             nama: nama,
@@ -31,12 +46,19 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
             catatan: catatan
         };
 
-        // 1. KIRIM DATA VIA IMAGE BEACON (100% Bebas Blokir CORS Browser)
-        const params = new URLSearchParams(payload).toString();
-        const beacon = new Image();
-        beacon.src = `${GOOGLE_SCRIPT_URL}?${params}`;
+        for (const key in payload) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = payload[key];
+            hiddenForm.appendChild(input);
+        }
 
-        // 2. Isi data ke Pop-up Modal
+        document.body.appendChild(hiddenForm);
+        hiddenForm.submit();
+        setTimeout(() => document.body.removeChild(hiddenForm), 1000);
+
+        // 2. Isi Data ke Pop-up Modal
         const elOrderId = document.getElementById('modalOrderId');
         const elNama = document.getElementById('modalNama');
         const elFile = document.getElementById('modalFile');

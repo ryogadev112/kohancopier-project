@@ -36,31 +36,30 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadOrders() {
     const tableBody = document.getElementById('ordersTableBody');
     if (tableBody) {
-        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Mengambil data...</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Mengambil data pesanan...</td></tr>';
     }
 
     try {
         const res = await fetch('/api/orders');
         const data = await res.json();
-        
+
         if (!tableBody) return;
-        
         tableBody.innerHTML = '';
-        
+
         if (!data.orders || data.orders.length === 0) {
             tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: #64748b;">Belum ada pesanan masuk.</td></tr>';
             return;
         }
 
-        data.orders.slice().reverse().forEach(order => {
+        data.orders.forEach(order => {
             const row = `
                 <tr>
                     <td><b>${order.id}</b></td>
                     <td>${order.nama}</td>
-                    <td><a href="https://wa.me/${order.phone}" target="_blank" style="color: #2563eb; font-weight:600;">${order.phone}</a></td>
+                    <td><a href="https://wa.me/${order.phone}" target="_blank" style="color: #2563eb; font-weight:600; text-decoration:none;">📱 ${order.phone}</a></td>
                     <td>${order.jumlahHalaman} Hal (${order.jenisCetak})</td>
-                    <td><span style="background:#dcfce7; color:#15803d; padding:4px 8px; border-radius:6px; font-weight:bold;">Pending</span></td>
-                    <td>${order.fileName}</td>
+                    <td><span style="background:#dcfce7; color:#15803d; padding:4px 8px; border-radius:6px; font-weight:bold; font-size:12px;">Baru</span></td>
+                    <td>📄 ${order.fileName}</td>
                 </tr>
             `;
             tableBody.innerHTML += row;
@@ -68,7 +67,7 @@ async function loadOrders() {
     } catch (err) {
         console.error('Error loading orders:', err);
         if (tableBody) {
-            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: #64748b;">Belum ada pesanan masuk.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#ef4444;">Gagal memuat data. Silakan klik "Refresh Data".</td></tr>';
         }
     }
 }

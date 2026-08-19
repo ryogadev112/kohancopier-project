@@ -8,7 +8,6 @@
 </head>
 <body>
 
-    <!-- Header Navigation -->
     <header class="navbar">
         <div class="nav-container">
             <div class="brand-logo">
@@ -19,14 +18,12 @@
     </header>
 
     <main class="main-wrapper">
-        <!-- Hero Section -->
         <section class="hero-section">
             <div class="hero-tag">⚡ Layanan Print PDF Online #1</div>
             <h1>Cetak Dokumen Tanpa Antre, Kirim Langsung via WhatsApp</h1>
-            <p>Unggah berkas PDF kamu, tentukan spesifikasi cetak, dan ambil atau terima dokumen dengan cepat dan rapi.</p>
+            <p>Unggah berkas PDF kamu, tentukan spesifikasi cetak, dan terima dokumen dengan cepat.</p>
         </section>
 
-        <!-- Form Pemesanan Utama -->
         <section class="card-box" id="order-section">
             <div class="section-header">
                 <h2>📄 Form Pemesanan Cetak</h2>
@@ -80,7 +77,6 @@
             </form>
         </section>
 
-        <!-- Section Lacak Pesanan -->
         <section class="card-box track-box">
             <div class="section-header">
                 <h2>🔍 Lacak Status Pesanan</h2>
@@ -106,7 +102,6 @@
                 <p style="font-size: 13px; color: #64748b;">Pesanan kamu telah dicatat. Silakan lakukan pembayaran & lanjut ke WhatsApp.</p>
             </div>
 
-            <!-- Ringkasan Detail -->
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; font-size: 14px; margin-bottom: 16px; line-height: 1.6;">
                 <p><strong>ID Pesanan:</strong> <span id="modalOrderId" style="color: #2563eb; font-weight: bold;">-</span></p>
                 <p><strong>Nama:</strong> <span id="modalNama">-</span></p>
@@ -115,7 +110,6 @@
                 <p><strong>Status Pembayaran:</strong> <span style="background: #fef3c7; color: #d97706; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: bold;">Belum Dibayar / Pending</span></p>
             </div>
 
-            <!-- Area QRIS / Bank Transfer -->
             <div style="text-align: center; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 16px; margin-bottom: 20px; background: #fafafa;">
                 <p style="font-size: 13px; font-weight: bold; color: #334155; margin-bottom: 8px;">Scan QRIS Untuk Pembayaran</p>
                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=KohanCopierPayment" alt="QRIS Payment" style="width: 160px; height: 160px; border-radius: 8px; border: 1px solid #ddd;">
@@ -125,7 +119,6 @@
                 </div>
             </div>
 
-            <!-- Tombol Aksi -->
             <button id="btnGoToWA" style="width: 100%; background: #25d366; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;">
                 <span>📱 Lanjut ke WhatsApp</span>
             </button>
@@ -146,7 +139,6 @@
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length > 0) {
                 fileNameDisplay.textContent = '📄 ' + fileInput.files[0].name;
-                dropZone.classList.add('has-file');
             }
         });
     </script>

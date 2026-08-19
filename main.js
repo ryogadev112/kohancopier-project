@@ -4,9 +4,10 @@ document.getElementById('orderForm')?.addEventListener('submit', async function(
     e.preventDefault();
 
     const submitBtn = document.getElementById('submitBtn');
+    
     if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerText = 'Memproses Pesanan...';
+        submitBtn.innerHTML = `<span class="btn-loading"><span class="spinner"></span> Memproses Pesanan...</span>`;
     }
 
     try {
@@ -30,14 +31,12 @@ document.getElementById('orderForm')?.addEventListener('submit', async function(
             catatan: catatan
         };
 
-        // 1. Kirim data ke API Vercel internal (Pasti berhasil & bebas CORS)
         await fetch('/api/orders', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
-        // 2. Isi data Pop-up Modal
         const elOrderId = document.getElementById('modalOrderId');
         const elNama = document.getElementById('modalNama');
         const elFile = document.getElementById('modalFile');
@@ -48,17 +47,16 @@ document.getElementById('orderForm')?.addEventListener('submit', async function(
         if (elFile) elFile.innerText = fileName;
         if (elDetail) elDetail.innerText = `${jumlahHalaman} Halaman (${jenisCetak})`;
 
-        // 3. Tampilkan Pop-up Modal
-        const modal = document.getElementById('orderModal');
-        if (modal) modal.style.display = 'flex';
+        setTimeout(() => {
+            const modal = document.getElementById('orderModal');
+            if (modal) modal.style.display = 'flex';
 
-        // 4. Reset Tombol Utama
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<span>🚀 Kirim Pesanan Sekarang</span>';
-        }
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>🚀 Kirim Pesanan Sekarang</span>';
+            }
+        }, 600);
 
-        // 5. Siapkan Link WhatsApp
         const pesanWA = `Halo Admin KohanCopier,\n\nSaya telah membuat pesanan cetak dokumen baru:` +
             `\n- *ID Pesanan:* ${orderId}` +
             `\n- *Nama:* ${nama}` +

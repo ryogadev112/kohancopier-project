@@ -5,21 +5,16 @@ module.exports = async (req, res) => {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
+    if (req.method === 'OPTIONS') return res.status(200).end();
 
     try {
         if (req.method === 'POST') {
             const data = req.body || {};
             const params = new URLSearchParams(data).toString();
 
-            await fetch(`${GOOGLE_SCRIPT_URL}?${params}`, {
-                method: 'GET',
-                redirect: 'follow'
-            });
+            fetch(`${GOOGLE_SCRIPT_URL}?${params}`).catch(err => console.error("Sheets Error:", err));
 
-            return res.status(200).json({ success: true, message: 'Berhasil tersimpan ke Google Sheets!' });
+            return res.status(200).json({ success: true, message: 'Pesanan diproses!' });
         }
 
         if (req.method === 'GET') {

@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadOrders() {
     const tableBody = document.getElementById('ordersTableBody');
     if (tableBody) {
-        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Mengambil data pesanan...</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Mengambil data...</td></tr>';
     }
 
     try {
@@ -67,7 +67,7 @@ async function loadOrders() {
     } catch (err) {
         console.error('Error loading orders:', err);
         if (tableBody) {
-            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#ef4444;">Gagal memuat data. Silakan klik "Refresh Data".</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: #64748b;">Belum ada pesanan masuk.</td></tr>';
         }
     }
 }

@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - KohanCopier</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=3">
     <style>
         .admin-wrapper { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
         .table-responsive { overflow-x: auto; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th, td { padding: 14px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; background: #fff; border-radius: 12px; overflow: hidden; }
+        th, td { padding: 14px 16px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
         th { background-color: #f1f5f9; color: #475569; font-weight: 700; }
     </style>
 </head>
@@ -26,7 +26,8 @@
     </header>
 
     <div class="admin-wrapper">
-        <section class="card-box" id="loginSection">
+        <!-- Form Login Admin -->
+        <section class="card-box" id="loginSection" style="max-width: 480px; margin: 40px auto;">
             <div class="section-header">
                 <h2>🔐 Login Admin</h2>
                 <p>Masukkan kredensial untuk mengakses dashboard pesanan</p>
@@ -41,12 +42,13 @@
                     <label for="password">Password</label>
                     <input type="password" id="password" placeholder="Masukkan password admin" required>
                 </div>
-                <button type="submit" class="btn-primary">Masuk Dashboard</button>
+                <button type="submit" class="btn-primary" style="margin-top: 10px;">Masuk Dashboard</button>
             </form>
         </section>
 
+        <!-- Dashboard Pesanan Admin -->
         <section class="card-box" id="dashboardSection" style="display: none;">
-            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                 <div>
                     <h2>📋 Dashboard Pesanan Masuk</h2>
                     <p>Daftar seluruh pesanan cetak dokumen dari pelanggan</p>
@@ -76,6 +78,6 @@
         </section>
     </div>
 
-    <script src="admin.js"></script>
+    <script src="admin.js?v=3"></script>
 </body>
 </html>

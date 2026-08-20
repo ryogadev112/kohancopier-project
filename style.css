@@ -107,23 +107,28 @@ body {
     margin-bottom: 6px;
 }
 
+/* Konsistensi Seluruh Input Form (Bypass Bug Password Admin) */
 input[type="text"],
 input[type="tel"],
 input[type="number"],
+input[type="password"],
 select,
 textarea {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    font-size: 14px;
-    outline: none;
-    transition: all 0.2s;
+    width: 100% !important;
+    padding: 12px 16px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    outline: none !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    transition: all 0.2s !important;
+    box-sizing: border-box !important;
 }
 
 input:focus, select:focus, textarea:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
 }
 
 .form-row {
@@ -133,6 +138,30 @@ input:focus, select:focus, textarea:focus {
 
 .form-group.half {
     flex: 1;
+}
+
+/* Box Estimasi Harga Otomatis */
+.price-box {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.price-box span {
+    font-size: 13px;
+    color: #1e40af;
+    font-weight: 600;
+}
+
+.price-amount {
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    color: #2563eb !important;
 }
 
 .drop-zone {
@@ -204,7 +233,7 @@ input:focus, select:focus, textarea:focus {
     gap: 10px;
 }
 
-/* Animasi Loading Spinner (Diperbaiki) */
+/* Animasi Loading Spinner */
 .spinner {
     display: inline-block !important;
     width: 18px !important;

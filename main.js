@@ -1,12 +1,33 @@
 const NOMOR_WA_ADMIN = "6288218475220";
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyotw4ez7OI14rmdQVuHsdBGHx3t1z4WcLnSGWNF17yXMQ3FJzsv1HZWUWRFlXFS84Psg/exec";
 
+// 1. FUNGSI KALKULATOR HARGA OTOMATIS
+function hitungTotalBiaya() {
+    const jumlahHalaman = parseInt(document.getElementById('jumlahHalaman')?.value) || 1;
+    const jenisCetak = document.getElementById('jenisCetak')?.value || 'Hitam Putih';
+    
+    // Hitam Putih = 1000, Warna = 2000
+    const hargaPerHal = (jenisCetak === 'Warna') ? 2000 : 1000;
+    const total = jumlahHalaman * hargaPerHal;
+    const formatted = 'Rp ' + total.toLocaleString('id-ID');
+
+    const previewEl = document.getElementById('pricePreview');
+    if (previewEl) previewEl.innerText = formatted;
+
+    return { total, formatted };
+}
+
+// Jalankan kalkulator saat input diketik/diubah
+document.getElementById('jumlahHalaman')?.addEventListener('input', hitungTotalBiaya);
+document.getElementById('jenisCetak')?.addEventListener('change', hitungTotalBiaya);
+document.addEventListener('DOMContentLoaded', hitungTotalBiaya);
+
+// 2. PROSES FORM PEMESANAN
 document.getElementById('orderForm')?.addEventListener('submit', function(e) {
     e.preventDefault();
 
     const submitBtn = document.getElementById('submitBtn');
     
-    // 1. Tampilkan animasi spinner & kunci tombol
     if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = `<span class="btn-loading"><span class="spinner"></span> <span>Memproses Pesanan...</span></span>`;
@@ -21,6 +42,7 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
         const fileInput = document.getElementById('file');
         const fileName = fileInput && fileInput.files && fileInput.files.length > 0 ? fileInput.files[0].name : 'Tidak Ada File';
 
+        const { formatted: totalHargaFormatted } = hitungTotalBiaya();
         const orderId = 'KC-' + Date.now();
 
         const payload = {
@@ -33,25 +55,27 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
             catatan: catatan
         };
 
-        // 2. Kirim data langsung ke Google Sheets (Direct Fetch no-cors)
+        // Kirim langsung ke Google Sheets
         const params = new URLSearchParams(payload).toString();
         fetch(`${GOOGLE_SCRIPT_URL}?${params}`, {
             method: 'GET',
             mode: 'no-cors'
         });
 
-        // 3. Masukkan data ke Modal Detail Pesanan
+        // Masukkan data ke Modal
         const elOrderId = document.getElementById('modalOrderId');
         const elNama = document.getElementById('modalNama');
         const elFile = document.getElementById('modalFile');
         const elDetail = document.getElementById('modalDetail');
+        const elTotal = document.getElementById('modalTotalHarga');
 
         if (elOrderId) elOrderId.innerText = orderId;
         if (elNama) elNama.innerText = nama;
         if (elFile) elFile.innerText = fileName;
         if (elDetail) elDetail.innerText = `${jumlahHalaman} Halaman (${jenisCetak})`;
+        if (elTotal) elTotal.innerText = totalHargaFormatted;
 
-        // 4. Beri jeda 500ms lalu tampilkan Modal Pop-up
+        // Tampilkan Modal
         setTimeout(() => {
             const modal = document.getElementById('orderModal');
             if (modal) modal.style.display = 'flex';
@@ -62,13 +86,14 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
             }
         }, 500);
 
-        // 5. Siapkan Link WhatsApp
+        // Link WhatsApp Admin
         const pesanWA = `Halo Admin KohanCopier,\n\nSaya telah membuat pesanan cetak dokumen baru:` +
             `\n- *ID Pesanan:* ${orderId}` +
             `\n- *Nama:* ${nama}` +
             `\n- *No WA:* ${phone}` +
             `\n- *Jumlah Halaman:* ${jumlahHalaman}` +
             `\n- *Jenis Cetak:* ${jenisCetak}` +
+            `\n- *Total Biaya:* ${totalHargaFormatted}` +
             `\n- *Nama File:* ${fileName}` +
             `\n- *Catatan:* ${catatan}` +
             `\n\nMohon dicek dan diproses. Terima kasih!`;

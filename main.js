@@ -1,12 +1,11 @@
 const NOMOR_WA_ADMIN = "6288218475220";
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyotw4ez7OI14rmdQVuHsdBGHx3t1z4WcLnSGWNF17yXMQ3FJzsv1HZWUWRFlXFS84Psg/exec";
 
-// 1. FUNGSI KALKULATOR HARGA OTOMATIS
+// 1. Kalkulator Estimasi Biaya
 function hitungTotalBiaya() {
     const jumlahHalaman = parseInt(document.getElementById('jumlahHalaman')?.value) || 1;
     const jenisCetak = document.getElementById('jenisCetak')?.value || 'Hitam Putih';
     
-    // Hitam Putih = 1000, Warna = 2000
     const hargaPerHal = (jenisCetak === 'Warna') ? 2000 : 1000;
     const total = jumlahHalaman * hargaPerHal;
     const formatted = 'Rp ' + total.toLocaleString('id-ID');
@@ -17,12 +16,11 @@ function hitungTotalBiaya() {
     return { total, formatted };
 }
 
-// Jalankan kalkulator saat input diketik/diubah
 document.getElementById('jumlahHalaman')?.addEventListener('input', hitungTotalBiaya);
 document.getElementById('jenisCetak')?.addEventListener('change', hitungTotalBiaya);
 document.addEventListener('DOMContentLoaded', hitungTotalBiaya);
 
-// 2. PROSES FORM PEMESANAN
+// 2. Kirim Form
 document.getElementById('orderForm')?.addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -55,14 +53,12 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
             catatan: catatan
         };
 
-        // Kirim langsung ke Google Sheets
         const params = new URLSearchParams(payload).toString();
         fetch(`${GOOGLE_SCRIPT_URL}?${params}`, {
             method: 'GET',
             mode: 'no-cors'
         });
 
-        // Masukkan data ke Modal
         const elOrderId = document.getElementById('modalOrderId');
         const elNama = document.getElementById('modalNama');
         const elFile = document.getElementById('modalFile');
@@ -75,7 +71,6 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
         if (elDetail) elDetail.innerText = `${jumlahHalaman} Halaman (${jenisCetak})`;
         if (elTotal) elTotal.innerText = totalHargaFormatted;
 
-        // Tampilkan Modal
         setTimeout(() => {
             const modal = document.getElementById('orderModal');
             if (modal) modal.style.display = 'flex';
@@ -86,7 +81,6 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
             }
         }, 500);
 
-        // Link WhatsApp Admin
         const pesanWA = `Halo Admin KohanCopier,\n\nSaya telah membuat pesanan cetak dokumen baru:` +
             `\n- *ID Pesanan:* ${orderId}` +
             `\n- *Nama:* ${nama}` +

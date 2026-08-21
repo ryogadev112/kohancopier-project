@@ -107,7 +107,7 @@ body {
     margin-bottom: 6px;
 }
 
-/* Konsistensi Seluruh Input Form (Bypass Bug Password Admin) */
+/* Konsistensi Semua Input Form (Memperbaiki Input Password Admin) */
 input[type="text"],
 input[type="tel"],
 input[type="number"],
@@ -140,7 +140,7 @@ input:focus, select:focus, textarea:focus {
     flex: 1;
 }
 
-/* Box Estimasi Harga Otomatis */
+/* Box Estimasi Harga */
 .price-box {
     background: #eff6ff;
     border: 1px solid #bfdbfe;

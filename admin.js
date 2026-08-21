@@ -35,22 +35,33 @@ async function loadOrders() {
         if (!tableBody) return;
         tableBody.innerHTML = '';
 
-        if (!data.orders || data.orders.length === 0) {
+        // Tangani jika response data berupa array langsung atau object wrapper
+        const orderList = Array.isArray(data) ? data : (data.orders || []);
+
+        if (orderList.length === 0) {
             tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: #64748b;">Belum ada pesanan aktif.</td></tr>';
             return;
         }
 
-        data.orders.slice().reverse().forEach(order => {
+        orderList.slice().reverse().forEach(order => {
+            // Ambil variabel dengan fallback jika properti sedikit berbeda
+            const id = order.id || order.orderId || '-';
+            const nama = order.nama || order.customerName || '-';
+            const phone = order.phone || order.noWa || '-';
+            const jumlahHalaman = order.jumlahHalaman || order.halaman || '0';
+            const jenisCetak = order.jenisCetak || order.jenis || 'Hitam Putih';
+            const fileName = order.fileName || order.file || '-';
+
             const row = `
                 <tr>
-                    <td><b>${order.id}</b></td>
-                    <td>${order.nama}</td>
-                    <td><a href="https://wa.me/${order.phone}" target="_blank" style="color: #2563eb; font-weight:600; text-decoration:none;">📱 ${order.phone}</a></td>
-                    <td>${order.jumlahHalaman} Hal (${order.jenisCetak})</td>
+                    <td><b>${id}</b></td>
+                    <td>${nama}</td>
+                    <td><a href="https://wa.me/${phone}" target="_blank" style="color: #2563eb; font-weight:600; text-decoration:none;">📱 ${phone}</a></td>
+                    <td>${jumlahHalaman} Hal (${jenisCetak})</td>
                     <td><span style="background:#fef3c7; color:#d97706; padding:4px 8px; border-radius:6px; font-weight:bold; font-size:12px;">Pending</span></td>
-                    <td>📄 ${order.fileName}</td>
+                    <td>📄 ${fileName}</td>
                     <td>
-                        <button onclick="archiveOrder('${order.id}')" style="background:#22c55e; color:white; border:none; padding:6px 12px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:12px;">
+                        <button onclick="archiveOrder('${id}')" style="background:#22c55e; color:white; border:none; padding:6px 12px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:12px;">
                             ✅ Selesai & Arsip
                         </button>
                     </td>

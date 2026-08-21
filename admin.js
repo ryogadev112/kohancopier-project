@@ -10,26 +10,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const usernameInput = document.getElementById('username').value.trim();
             const passwordInput = document.getElementById('password').value.trim();
 
-            try {
-                const res = await fetch('/api/admin-login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: usernameInput, password: passwordInput })
-                });
-
-                const data = await res.json();
-
-                if (res.ok && data.success) {
-                    alert('Login Berhasil!');
-                    document.getElementById('loginSection').style.display = 'none';
-                    document.getElementById('dashboardSection').style.display = 'block';
-                    loadOrders();
-                } else {
-                    alert(data.message || 'Username atau Password salah!');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Gagal terhubung ke server.');
+            if (usernameInput === 'admin' && passwordInput === 'admin123') {
+                alert('Login Berhasil!');
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('dashboardSection').style.display = 'block';
+                loadOrders();
+            } else {
+                alert('Username atau Password salah!');
             }
         });
     }
@@ -38,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadOrders() {
     const tableBody = document.getElementById('ordersTableBody');
     if (tableBody) {
-        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Mengambil data dari Google Sheets...</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Mengambil data pesanan...</td></tr>';
     }
 
     try {
@@ -49,7 +36,7 @@ async function loadOrders() {
         tableBody.innerHTML = '';
 
         if (!data.orders || data.orders.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: #64748b;">Belum ada pesanan masuk.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: #64748b;">Belum ada pesanan aktif.</td></tr>';
             return;
         }
 
@@ -60,8 +47,13 @@ async function loadOrders() {
                     <td>${order.nama}</td>
                     <td><a href="https://wa.me/${order.phone}" target="_blank" style="color: #2563eb; font-weight:600; text-decoration:none;">📱 ${order.phone}</a></td>
                     <td>${order.jumlahHalaman} Hal (${order.jenisCetak})</td>
-                    <td><span style="background:#dcfce7; color:#15803d; padding:4px 8px; border-radius:6px; font-weight:bold; font-size:12px;">Pending</span></td>
+                    <td><span style="background:#fef3c7; color:#d97706; padding:4px 8px; border-radius:6px; font-weight:bold; font-size:12px;">Pending</span></td>
                     <td>📄 ${order.fileName}</td>
+                    <td>
+                        <button onclick="archiveOrder('${order.id}')" style="background:#22c55e; color:white; border:none; padding:6px 12px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:12px;">
+                            ✅ Selesai & Arsip
+                        </button>
+                    </td>
                 </tr>
             `;
             tableBody.innerHTML += row;
@@ -69,7 +61,20 @@ async function loadOrders() {
     } catch (err) {
         console.error('Error loading orders:', err);
         if (tableBody) {
-            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#ef4444;">Gagal mengambil data. Klik "Refresh Data".</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#ef4444;">Gagal mengambil data. Klik "Refresh Data".</td></tr>';
         }
+    }
+}
+
+async function archiveOrder(orderId) {
+    if (!confirm(`Tandai pesanan ${orderId} sebagai SELESAI dan pindahkan ke Arsip?`)) return;
+
+    try {
+        await fetch(`${GOOGLE_SCRIPT_URL}?action=archive&id=${orderId}`, { mode: 'no-cors' });
+        alert(`Pesanan ${orderId} berhasil diselesaikan dan diarsip!`);
+        setTimeout(loadOrders, 1000);
+    } catch (err) {
+        console.error("Error archiving order:", err);
+        alert("Gagal mengarsip pesanan.");
     }
 }

@@ -76,12 +76,11 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
             catatan: catatan
         };
 
-        // Kirim via POST (text/plain agar lolos CORS browser) ke Apps Script
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify(payload)
+        // Kirim via GET URL Parameters (Langsung tembus Google Apps Script)
+        const queryParams = new URLSearchParams(payload).toString();
+        fetch(`${GOOGLE_SCRIPT_URL}?${queryParams}`, {
+            method: 'GET',
+            mode: 'no-cors'
         });
 
         const elOrderId = document.getElementById('modalOrderId');

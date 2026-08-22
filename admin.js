@@ -29,7 +29,7 @@ async function loadOrders() {
     }
 
     try {
-        const res = await fetch(GOOGLE_SCRIPT_URL);
+        const res = await fetch(`${GOOGLE_SCRIPT_URL}?t=${Date.now()}`);
         const data = await res.json();
 
         if (!tableBody) return;
@@ -43,12 +43,12 @@ async function loadOrders() {
         }
 
         orderList.slice().reverse().forEach(order => {
-            const id = order.id || order.orderId || '-';
-            const nama = order.nama || order.customerName || '-';
-            const phone = order.phone || order.noWa || '-';
-            const jumlahHalaman = order.jumlahHalaman || order.halaman || '0';
-            const jenisCetak = order.jenisCetak || order.jenis || 'Hitam Putih';
-            const fileName = order.fileName || order.file || '-';
+            const id = order.id || '-';
+            const nama = order.nama || '-';
+            const phone = order.phone || '-';
+            const jumlahHalaman = order.jumlahHalaman || '0';
+            const jenisCetak = order.jenisCetak || 'Hitam Putih';
+            const fileName = order.fileName || '-';
 
             const row = `
                 <tr>
@@ -79,15 +79,11 @@ async function archiveOrder(orderId) {
     if (!confirm(`Tandai pesanan ${orderId} sebagai SELESAI dan pindahkan ke Arsip?`)) return;
 
     try {
-        await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'archive', id: orderId })
-        });
-
-        alert(`Pesanan ${orderId} berhasil diselesaikan dan diarsip!`);
-        setTimeout(loadOrders, 1200);
+        // Panggil endpoint khusus archive
+        await fetch(`${GOOGLE_SCRIPT_URL}?action=archive&id=${encodeURIComponent(orderId)}&t=${Date.now()}`, { mode: 'no-cors' });
+        
+        alert(`Pesanan ${orderId} berhasil diproses!`);
+        setTimeout(loadOrders, 1500);
     } catch (err) {
         console.error("Error archiving order:", err);
         alert("Gagal mengarsip pesanan.");

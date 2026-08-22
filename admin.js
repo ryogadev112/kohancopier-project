@@ -79,10 +79,11 @@ async function archiveOrder(orderId) {
     if (!confirm(`Tandai pesanan ${orderId} sebagai SELESAI dan pindahkan ke Arsip?`)) return;
 
     try {
-        // Panggil endpoint Apps Script dengan mode 'no-cors'
-        await fetch(`${GOOGLE_SCRIPT_URL}?action=archive&id=${encodeURIComponent(orderId)}&t=${Date.now()}`, { 
-            method: 'GET',
-            mode: 'no-cors' 
+        await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({ action: 'archive', id: orderId })
         });
 
         alert(`Pesanan ${orderId} berhasil diarsipkan!`);

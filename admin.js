@@ -79,25 +79,43 @@ async function loadOrders() {
     }
 }
 
-async function archiveOrder(orderId) {
+function archiveOrder(orderId) {
     if (!confirm(`Tandai pesanan ${orderId} sebagai SELESAI dan pindahkan ke Arsip?`)) return;
 
-    try {
-        const queryParams = new URLSearchParams({
-            action: 'archive',
-            id: orderId,
-            t: Date.now()
-        }).toString();
+    // Buat iframe tersembunyi untuk mengeksekusi request secara langsung
+    const iframeName = 'hidden_archive_iframe_' + Date.now();
+    const iframe = document.createElement('iframe');
+    iframe.name = iframeName;
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
 
-        await fetch(`${GOOGLE_SCRIPT_URL}?${queryParams}`, {
-            method: 'GET',
-            mode: 'no-cors'
-        });
+    // Kirim request via Form submission alami
+    const form = document.createElement('form');
+    form.method = 'GET';
+    form.action = GOOGLE_SCRIPT_URL;
+    form.target = iframeName;
 
-        alert(`Pesanan ${orderId} berhasil dipindahkan ke Arsip!`);
-        setTimeout(loadOrders, 1500);
-    } catch (err) {
-        console.error("Error archiving order:", err);
-        alert("Gagal mengarsip pesanan.");
-    }
+    const inputAction = document.createElement('input');
+    inputAction.type = 'hidden';
+    inputAction.name = 'action';
+    inputAction.value = 'archive';
+    form.appendChild(inputAction);
+
+    const inputId = document.createElement('input');
+    inputId.type = 'hidden';
+    inputId.name = 'id';
+    inputId.value = orderId;
+    form.appendChild(inputId);
+
+    document.body.appendChild(form);
+    form.submit();
+
+    alert(`Pesanan ${orderId} dipindahkan ke Arsip!`);
+
+    // Bersihkan DOM dan refresh tabel setelah 1.5 detik
+    setTimeout(() => {
+        document.body.removeChild(form);
+        document.body.removeChild(iframe);
+        loadOrders();
+    }, 1500);
 }

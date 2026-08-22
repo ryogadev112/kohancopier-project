@@ -1,6 +1,5 @@
 const NOMOR_WA_ADMIN = "6288218475220";
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyotw4ez7OI14rmdQVuHsdBGHx3t1z4WcLnSGWNF17yXMQ3FJzsv1HZWUWRFlXFS84Psg/exec";
-
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6hlU7FtCH4-NDlKUkew1NjeBoaui3aR0UhYHDnzfUyTKYyhn45q4xPIpC4AuXm-lxIg/exec";
 // 1. Kalkulator Estimasi Biaya
 function hitungTotalBiaya() {
     const elJumlah = document.getElementById('jumlahHalaman');

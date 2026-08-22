@@ -75,14 +75,20 @@ async function loadOrders() {
     }
 }
 
-function archiveOrder(orderId) {
+async function archiveOrder(orderId) {
     if (!confirm(`Tandai pesanan ${orderId} sebagai SELESAI dan pindahkan ke Arsip?`)) return;
 
-    // Gunakan Image beacon untuk memastikan request sampai tanpa hambatan CORS
-    const cleanId = encodeURIComponent(orderId);
-    const img = new Image();
-    img.src = `${GOOGLE_SCRIPT_URL}?action=archive&id=${cleanId}&t=${Date.now()}`;
+    try {
+        // Panggil endpoint Apps Script dengan mode 'no-cors'
+        await fetch(`${GOOGLE_SCRIPT_URL}?action=archive&id=${encodeURIComponent(orderId)}&t=${Date.now()}`, { 
+            method: 'GET',
+            mode: 'no-cors' 
+        });
 
-    alert(`Pesanan ${orderId} sedang dipindahkan ke Arsip...`);
-    setTimeout(loadOrders, 2000);
+        alert(`Pesanan ${orderId} berhasil diarsipkan!`);
+        setTimeout(loadOrders, 1500);
+    } catch (err) {
+        console.error("Error archiving order:", err);
+        alert("Gagal mengarsip pesanan.");
+    }
 }

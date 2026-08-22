@@ -1,7 +1,7 @@
 const NOMOR_WA_ADMIN = "6288218475220";
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyotw4ez7OI14rmdQVuHsdBGHx3t1z4WcLnSGWNF17yXMQ3FJzsv1HZWUWRFlXFS84Psg/exec";
 
-// 1. FUNGSI KALKULATOR HARGA OTOMATIS
+// 1. Kalkulator Estimasi Biaya
 function hitungTotalBiaya() {
     const elJumlah = document.getElementById('jumlahHalaman');
     const elJenis = document.getElementById('jenisCetak');
@@ -12,7 +12,6 @@ function hitungTotalBiaya() {
     const jumlahHalaman = parseInt(elJumlah.value) || 1;
     const jenisCetak = elJenis.value || 'Hitam Putih';
     
-    // Hitam Putih = Rp 1.000, Warna = Rp 2.000
     const hargaPerHal = (jenisCetak === 'Warna') ? 2000 : 1000;
     const total = jumlahHalaman * hargaPerHal;
     const formatted = 'Rp ' + total.toLocaleString('id-ID');
@@ -22,7 +21,6 @@ function hitungTotalBiaya() {
     return { total, formatted };
 }
 
-// Inisialisasi Event Listener Kalkulator
 function initCalculator() {
     const elJumlah = document.getElementById('jumlahHalaman');
     const elJenis = document.getElementById('jenisCetak');
@@ -35,7 +33,6 @@ function initCalculator() {
         elJenis.addEventListener('change', hitungTotalBiaya);
     }
     
-    // Jalankan kalkulasi pertama kali saat halaman dimuat
     hitungTotalBiaya();
 }
 
@@ -45,7 +42,7 @@ if (document.readyState === 'loading') {
     initCalculator();
 }
 
-// 2. PROSES FORM PEMESANAN
+// 2. Kirim Form Pemesanan
 document.getElementById('orderForm')?.addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -78,14 +75,14 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
             catatan: catatan
         };
 
-        // Kirim langsung ke Google Sheets
-        const params = new URLSearchParams(payload).toString();
-        fetch(`${GOOGLE_SCRIPT_URL}?${params}`, {
-            method: 'GET',
-            mode: 'no-cors'
+        // Kirim via POST ke Google Apps Script
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
 
-        // Masukkan data ke Modal Pop-up
         const elOrderId = document.getElementById('modalOrderId');
         const elNama = document.getElementById('modalNama');
         const elFile = document.getElementById('modalFile');
@@ -98,7 +95,6 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
         if (elDetail) elDetail.innerText = `${jumlahHalaman} Halaman (${jenisCetak})`;
         if (elTotal) elTotal.innerText = totalHargaFormatted;
 
-        // Tampilkan Modal
         setTimeout(() => {
             const modal = document.getElementById('orderModal');
             if (modal) modal.style.display = 'flex';
@@ -109,7 +105,6 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
             }
         }, 500);
 
-        // Link WhatsApp Admin
         const pesanWA = `Halo Admin KohanCopier,\n\nSaya telah membuat pesanan cetak dokumen baru:` +
             `\n- *ID Pesanan:* ${orderId}` +
             `\n- *Nama:* ${nama}` +

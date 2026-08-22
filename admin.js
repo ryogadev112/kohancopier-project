@@ -35,7 +35,6 @@ async function loadOrders() {
         if (!tableBody) return;
         tableBody.innerHTML = '';
 
-        // Tangani jika response data berupa array langsung atau object wrapper
         const orderList = Array.isArray(data) ? data : (data.orders || []);
 
         if (orderList.length === 0) {
@@ -44,7 +43,6 @@ async function loadOrders() {
         }
 
         orderList.slice().reverse().forEach(order => {
-            // Ambil variabel dengan fallback jika properti sedikit berbeda
             const id = order.id || order.orderId || '-';
             const nama = order.nama || order.customerName || '-';
             const phone = order.phone || order.noWa || '-';
@@ -81,9 +79,15 @@ async function archiveOrder(orderId) {
     if (!confirm(`Tandai pesanan ${orderId} sebagai SELESAI dan pindahkan ke Arsip?`)) return;
 
     try {
-        await fetch(`${GOOGLE_SCRIPT_URL}?action=archive&id=${orderId}`, { mode: 'no-cors' });
+        await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'archive', id: orderId })
+        });
+
         alert(`Pesanan ${orderId} berhasil diselesaikan dan diarsip!`);
-        setTimeout(loadOrders, 1000);
+        setTimeout(loadOrders, 1200);
     } catch (err) {
         console.error("Error archiving order:", err);
         alert("Gagal mengarsip pesanan.");

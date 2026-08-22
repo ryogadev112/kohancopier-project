@@ -12,6 +12,7 @@ function hitungTotalBiaya() {
     const jumlahHalaman = parseInt(elJumlah.value) || 1;
     const jenisCetak = elJenis.value || 'Hitam Putih';
     
+    // Hitam Putih = Rp 1.000, Warna = Rp 2.000
     const hargaPerHal = (jenisCetak === 'Warna') ? 2000 : 1000;
     const total = jumlahHalaman * hargaPerHal;
     const formatted = 'Rp ' + total.toLocaleString('id-ID');
@@ -75,12 +76,11 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
             catatan: catatan
         };
 
-        // Kirim via POST ke Google Apps Script
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+        // Kirim via GET URL Parameters ke Google Apps Script
+        const params = new URLSearchParams(payload).toString();
+        fetch(`${GOOGLE_SCRIPT_URL}?${params}`, {
+            method: 'GET',
+            mode: 'no-cors'
         });
 
         const elOrderId = document.getElementById('modalOrderId');

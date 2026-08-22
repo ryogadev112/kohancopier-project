@@ -75,17 +75,14 @@ async function loadOrders() {
     }
 }
 
-async function archiveOrder(orderId) {
+function archiveOrder(orderId) {
     if (!confirm(`Tandai pesanan ${orderId} sebagai SELESAI dan pindahkan ke Arsip?`)) return;
 
-    try {
-        // Panggil endpoint khusus archive
-        await fetch(`${GOOGLE_SCRIPT_URL}?action=archive&id=${encodeURIComponent(orderId)}&t=${Date.now()}`, { mode: 'no-cors' });
-        
-        alert(`Pesanan ${orderId} berhasil diproses!`);
-        setTimeout(loadOrders, 1500);
-    } catch (err) {
-        console.error("Error archiving order:", err);
-        alert("Gagal mengarsip pesanan.");
-    }
+    // Gunakan Image beacon untuk memastikan request sampai tanpa hambatan CORS
+    const cleanId = encodeURIComponent(orderId);
+    const img = new Image();
+    img.src = `${GOOGLE_SCRIPT_URL}?action=archive&id=${cleanId}&t=${Date.now()}`;
+
+    alert(`Pesanan ${orderId} sedang dipindahkan ke Arsip...`);
+    setTimeout(loadOrders, 2000);
 }

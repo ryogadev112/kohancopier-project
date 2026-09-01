@@ -46,15 +46,14 @@ async function loadOrders() {
             return;
         }
 
-        // Hitung nomor antrian kronologis (pesanan paling lama = Antrian #1)
-        // orderList berurut dari lama ke baru (indeks 0 = paling tua)
+        // Hitung nomor antrian (pesanan paling tua = Antrian #1 di posisi teratas)
         const activeOrdersWithQueue = orderList.map((order, index) => ({
             ...order,
-            queueNumber: index + 1 // Nomor Antrian Fisik (1, 2, 3...)
+            queueNumber: index + 1
         }));
 
-        // Tampilkan pesanan terbaru di posisi atas tabel
-        activeOrdersWithQueue.reverse().forEach(order => {
+        // Tampilkan urut dari Antrian #1 di paling atas ke Antrian berikutnya di bawahnya
+        activeOrdersWithQueue.forEach(order => {
             const id = order.id || '-';
             const nama = order.nama || '-';
             const phone = order.phone || '-';
@@ -63,10 +62,9 @@ async function loadOrders() {
             const fileName = order.fileName || '-';
             const queueNum = order.queueNumber;
 
-            // Penanda visual khusus jika ini antrian No. 1 (paling pertama harus dicetak)
             const isNext = queueNum === 1;
             const queueBadgeStyle = isNext 
-                ? 'background: #ef4444; color: white; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 13px; display: inline-block; animation: pulse 1.5s infinite;'
+                ? 'background: #ef4444; color: white; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 13px; display: inline-block;'
                 : 'background: #3b82f6; color: white; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 12px; display: inline-block;';
 
             const queueText = isNext ? `🔥 Antrian #${queueNum} (NEXT)` : `🏷️ Antrian #${queueNum}`;

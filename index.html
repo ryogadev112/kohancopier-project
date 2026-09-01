@@ -8,6 +8,18 @@
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f1f5f9; margin: 0; padding: 20px; color: #1e293b; }
         .container { max-width: 600px; margin: 0 auto; background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        
+        /* Navbar Styles */
+        .navbar { display: flex; justify-content: space-around; background: #1e293b; padding: 10px; border-radius: 12px; margin-bottom: 24px; }
+        .navbar button { background: transparent; color: #94a3b8; border: none; padding: 10px 16px; font-weight: bold; font-size: 14px; cursor: pointer; border-radius: 8px; transition: 0.3s; }
+        .navbar button:hover { color: white; background: #334155; }
+        .navbar button.active { background: #2563eb; color: white; }
+
+        /* Page System */
+        .page-section { display: none; animation: fadeIn 0.4s ease; }
+        .page-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         .header { text-align: center; margin-bottom: 24px; }
         .header h1 { margin: 0; color: #1e293b; font-size: 24px; }
         .header p { color: #64748b; font-size: 14px; margin-top: 4px; }
@@ -37,6 +49,13 @@
         .modal-content { background: white; padding: 24px; border-radius: 16px; max-width: 450px; width: 100%; text-align: center; }
         .modal-content h2 { margin-top: 0; color: #16a34a; }
         .btn-wa { display: inline-block; width: 100%; background: #22c55e; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 16px; text-decoration: none; }
+        
+        /* Home Hero Styles */
+        .hero { text-align: center; padding: 20px 0; }
+        .hero-img { font-size: 60px; margin-bottom: 10px; }
+        .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .feature-card { background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; }
+        .btn-primary { background: #2563eb; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; width: 100%; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -47,78 +66,112 @@
         <p>Layanan Cetak Dokumen Fast & Easy</p>
     </div>
 
-    <!-- Section 1: Cek Riwayat & Pesan Ulang (Returning Customer) -->
-    <div class="box-section">
-        <h3 style="color: #1e293b;">🔄 Pelanggan Setia? Cek Riwayat & Pesan Ulang</h3>
-        <p>Masukkan nomor WhatsApp Anda untuk mengisi form otomatis dari pesanan lalu.</p>
-        
-        <div class="input-group">
-            <input type="tel" id="searchPhone" placeholder="Contoh: 088218475220">
-            <button type="button" onclick="cariRiwayatPesanan()" style="background: #2563eb;">🔍 Cari</button>
-        </div>
-
-        <div id="historyResult" style="margin-top: 12px; display: none;"></div>
+    <!-- NAVBAR NAVIGASI -->
+    <div class="navbar">
+        <button id="nav-home" class="active" onclick="switchPage('home')">🏠 Beranda</button>
+        <button id="nav-order" onclick="switchPage('order')">📝 Pesan</button>
+        <button id="nav-track" onclick="switchPage('track')">📍 Lacak</button>
     </div>
 
-    <!-- Section 2: Lacak Status Antrian & Estimasi (Task 4 & 5) -->
-    <div class="box-section" style="border-color: #3b82f6; background: #eff6ff;">
-        <h3 style="color: #1e40af;">📍 Cek Status Antrian & Estimasi Selesai</h3>
-        <p>Masukkan ID Pesanan (KC-xxx) atau Nomor WhatsApp Anda.</p>
-        
-        <div class="input-group">
-            <input type="text" id="trackInput" placeholder="Contoh: KC-178753... atau No WA">
-            <button type="button" onclick="lacakStatusPesanan()" style="background: #1d4ed8;">📍 Lacak</button>
-        </div>
+    <!-- ================= HALAMAN 1: BERANDA ================= -->
+    <div id="page-home" class="page-section active">
+        <div class="hero">
+            <div class="hero-img">🏫</div>
+            <h2 style="margin: 0 0 10px 0; color: #1e293b;">Selamat Datang!</h2>
+            <p style="color: #64748b; line-height: 1.5; font-size: 14px;">Platform cetak dokumen pintar untuk kebutuhan tugas sekolah dan kantoran. Pesan dari mana saja, pantau antrian secara real-time, dan ambil saat sudah selesai!</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3 style="margin: 0 0 5px 0;">⚡</h3>
+                    <strong style="font-size: 13px;">Tanpa Antre Fisik</strong>
+                </div>
+                <div class="feature-card">
+                    <h3 style="margin: 0 0 5px 0;">⏱️</h3>
+                    <strong style="font-size: 13px;">Estimasi Live</strong>
+                </div>
+            </div>
 
-        <div id="trackResult" style="margin-top: 12px; display: none;"></div>
+            <button class="btn-primary" onclick="switchPage('order')">🚀 Buat Pesanan Baru Sekarang</button>
+        </div>
     </div>
 
-    <!-- Section 3: Form Utama Pemesanan -->
-    <form id="orderForm">
-        <div class="form-group">
-            <label for="nama">Nama Lengkap</label>
-            <input type="text" id="nama" placeholder="Masukkan nama Anda" required>
+    <!-- ================= HALAMAN 2: PESAN / ORDER ================= -->
+    <div id="page-order" class="page-section">
+        <!-- Cek Riwayat & Pesan Ulang (Returning Customer) -->
+        <div class="box-section">
+            <h3 style="color: #1e293b;">🔄 Pelanggan Setia? Pesan Ulang</h3>
+            <p>Masukkan nomor WhatsApp Anda untuk mengisi form otomatis dari pesanan lalu.</p>
+            
+            <div class="input-group">
+                <input type="tel" id="searchPhone" placeholder="Contoh: 088218475220">
+                <button type="button" onclick="cariRiwayatPesanan()" style="background: #2563eb;">🔍 Cari</button>
+            </div>
+            <div id="historyResult" style="margin-top: 12px; display: none;"></div>
         </div>
 
-        <div class="form-group">
-            <label for="phone">Nomor WhatsApp</label>
-            <input type="tel" id="phone" placeholder="Contoh: 088218475220" required>
-        </div>
+        <!-- Form Utama Pemesanan -->
+        <form id="orderForm">
+            <h3 style="margin-bottom: 16px; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Form Cetak Dokumen</h3>
+            <div class="form-group">
+                <label for="nama">Nama Lengkap</label>
+                <input type="text" id="nama" placeholder="Masukkan nama Anda" required>
+            </div>
 
-        <div class="form-group">
-            <label for="jumlahHalaman">Jumlah Halaman</label>
-            <input type="number" id="jumlahHalaman" min="1" value="1" required>
-        </div>
+            <div class="form-group">
+                <label for="phone">Nomor WhatsApp</label>
+                <input type="tel" id="phone" placeholder="Contoh: 088218475220" required>
+            </div>
 
-        <div class="form-group">
-            <label for="jenisCetak">Jenis Cetak</label>
-            <select id="jenisCetak">
-                <option value="Hitam Putih">Hitam Putih (Rp 1.000/hal)</option>
-                <option value="Warna">Warna (Rp 2.000/hal)</option>
-            </select>
-        </div>
+            <div class="form-group">
+                <label for="jumlahHalaman">Jumlah Halaman</label>
+                <input type="number" id="jumlahHalaman" min="1" value="1" required>
+            </div>
 
-        <div class="form-group">
-            <label for="file">Upload File Dokumen (PDF/DOCX)</label>
-            <input type="file" id="file" required>
-        </div>
+            <div class="form-group">
+                <label for="jenisCetak">Jenis Cetak</label>
+                <select id="jenisCetak">
+                    <option value="Hitam Putih">Hitam Putih (Rp 1.000/hal)</option>
+                    <option value="Warna">Warna (Rp 2.000/hal)</option>
+                </select>
+            </div>
 
-        <div class="form-group">
-            <label for="catatan">Catatan Tambahan (Opsional)</label>
-            <textarea id="catatan" placeholder="Contoh: Jilid klip di pojok kiri atas"></textarea>
-        </div>
+            <div class="form-group">
+                <label for="file">Upload File Dokumen (PDF/DOCX)</label>
+                <input type="file" id="file" required>
+            </div>
 
-        <div class="price-box">
-            <span>Estimasi Total Biaya:</span>
-            <strong id="pricePreview">Rp 1.000</strong>
-        </div>
+            <div class="form-group">
+                <label for="catatan">Catatan Tambahan (Opsional)</label>
+                <textarea id="catatan" placeholder="Contoh: Jilid klip di pojok kiri atas"></textarea>
+            </div>
 
-        <button type="submit" id="submitBtn" class="btn-submit">
-            <span>🚀 Kirim Pesanan Sekarang</span>
-        </button>
-    </form>
+            <div class="price-box">
+                <span>Estimasi Total Biaya:</span>
+                <strong id="pricePreview">Rp 1.000</strong>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-submit">
+                <span>🚀 Kirim Pesanan Sekarang</span>
+            </button>
+        </form>
+    </div>
+
+    <!-- ================= HALAMAN 3: LACAK ================= -->
+    <div id="page-track" class="page-section">
+        <div class="box-section" style="border-color: #3b82f6; background: #eff6ff;">
+            <h3 style="color: #1e40af;">📍 Cek Status Antrian & Estimasi Selesai</h3>
+            <p>Masukkan ID Pesanan (KC-xxx) atau Nomor WhatsApp Anda.</p>
+            
+            <div class="input-group">
+                <input type="text" id="trackInput" placeholder="Contoh: KC-178753... atau No WA">
+                <button type="button" onclick="lacakStatusPesanan()" style="background: #1d4ed8;">📍 Lacak</button>
+            </div>
+            <div id="trackResult" style="margin-top: 12px; display: none;"></div>
+        </div>
+    </div>
 </div>
 
+<!-- Modal Konfirmasi Pesanan (Global) -->
 <div id="orderModal" class="modal">
     <div class="modal-content">
         <h2>🎉 Pesanan Berhasil dibuat!</h2>
@@ -136,5 +189,25 @@
 </div>
 
 <script src="main.js"></script>
+
+<!-- Script Khusus Pindah Halaman -->
+<script>
+    function switchPage(pageId) {
+        // Hilangkan class 'active' dari semua tombol nav
+        document.getElementById('nav-home').classList.remove('active');
+        document.getElementById('nav-order').classList.remove('active');
+        document.getElementById('nav-track').classList.remove('active');
+
+        // Hilangkan class 'active' dari semua halaman
+        document.getElementById('page-home').classList.remove('active');
+        document.getElementById('page-order').classList.remove('active');
+        document.getElementById('page-track').classList.remove('active');
+
+        // Tambahkan class 'active' ke elemen yang dituju
+        document.getElementById('nav-' + pageId).classList.add('active');
+        document.getElementById('page-' + pageId).classList.add('active');
+    }
+</script>
+
 </body>
 </html>

@@ -42,7 +42,7 @@ if (document.readyState === 'loading') {
     initCalculator();
 }
 
-// 2. Lacak Status Antrian & Estimasi Selesai (Task 4 & 5 - Opsi B)
+// 2. Lacak Status Antrian, Estimasi Selesai (Jam Live), & Status Selesai
 async function lacakStatusPesanan() {
     const inputVal = document.getElementById('trackInput')?.value.trim();
     const trackResultEl = document.getElementById('trackResult');
@@ -55,66 +55,109 @@ async function lacakStatusPesanan() {
     if (!trackResultEl) return;
 
     trackResultEl.style.display = 'block';
-    trackResultEl.innerHTML = '<p style="font-size:13px; color:#64748b;">Mengecek posisi antrian...</p>';
+    trackResultEl.innerHTML = '<p style="font-size:13px; color:#64748b;">Mengecek status pesanan...</p>';
 
     try {
         const res = await fetch(`${GOOGLE_SCRIPT_URL}?t=${Date.now()}`);
         const data = await res.json();
+        
         const pendingOrders = data.orders || [];
+        const archivedOrders = data.archived || []; // Mengambil data pesanan yang sudah selesai
 
         const cleanInput = inputVal.toLowerCase().replace(/\D/g, '');
+        const searchStr = inputVal.toLowerCase();
 
+        // --- CEK 1: APAKAH MASIH ANTRE (PENDING)? ---
         const targetIndex = pendingOrders.findIndex(o => {
             const cleanId = String(o.id || '').toLowerCase();
             const cleanPhone = String(o.phone || '').replace(/\D/g, '');
-            return cleanId.includes(inputVal.toLowerCase()) || (cleanInput && cleanPhone.endsWith(cleanInput));
+            return cleanId.includes(searchStr) || (cleanInput && cleanPhone.endsWith(cleanInput));
         });
 
-        if (targetIndex === -1) {
+        if (targetIndex !== -1) {
+            // SKENARIO A: MASIH ANTRE (Tampilkan Estimasi & Jam Live)
+            const myOrder = pendingOrders[targetIndex];
+            const queuePos = targetIndex + 1;
+
+            // Hitung halaman di depan
+            let totalHalamanDiDepan = 0;
+            for (let i = 0; i < targetIndex; i++) {
+                totalHalamanDiDepan += (parseInt(pendingOrders[i].jumlahHalaman) || 1);
+            }
+
+            // Hitung menit
+            const estimasiDetik = (totalHalamanDiDepan * 5) + (targetIndex * 120);
+            let estimasiMenit = Math.max(1, Math.ceil(estimasiDetik / 60));
+            
+            const isNext = queuePos === 1;
+            if (isNext) estimasiMenit = 3; // Max 3 menit jika antrian pertama
+
+            // Hitung JAM LIVE (Waktu Sekarang + Estimasi Menit)
+            const waktuSelesai = new Date();
+            waktuSelesai.setMinutes(waktuSelesai.getMinutes() + estimasiMenit);
+            const jamText = waktuSelesai.getHours().toString().padStart(2, '0') + ':' + waktuSelesai.getMinutes().toString().padStart(2, '0');
+
+            const statusBadge = isNext 
+                ? '<span style="background:#ef4444; color:white; padding:4px 10px; border-radius:12px; font-weight:bold; font-size:12px;">🔥 Sedang/Siap Dicetak</span>'
+                : `<span style="background:#3b82f6; color:white; padding:4px 10px; border-radius:12px; font-weight:bold; font-size:12px;">⏳ Antrian #${queuePos}</span>`;
+
+            const estimasiTeks = isNext 
+                ? `± 1 - 3 Menit (Sekitar pukul ${jamText} WIB)`
+                : `± ${estimasiMenit} Menit (Sekitar pukul ${jamText} WIB)`;
+
             trackResultEl.innerHTML = `
-                <div style="background:white; padding:12px; border-radius:8px; border:1px solid #fed7aa; color:#c2410c; font-size:13px;">
-                    ❌ Pesanan tidak ditemukan di antrian aktif. Pesanan Anda mungkin <b>sudah selesai dicetak (Arsip)</b> atau ID salah.
+                <div style="background:white; padding:14px; border-radius:10px; border:1px solid #bfdbfe; font-size:13px; color:#1e293b;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <strong>${myOrder.nama} <small style="color:#64748b;">(${myOrder.id})</small></strong>
+                        ${statusBadge}
+                    </div>
+                    <hr style="border:none; border-top:1px solid #e2e8f0; margin:8px 0;">
+                    <p style="margin:4px 0;">📄 <b>Dokumen:</b> ${myOrder.fileName} (${myOrder.jumlahHalaman} Hal - ${myOrder.jenisCetak})</p>
+                    <p style="margin:4px 0;">👥 <b>Antrian di Depan:</b> ${targetIndex} Pesanan (${totalHalamanDiDepan} Halaman)</p>
+                    <p style="margin:6px 0 0 0; color:#1d4ed8; font-size:14px; font-weight:bold;">
+                        ⏱️ <b>Estimasi Selesai:</b> ${estimasiTeks}
+                    </p>
                 </div>
             `;
             return;
         }
 
-        const myOrder = pendingOrders[targetIndex];
-        const queuePos = targetIndex + 1;
+        // --- CEK 2: APAKAH SUDAH SELESAI (ARCHIVE)? ---
+        const archiveIndex = archivedOrders.findIndex(o => {
+            const cleanId = String(o.id || '').toLowerCase();
+            const cleanPhone = String(o.phone || '').replace(/\D/g, '');
+            return cleanId.includes(searchStr) || (cleanInput && cleanPhone.endsWith(cleanInput));
+        });
 
-        // Hitung total lembar halaman dokumen antrian di depan
-        let totalHalamanDiDepan = 0;
-        for (let i = 0; i < targetIndex; i++) {
-            totalHalamanDiDepan += (parseInt(pendingOrders[i].jumlahHalaman) || 1);
+        if (archiveIndex !== -1) {
+            // SKENARIO B: SUDAH SELESAI (Tampilan Hijau Sukses)
+            const myOrder = archivedOrders[archiveIndex];
+            trackResultEl.innerHTML = `
+                <div style="background:#f0fdf4; padding:14px; border-radius:10px; border:1px solid #86efac; font-size:13px; color:#166534;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <strong style="color:#15803d;">${myOrder.nama} <small style="color:#166534;">(${myOrder.id})</small></strong>
+                        <span style="background:#22c55e; color:white; padding:4px 10px; border-radius:12px; font-weight:bold; font-size:12px;">✅ Selesai</span>
+                    </div>
+                    <hr style="border:none; border-top:1px solid #bbf7d0; margin:8px 0;">
+                    <p style="margin:4px 0;">📄 <b>Dokumen:</b> ${myOrder.fileName} (${myOrder.jumlahHalaman} Hal - ${myOrder.jenisCetak})</p>
+                    <p style="margin:6px 0 0 0; font-size:14px; font-weight:bold; color:#15803d;">
+                        🎉 Pesanan Anda sudah selesai dicetak dan siap untuk diambil!
+                    </p>
+                </div>
+            `;
+            return;
         }
 
-        // Estimasi: (Total Halaman * 5 detik) + (Jumlah Pesanan di Depan * 2 menit)
-        const estimasiDetik = (totalHalamanDiDepan * 5) + (targetIndex * 120);
-        const estimasiMenit = Math.max(1, Math.ceil(estimasiDetik / 60));
-
-        const isNext = queuePos === 1;
-        const statusBadge = isNext 
-            ? '<span style="background:#ef4444; color:white; padding:4px 10px; border-radius:12px; font-weight:bold; font-size:12px;">🔥 Sedang/Siap Dicetak</span>'
-            : `<span style="background:#3b82f6; color:white; padding:4px 10px; border-radius:12px; font-weight:bold; font-size:12px;">⏳ Antrian #${queuePos}</span>`;
-
+        // --- SKENARIO C: TIDAK DITEMUKAN (Tampilan Merah Error) ---
         trackResultEl.innerHTML = `
-            <div style="background:white; padding:14px; border-radius:10px; border:1px solid #bfdbfe; font-size:13px; color:#1e293b;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <strong>${myOrder.nama} <small style="color:#64748b;">(${myOrder.id})</small></strong>
-                    ${statusBadge}
-                </div>
-                <hr style="border:none; border-top:1px solid #e2e8f0; margin:8px 0;">
-                <p style="margin:4px 0;">📄 <b>Dokumen:</b> ${myOrder.fileName} (${myOrder.jumlahHalaman} Hal - ${myOrder.jenisCetak})</p>
-                <p style="margin:4px 0;">👥 <b>Antrian di Depan:</b> ${targetIndex} Pesanan (${totalHalamanDiDepan} Halaman)</p>
-                <p style="margin:6px 0 0 0; color:#1d4ed8; font-size:14px; font-weight:bold;">
-                    ⏱️ <b>Estimasi Selesai:</b> ± ${isNext ? '1 - 3' : estimasiMenit} Menit
-                </p>
+            <div style="background:#fef2f2; padding:12px; border-radius:8px; border:1px solid #fca5a5; color:#b91c1c; font-size:13px;">
+                ❌ <b>Pesanan tidak ditemukan.</b> Pastikan ID Pesanan atau Nomor WhatsApp yang Anda masukkan sudah benar.
             </div>
         `;
 
     } catch (err) {
         console.error("Tracking error:", err);
-        trackResultEl.innerHTML = '<p style="font-size:13px; color:#ef4444;">Gagal mengambil data antrian.</p>';
+        trackResultEl.innerHTML = '<p style="font-size:13px; color:#ef4444;">Gagal mengambil data pesanan. Coba lagi nanti.</p>';
     }
 }
 

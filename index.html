@@ -78,7 +78,7 @@
         <div class="hero">
             <div class="hero-img">🏫</div>
             <h2 style="margin: 0 0 10px 0; color: #1e293b;">Selamat Datang!</h2>
-            <p style="color: #64748b; line-height: 1.5; font-size: 14px;">Platform cetak dokumen pintar untuk kebutuhan tugas sekolah dan kantoran. Pesan dari mana saja, pantau antrian secara real-time, dan ambil saat sudah selesai!</p>
+            <p style="color: #64748b; line-height: 1.5; font-size: 14px;">Platform cetak dokumen pintar untuk kebutuhan tugas sekolah dan kantoran. Pesan dari mana saja, pantau antrean secara real-time, dan ambil saat sudah selesai!</p>
             
             <div class="feature-grid">
                 <div class="feature-card">
@@ -193,17 +193,14 @@
 <!-- Script Khusus Pindah Halaman -->
 <script>
     function switchPage(pageId) {
-        // Hilangkan class 'active' dari semua tombol nav
         document.getElementById('nav-home').classList.remove('active');
         document.getElementById('nav-order').classList.remove('active');
         document.getElementById('nav-track').classList.remove('active');
 
-        // Hilangkan class 'active' dari semua halaman
         document.getElementById('page-home').classList.remove('active');
         document.getElementById('page-order').classList.remove('active');
         document.getElementById('page-track').classList.remove('active');
 
-        // Tambahkan class 'active' ke elemen yang dituju
         document.getElementById('nav-' + pageId).classList.add('active');
         document.getElementById('page-' + pageId).classList.add('active');
     }

@@ -42,7 +42,83 @@ if (document.readyState === 'loading') {
     initCalculator();
 }
 
-// 2. FITUR STEP 2: Cari Riwayat Pesanan & Fast Re-Order (Returning Customer)
+// 2. Lacak Status Antrian & Estimasi Selesai (Task 4 & 5 - Opsi B)
+async function lacakStatusPesanan() {
+    const inputVal = document.getElementById('trackInput')?.value.trim();
+    const trackResultEl = document.getElementById('trackResult');
+
+    if (!inputVal) {
+        alert("Masukkan ID Pesanan atau Nomor WhatsApp!");
+        return;
+    }
+
+    if (!trackResultEl) return;
+
+    trackResultEl.style.display = 'block';
+    trackResultEl.innerHTML = '<p style="font-size:13px; color:#64748b;">Mengecek posisi antrian...</p>';
+
+    try {
+        const res = await fetch(`${GOOGLE_SCRIPT_URL}?t=${Date.now()}`);
+        const data = await res.json();
+        const pendingOrders = data.orders || [];
+
+        const cleanInput = inputVal.toLowerCase().replace(/\D/g, '');
+
+        const targetIndex = pendingOrders.findIndex(o => {
+            const cleanId = String(o.id || '').toLowerCase();
+            const cleanPhone = String(o.phone || '').replace(/\D/g, '');
+            return cleanId.includes(inputVal.toLowerCase()) || (cleanInput && cleanPhone.endsWith(cleanInput));
+        });
+
+        if (targetIndex === -1) {
+            trackResultEl.innerHTML = `
+                <div style="background:white; padding:12px; border-radius:8px; border:1px solid #fed7aa; color:#c2410c; font-size:13px;">
+                    ❌ Pesanan tidak ditemukan di antrian aktif. Pesanan Anda mungkin <b>sudah selesai dicetak (Arsip)</b> atau ID salah.
+                </div>
+            `;
+            return;
+        }
+
+        const myOrder = pendingOrders[targetIndex];
+        const queuePos = targetIndex + 1;
+
+        // Hitung total lembar halaman dokumen antrian di depan
+        let totalHalamanDiDepan = 0;
+        for (let i = 0; i < targetIndex; i++) {
+            totalHalamanDiDepan += (parseInt(pendingOrders[i].jumlahHalaman) || 1);
+        }
+
+        // Estimasi: (Total Halaman * 5 detik) + (Jumlah Pesanan di Depan * 2 menit)
+        const estimasiDetik = (totalHalamanDiDepan * 5) + (targetIndex * 120);
+        const estimasiMenit = Math.max(1, Math.ceil(estimasiDetik / 60));
+
+        const isNext = queuePos === 1;
+        const statusBadge = isNext 
+            ? '<span style="background:#ef4444; color:white; padding:4px 10px; border-radius:12px; font-weight:bold; font-size:12px;">🔥 Sedang/Siap Dicetak</span>'
+            : `<span style="background:#3b82f6; color:white; padding:4px 10px; border-radius:12px; font-weight:bold; font-size:12px;">⏳ Antrian #${queuePos}</span>`;
+
+        trackResultEl.innerHTML = `
+            <div style="background:white; padding:14px; border-radius:10px; border:1px solid #bfdbfe; font-size:13px; color:#1e293b;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <strong>${myOrder.nama} <small style="color:#64748b;">(${myOrder.id})</small></strong>
+                    ${statusBadge}
+                </div>
+                <hr style="border:none; border-top:1px solid #e2e8f0; margin:8px 0;">
+                <p style="margin:4px 0;">📄 <b>Dokumen:</b> ${myOrder.fileName} (${myOrder.jumlahHalaman} Hal - ${myOrder.jenisCetak})</p>
+                <p style="margin:4px 0;">👥 <b>Antrian di Depan:</b> ${targetIndex} Pesanan (${totalHalamanDiDepan} Halaman)</p>
+                <p style="margin:6px 0 0 0; color:#1d4ed8; font-size:14px; font-weight:bold;">
+                    ⏱️ <b>Estimasi Selesai:</b> ± ${isNext ? '1 - 3' : estimasiMenit} Menit
+                </p>
+            </div>
+        `;
+
+    } catch (err) {
+        console.error("Tracking error:", err);
+        trackResultEl.innerHTML = '<p style="font-size:13px; color:#ef4444;">Gagal mengambil data antrian.</p>';
+    }
+}
+
+// 3. Cari Riwayat Pesanan & Fast Re-Order (Returning Customer)
 async function cariRiwayatPesanan() {
     const searchPhoneInput = document.getElementById('searchPhone')?.value.trim();
     const historyResultEl = document.getElementById('historyResult');
@@ -60,11 +136,8 @@ async function cariRiwayatPesanan() {
     try {
         const res = await fetch(`${GOOGLE_SCRIPT_URL}?t=${Date.now()}`);
         const data = await res.json();
-
-        // Gabungkan pesanan aktif (orders) dan arsip (archived)
         const allOrders = [...(data.orders || []), ...(data.archived || [])];
 
-        // Filter berdasarkan nomor telepon
         const matchedOrders = allOrders.filter(o => {
             const cleanPhone = String(o.phone || '').replace(/\D/g, '');
             const cleanInput = searchPhoneInput.replace(/\D/g, '');
@@ -76,7 +149,6 @@ async function cariRiwayatPesanan() {
             return;
         }
 
-        // Ambil maksimal 3 pesanan terakhir
         let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
         matchedOrders.slice(-3).reverse().forEach(item => {
             html += `
@@ -103,7 +175,6 @@ async function cariRiwayatPesanan() {
     }
 }
 
-// Auto-fill form dari riwayat pesanan
 function fastReOrder(namaEncoded, phoneEncoded, jenisCetakEncoded, catatanEncoded) {
     const nama = decodeURIComponent(namaEncoded);
     const phone = decodeURIComponent(phoneEncoded);
@@ -116,13 +187,11 @@ function fastReOrder(namaEncoded, phoneEncoded, jenisCetakEncoded, catatanEncode
     if (document.getElementById('catatan')) document.getElementById('catatan').value = catatan;
 
     hitungTotalBiaya();
-
-    // Scroll ke form pemesanan
     document.getElementById('orderForm')?.scrollIntoView({ behavior: 'smooth' });
     alert(`Data pesanan ${nama} berhasil diisi otomatis! Silakan upload file baru dan klik Kirim.`);
 }
 
-// 3. Kirim Form Pemesanan
+// 4. Kirim Form Pemesanan
 document.getElementById('orderForm')?.addEventListener('submit', function(e) {
     e.preventDefault();
 

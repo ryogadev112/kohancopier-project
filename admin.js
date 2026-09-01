@@ -46,13 +46,12 @@ async function loadOrders() {
             return;
         }
 
-        // Hitung nomor antrian (pesanan paling tua = Antrian #1 di posisi teratas)
+        // Urutkan kronologis dari Antrian #1 (teratas)
         const activeOrdersWithQueue = orderList.map((order, index) => ({
             ...order,
             queueNumber: index + 1
         }));
 
-        // Tampilkan urut dari Antrian #1 di paling atas ke Antrian berikutnya di bawahnya
         activeOrdersWithQueue.forEach(order => {
             const id = order.id || '-';
             const nama = order.nama || '-';

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KohanCopier - Cetak Dokumen Online</title>
+    <title>KohanCopier - Cetak Dokumen & Stiker Online</title>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f8fafc; margin: 0; padding: 0; color: #1e293b; display: flex; flex-direction: column; min-height: 100vh; }
@@ -62,7 +62,6 @@
         .btn-wa { display: block; width: 100%; background: #22c55e; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; text-align: center; text-decoration: none; margin-top: 20px; }
         .btn-wa:hover { background: #16a34a; }
 
-        /* Animasi Modal & Pulse Timer */
         @keyframes scaleUp {
             from { opacity: 0; transform: scale(0.95) translateY(10px); }
             to { opacity: 1; transform: scale(1) translateY(0); }
@@ -76,7 +75,6 @@
 
         .footer { background: #1e293b; color: #94a3b8; text-align: center; padding: 24px 20px; font-size: 14px; margin-top: auto; }
 
-        /* Media Queries Khusus Tampilan HP */
         @media (max-width: 768px) {
             .container { padding: 0 12px; }
             .navbar { padding: 16px 0; margin-bottom: 16px; flex-direction: column; gap: 12px; align-items: stretch; text-align: center; }
@@ -92,7 +90,6 @@
             .input-group input, .input-group button { width: 100%; }
         }
 
-        /* Styling Kartu Pilihan Form */
         .form-section-title { font-size: 16px; color: #1e40af; font-weight: 700; margin: 24px 0 16px 0; padding-bottom: 8px; border-bottom: 2px dashed #bfdbfe; display: flex; align-items: center; gap: 8px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
@@ -120,8 +117,8 @@
     <!-- HALAMAN BERANDA -->
     <div id="page-home" class="page-section active">
         <div class="hero-banner">
-            <h1>Cetak Dokumen Tanpa Antre!</h1>
-            <p>Platform cetak dokumen pintar. Pesan secara online dari mana saja, lalu pantau status dokumenmu secara real-time.</p>
+            <h1>Cetak Dokumen & Stiker Tanpa Antre!</h1>
+            <p>Platform cetak dokumen dan stiker profesional. Pesan online dari mana saja, lalu pantau statusnya secara real-time.</p>
             <button class="btn-primary" onclick="switchPage('order')">Mulai Print Sekarang &nbsp; 🚀</button>
         </div>
 
@@ -130,17 +127,17 @@
             <div class="feature-card">
                 <div class="feature-icon">1</div>
                 <h3>Upload File</h3>
-                <p>Isi form dan upload dokumen PDF/DOCX kamu tanpa ribet.</p>
+                <p>Isi form dan upload dokumen atau desain logo/stiker kamu.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">2</div>
                 <h3>Pantau Antrian</h3>
-                <p>Cek status pesanan secara real-time dan lihat estimasi jam selesainya.</p>
+                <p>Cek status pesanan secara real-time dan lihat estimasi selesainya.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">3</div>
-                <h3>Ambil Dokumen</h3>
-                <p>Datang ke toko fisik hanya untuk mengambil dokumen yang sudah siap.</p>
+                <h3>Ambil / Kirim</h3>
+                <p>Datang ke toko fisik untuk mengambil pesanan yang sudah siap.</p>
             </div>
         </div>
     </div>
@@ -150,63 +147,97 @@
         <div class="form-container">
             <form id="orderForm">
                 <h2 style="margin: 0 0 16px 0; color: #1e293b; font-size: 24px; text-align: center;">Mulai Pesanan</h2>
-                <p style="text-align: center; color: #64748b; font-size: 14px; margin-bottom: 24px;">Lengkapi detail di bawah untuk melihat estimasi harga.</p>
+                <p style="text-align: center; color: #64748b; font-size: 14px; margin-bottom: 24px;">Pilih kategori layanan cetak yang kamu inginkan.</p>
                 
-                <div class="form-section-title">📂 1. Detail Dokumen</div>
+                <div class="form-section-title">📦 Kategori Layanan *</div>
+                <div class="form-group">
+                    <select id="kategoriLayanan">
+                        <option value="dokumen">Cetak Dokumen / Buku (HVS / F4)</option>
+                        <option value="stiker">Cetak Logo & Stiker (A3+ Vinyl / Kromo)</option>
+                    </select>
+                </div>
+
+                <div class="form-section-title">📂 1. Detail File & Jumlah</div>
                 
                 <div class="form-group">
-                    <label for="file">Upload File Dokumen (PDF/DOCX) *</label>
+                    <label for="file">Upload File (PDF/DOCX/PNG/JPG/CDR) *</label>
                     <input type="file" id="file" required>
                     <span style="font-size: 12px; color: #94a3b8; display: block; margin-top: 4px;">Maksimal ukuran file: 10MB</span>
                 </div>
 
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="jumlahHalaman">Total Halaman File *</label>
-                        <input type="number" id="jumlahHalaman" min="1" value="1" required>
+                <!-- FORM KHUSUS DOKUMEN -->
+                <div id="sectionDokumen">
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="jumlahHalaman">Total Halaman File *</label>
+                            <input type="number" id="jumlahHalaman" min="1" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="jumlahCopy">Cetak Berapa Rangkap? *</label>
+                            <input type="number" id="jumlahCopy" min="1" value="1">
+                        </div>
                     </div>
+
                     <div class="form-group">
-                        <label for="jumlahCopy">Cetak Berapa Rangkap? *</label>
-                        <input type="number" id="jumlahCopy" min="1" value="1" required>
+                        <label>Format Warna Dokumen *</label>
+                        <div class="radio-group">
+                            <div class="radio-card">
+                                <input type="radio" name="jenisCetak" id="cetakBW" value="Hitam Putih" checked>
+                                <label for="cetakBW">
+                                    <span class="icon">⚫⚪</span>
+                                    Hitam Putih<br><small style="font-weight:normal;">Rp 1.000/hal</small>
+                                </label>
+                            </div>
+                            <div class="radio-card">
+                                <input type="radio" name="jenisCetak" id="cetakWarna" value="Warna">
+                                <label for="cetakWarna">
+                                    <span class="icon">🎨</span>
+                                    Full Warna<br><small style="font-weight:normal;">Rp 2.000/hal</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ukuranKertas">Ukuran Kertas *</label>
+                        <select id="ukuranKertas">
+                            <option value="A4">A4 (Standar)</option>
+                            <option value="F4">F4 (Folio)</option>
+                        </select>
                     </div>
                 </div>
 
-                <div class="form-section-title">🖨️ 2. Spesifikasi Cetak</div>
-
-                <div class="form-group">
-                    <label>Format Warna *</label>
-                    <div class="radio-group">
-                        <div class="radio-card">
-                            <input type="radio" name="jenisCetak" id="cetakBW" value="Hitam Putih" checked>
-                            <label for="cetakBW">
-                                <span class="icon">⚫⚪</span>
-                                Hitam Putih<br><small style="font-weight:normal;">Rp 1.000/hal</small>
-                            </label>
-                        </div>
-                        <div class="radio-card">
-                            <input type="radio" name="jenisCetak" id="cetakWarna" value="Warna">
-                            <label for="cetakWarna">
-                                <span class="icon">🎨</span>
-                                Full Warna<br><small style="font-weight:normal;">Rp 2.000/hal</small>
-                            </label>
-                        </div>
+                <!-- FORM KHUSUS STIKER -->
+                <div id="sectionStiker" style="display: none;">
+                    <div class="form-group">
+                        <label for="jenisStiker">Pilihan Bahan Stiker *</label>
+                        <select id="jenisStiker">
+                            <option value="Vinyl">Stiker Vinyl (Anti Air / Outdoor - Rp 15.000/lbr A3+)</option>
+                            <option value="Kromo">Stiker Kromo (Bahan Kertas / Label - Rp 10.000/lbr A3+)</option>
+                        </select>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="ukuranKertas">Ukuran Kertas *</label>
-                    <select id="ukuranKertas">
-                        <option value="A4">A4 (Standar)</option>
-                        <option value="F4">F4 (Folio)</option>
-                    </select>
+                    <div class="form-group">
+                        <label for="jumlahLembarStiker">Jumlah Lembar A3+ *</label>
+                        <input type="number" id="jumlahLembarStiker" min="1" value="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="finishingStiker">Pola Potong (Finishing) *</label>
+                        <select id="finishingStiker">
+                            <option value="Kiss Cut">Kiss Cut (Cabut satuan / mudah dilepas)</option>
+                            <option value="Die Cut">Die Cut (Putus sesuai bentuk)</option>
+                            <option value="Tanpa Potong">Tanpa Potong (Lembaran A3+ utuh)</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="catatan">Instruksi Tambahan (Opsional)</label>
-                    <textarea id="catatan" placeholder="Contoh: Tolong dijilid lakban hitam, halaman 1-5 saja yang dicetak..."></textarea>
+                    <textarea id="catatan" placeholder="Contoh: Jilid lakban hitam, atau instruksi potong stiker bulat..."></textarea>
                 </div>
 
-                <div class="form-section-title">👤 3. Data Pemesan</div>
+                <div class="form-section-title">👤 2. Data Pemesan</div>
 
                 <div class="form-group">
                     <label for="nama">Nama Lengkap *</label>
@@ -284,7 +315,7 @@
 <div id="confirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); justify-content: center; align-items: center; padding: 20px; z-index: 9999; backdrop-filter: blur(4px);">
     <div style="background: white; padding: 32px; border-radius: 20px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); position: relative; animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;">
         <h3 style="margin-top: 0; color: #1e293b; font-size: 22px;">📋 Konfirmasi Pesanan</h3>
-        <p style="font-size: 13px; color: #64748b; margin-bottom: 20px;">Pastikan data dokumen dan produk yang kamu pilih sudah sesuai.</p>
+        <p style="font-size: 13px; color: #64748b; margin-bottom: 20px;">Pastikan data pesanan kamu sudah sesuai.</p>
         
         <div style="text-align: left; font-size: 13px; line-height: 1.6; color: #334155; background: #f8fafc; padding: 14px 18px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
             <p style="margin: 3px 0;"><b>Nama:</b> <span id="mNama">-</span></p>

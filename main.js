@@ -12,34 +12,66 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// --- TOGGLE TAMPILAN FORM (DOKUMEN VS STIKER) ---
+const kategoriLayanan = document.getElementById('kategoriLayanan');
+const sectionDokumen = document.getElementById('sectionDokumen');
+const sectionStiker = document.getElementById('sectionStiker');
+
+function handleKategoriChange() {
+    if (!kategoriLayanan) return;
+    if (kategoriLayanan.value === 'stiker') {
+        sectionDokumen.style.display = 'none';
+        sectionStiker.style.display = 'block';
+    } else {
+        sectionDokumen.style.display = 'block';
+        sectionStiker.style.display = 'none';
+    }
+    updatePrice();
+}
+
+if (kategoriLayanan) {
+    kategoriLayanan.addEventListener('change', handleKategoriChange);
+}
+
 // --- KALKULASI HARGA REAL-TIME ---
 const jumlahHalamanInput = document.getElementById('jumlahHalaman');
 const jumlahCopyInput = document.getElementById('jumlahCopy');
 const radiosCetak = document.querySelectorAll('input[name="jenisCetak"]');
+const jenisStikerSelect = document.getElementById('jenisStiker');
+const jumlahLembarStikerInput = document.getElementById('jumlahLembarStiker');
 const pricePreview = document.getElementById('pricePreview');
 
 function updatePrice() {
-    const hal = parseInt(jumlahHalamanInput.value) || 1;
-    const copy = parseInt(jumlahCopyInput.value) || 1;
-    
-    const checkedRadio = document.querySelector('input[name="jenisCetak"]:checked');
-    const jenis = checkedRadio ? checkedRadio.value : 'Hitam Putih';
-    
-    const hargaPerHal = jenis === 'Warna' ? 2000 : 1000;
-    const total = hal * copy * hargaPerHal;
+    const kategori = kategoriLayanan ? kategoriLayanan.value : 'dokumen';
+    let total = 0;
+
+    if (kategori === 'stiker') {
+        const jenisStiker = jenisStikerSelect ? jenisStikerSelect.value : 'Vinyl';
+        const lembar = parseInt(jumlahLembarStikerInput ? jumlahLembarStikerInput.value : 1) || 1;
+        const hargaPerLembar = jenisStiker === 'Vinyl' ? 15000 : 10000;
+        total = lembar * hargaPerLembar;
+    } else {
+        const hal = parseInt(jumlahHalamanInput ? jumlahHalamanInput.value : 1) || 1;
+        const copy = parseInt(jumlahCopyInput ? jumlahCopyInput.value : 1) || 1;
+        const checkedRadio = document.querySelector('input[name="jenisCetak"]:checked');
+        const jenis = checkedRadio ? checkedRadio.value : 'Hitam Putih';
+        const hargaPerHal = jenis === 'Warna' ? 2000 : 1000;
+        total = hal * copy * hargaPerHal;
+    }
     
     if(pricePreview) {
         pricePreview.innerText = "Rp " + total.toLocaleString('id-ID');
     }
 }
 
-if (jumlahHalamanInput && jumlahCopyInput) {
-    jumlahHalamanInput.addEventListener('input', updatePrice);
-    jumlahCopyInput.addEventListener('input', updatePrice);
-    radiosCetak.forEach(radio => radio.addEventListener('change', updatePrice));
-}
+// Event Listeners untuk kalkulasi harga
+if (jumlahHalamanInput) jumlahHalamanInput.addEventListener('input', updatePrice);
+if (jumlahCopyInput) jumlahCopyInput.addEventListener('input', updatePrice);
+radiosCetak.forEach(radio => radio.addEventListener('change', updatePrice));
+if (jenisStikerSelect) jenisStikerSelect.addEventListener('change', updatePrice);
+if (jumlahLembarStikerInput) jumlahLembarStikerInput.addEventListener('input', updatePrice);
 
-// --- LOGIKA TIMER INVOICE DENGAN EFEK URGENSI ---
+// --- LOGIKA TIMER INVOICE ---
 let countdownInterval;
 function startInvoiceTimer(durationInSeconds) {
     clearInterval(countdownInterval);
@@ -55,8 +87,6 @@ function startInvoiceTimer(durationInSeconds) {
 
         if (timerDisplay) {
             timerDisplay.innerText = "⏱️ " + minutes + ":" + seconds;
-            
-            // Efek Urgensi: Jika waktu di bawah 2 menit (120 detik), ubah warna & buat berkedip
             if (timer <= 120) {
                 timerDisplay.style.background = "#fee2e2";
                 timerDisplay.style.color = "#dc2626";
@@ -76,7 +106,7 @@ function startInvoiceTimer(durationInSeconds) {
     }, 1000);
 }
 
-// --- VALIDASI & SUBMIT FORM DENGAN LOADING STATE ---
+// --- SUBMIT FORM & VALIDASI ---
 let tempOrderData = null;
 const orderForm = document.getElementById('orderForm');
 
@@ -87,14 +117,12 @@ if (orderForm) {
         const fileInput = document.getElementById('file');
         const file = fileInput.files[0];
 
-        // 1. Validasi Keamanan File (Client-Side Validation)
         if (file) {
-            const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-            if (!allowedTypes.includes(file.type) && !file.name.match(/\.(pdf|docx)$/i)) {
-                alert('❌ Format file tidak didukung! Harap upload file berformat PDF atau DOCX.');
+            const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/png', 'image/jpeg'];
+            if (!allowedTypes.includes(file.type) && !file.name.match(/\.(pdf|docx|png|jpg|jpeg|cdr)$/i)) {
+                alert('❌ Format file tidak didukung! Harap upload file PDF, DOCX, atau Gambar/Desain.');
                 return;
             }
-            // Batasan ukuran maks 10MB
             if (file.size > 10 * 1024 * 1024) {
                 alert('❌ Ukuran file terlalu besar! Maksimal 10MB.');
                 return;
@@ -104,39 +132,55 @@ if (orderForm) {
         const submitBtn = document.getElementById('submitBtn');
         const originalBtnText = submitBtn.innerHTML;
         
-        // 2. Loading State pada Tombol
         submitBtn.disabled = true;
         submitBtn.innerHTML = `<span>⏳ Memproses Pesanan...</span>`;
 
         setTimeout(() => {
             const nama = document.getElementById('nama').value;
             const phone = document.getElementById('phone').value;
-            const jumlahHalaman = document.getElementById('jumlahHalaman').value;
-            const jumlahCopy = document.getElementById('jumlahCopy').value;
-            const jenisCetak = document.querySelector('input[name="jenisCetak"]:checked').value;
-            const ukuranKertas = document.getElementById('ukuranKertas').value;
+            const kategori = kategoriLayanan.value;
             const catatan = document.getElementById('catatan').value || '-';
             const fileName = file ? file.name : 'Tidak ada file';
-
             const orderId = 'KC-' + Math.floor(1000000000 + Math.random() * 9000000000);
-            const hargaPerHal = jenisCetak === 'Warna' ? 2000 : 1000;
-            const totalHarga = jumlahHalaman * jumlahCopy * hargaPerHal;
 
-            tempOrderData = {
-                orderId, nama, phone, jumlahHalaman, jumlahCopy, jenisCetak, ukuranKertas, catatan, fileName, totalHarga, status: 'UNPAID', tanggal: new Date().toLocaleString()
-            };
+            let detailText = '';
+            let totalHarga = 0;
+
+            if (kategori === 'stiker') {
+                const jenisStiker = document.getElementById('jenisStiker').value;
+                const jumlahLembar = document.getElementById('jumlahLembarStiker').value;
+                const finishing = document.getElementById('finishingStiker').value;
+                const hargaPerLembar = jenisStiker === 'Vinyl' ? 15000 : 10000;
+                totalHarga = jumlahLembar * hargaPerLembar;
+
+                detailText = `Stiker ${jenisStiker} - ${jumlahLembar} Lembar A3+ (${finishing})`;
+                tempOrderData = {
+                    orderId, nama, phone, kategori, jenisStiker, jumlahLembar, finishing, catatan, fileName, totalHarga, status: 'UNPAID', tanggal: new Date().toLocaleString()
+                };
+            } else {
+                const jumlahHalaman = document.getElementById('jumlahHalaman').value;
+                const jumlahCopy = document.getElementById('jumlahCopy').value;
+                const jenisCetak = document.querySelector('input[name="jenisCetak"]:checked').value;
+                const ukuranKertas = document.getElementById('ukuranKertas').value;
+                const hargaPerHal = jenisCetak === 'Warna' ? 2000 : 1000;
+                totalHarga = jumlahHalaman * jumlahCopy * hargaPerHal;
+
+                detailText = `${jumlahHalaman} Hal x ${jumlahCopy} Rangkap (${jenisCetak} - ${ukuranKertas})`;
+                tempOrderData = {
+                    orderId, nama, phone, kategori, jumlahHalaman, jumlahCopy, jenisCetak, ukuranKertas, catatan, fileName, totalHarga, status: 'UNPAID', tanggal: new Date().toLocaleString()
+                };
+            }
 
             document.getElementById('mNama').innerText = nama;
             document.getElementById('mPhone').innerText = phone;
-            document.getElementById('mDetail').innerText = `${jumlahHalaman} Hal x ${jumlahCopy} Rangkap (${jenisCetak} - ${ukuranKertas})`;
+            document.getElementById('mDetail').innerText = detailText;
             document.getElementById('mTotal').innerText = 'Rp ' + totalHarga.toLocaleString('id-ID');
 
             document.getElementById('confirmModal').style.display = 'flex';
 
-            // Kembalikan tombol ke semula
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalBtnText;
-        }, 500); // Simulasi jeda halus 0.5 detik
+        }, 500);
     });
 }
 
@@ -155,10 +199,15 @@ if (btnProceedInvoice) {
 
         document.getElementById('invId').innerText = tempOrderData.orderId;
         document.getElementById('invNama').innerText = tempOrderData.nama + ' (' + tempOrderData.phone + ')';
-        document.getElementById('invDetail').innerText = `${tempOrderData.jumlahHalaman} Hal x ${tempOrderData.jumlahCopy} Rangkap (${tempOrderData.jenisCetak} - ${tempOrderData.ukuranKertas})\nFile: ${tempOrderData.fileName}`;
+        
+        let detailInv = tempOrderData.kategori === 'stiker' 
+            ? `Stiker ${tempOrderData.jenisStiker} - ${tempOrderData.jumlahLembar} Lembar A3+ (${tempOrderData.finishing})`
+            : `${tempOrderData.jumlahHalaman} Hal x ${tempOrderData.jumlahCopy} Rangkap (${tempOrderData.jenisCetak} - ${tempOrderData.ukuranKertas})`;
+
+        document.getElementById('invDetail').innerText = `${detailInv}\nFile: ${tempOrderData.fileName}`;
         document.getElementById('invTotal').innerText = 'Rp ' + tempOrderData.totalHarga.toLocaleString('id-ID');
 
-        const pesanWA = `Halo Admin KohanCopier, saya ingin konfirmasi pembayaran QRIS.\n\n*ID Invoice:* ${tempOrderData.orderId}\n*Nama:* ${tempOrderData.nama}\n*Detail:* ${tempOrderData.jumlahHalaman} Hal x ${tempOrderData.jumlahCopy} Rangkap (${tempOrderData.jenisCetak} - ${tempOrderData.ukuranKertas})\n*Catatan:* ${tempOrderData.catatan}\n*Total:* Rp ${tempOrderData.totalHarga.toLocaleString('id-ID')}\n\nBerikut bukti pembayarannya:`;
+        const pesanWA = `Halo Admin KohanCopier, saya ingin konfirmasi pembayaran QRIS.\n\n*ID Invoice:* ${tempOrderData.orderId}\n*Nama:* ${tempOrderData.nama}\n*Detail:* ${detailInv}\n*Catatan:* ${tempOrderData.catatan}\n*Total:* Rp ${tempOrderData.totalHarga.toLocaleString('id-ID')}\n\nBerikut bukti pembayarannya:`;
         document.getElementById('btnInvWA').href = `https://wa.me/${ADMIN_WA}?text=` + encodeURIComponent(pesanWA);
 
         closeConfirmModal();
@@ -176,12 +225,12 @@ if (btnProceedInvoice) {
         orderForm.reset();
         document.getElementById('nama').value = currentNama;
         document.getElementById('phone').value = currentPhone;
-        
+        handleKategoriChange();
         updatePrice();
     };
 }
 
-// --- LACAK PESANAN DENGAN EMPTY STATE YANG INFORMATIF ---
+// --- LACAK PESANAN ---
 function lacakStatusPesanan() {
     const keyword = document.getElementById('trackInput').value.trim();
     const resultDiv = document.getElementById('trackResult');
@@ -195,7 +244,6 @@ function lacakStatusPesanan() {
 
     let riwayat = JSON.parse(localStorage.getItem('kohancopier_orders')) || [];
     
-    // Empty state jika sama sekali belum ada data pesanan di browser
     if (riwayat.length === 0) {
         resultDiv.innerHTML = '<p style="color: #64748b; font-size: 13px; margin:0; background: #f1f5f9; padding: 10px; border-radius: 6px;">ℹ️ Belum ada riwayat pesanan yang tersimpan di perangkat ini.</p>';
         return;
@@ -207,9 +255,10 @@ function lacakStatusPesanan() {
         let html = '<div style="background:white; padding:12px; border-radius:8px; border:1px solid #cbd5e1; font-size:13px;">';
         found.forEach(o => {
             html += `<p style="margin:4px 0;"><b>ID:</b> ${o.orderId} | <b>Nama:</b> ${o.nama} | <b>Status:</b> <span style="color:#d97706; font-weight:bold;">${o.status}</span></p>`;
-            let copy = o.jumlahCopy ? `${o.jumlahCopy} Rangkap` : '';
-            let kertas = o.ukuranKertas ? `- ${o.ukuranKertas}` : '';
-            html += `<p style="margin:4px 0; color:#64748b;">Detail: ${o.jumlahHalaman} Hal ${copy} (${o.jenisCetak} ${kertas}) - Total: Rp ${o.totalHarga.toLocaleString('id-ID')}</p><hr style="border:0; border-top:1px solid #eee; margin:8px 0;">`;
+            let desc = o.kategori === 'stiker' 
+                ? `Stiker ${o.jenisStiker} - ${o.jumlahLembar} Lembar A3+ (${o.finishing})`
+                : `${o.jumlahHalaman} Hal ${o.jumlahCopy ? x + o.jumlahCopy + ' Rangkap' : ''} (${o.jenisCetak})`;
+            html += `<p style="margin:4px 0; color:#64748b;">Detail: ${desc} - Total: Rp ${o.totalHarga.toLocaleString('id-ID')}</p><hr style="border:0; border-top:1px solid #eee; margin:8px 0;">`;
         });
         html += '</div>';
         resultDiv.innerHTML = html;

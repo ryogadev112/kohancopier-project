@@ -62,30 +62,28 @@
         .btn-wa { display: block; width: 100%; background: #22c55e; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; text-align: center; text-decoration: none; margin-top: 20px; }
         .btn-wa:hover { background: #16a34a; }
 
-        /* Animasi Tipis-tipis untuk Modal Konfirmasi */
         @keyframes scaleUp {
             from { opacity: 0; transform: scale(0.95) translateY(10px); }
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        #confirmModal > div {
-            animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        #confirmModal button {
-            transition: all 0.2s ease;
-        }
-
-        #confirmModal button:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.05);
-        }
-
-        #confirmModal button:active {
-            transform: translateY(0);
-        }
-
         .footer { background: #1e293b; color: #94a3b8; text-align: center; padding: 24px 20px; font-size: 14px; margin-top: auto; }
+
+        /* Media Queries Khusus Tampilan HP */
+        @media (max-width: 768px) {
+            .container { padding: 0 12px; }
+            .navbar { padding: 16px 0; margin-bottom: 16px; flex-direction: column; gap: 12px; align-items: stretch; text-align: center; }
+            .nav-links { justify-content: center; flex-wrap: wrap; gap: 4px; }
+            .nav-links button { padding: 8px 12px; font-size: 13px; }
+            
+            .hero-banner { padding: 36px 16px; margin-bottom: 24px; }
+            .hero-banner h1 { font-size: 26px; }
+            .hero-banner p { font-size: 15px; }
+
+            .form-container { padding: 20px 16px; border-radius: 12px; }
+            .input-group { flex-direction: column; gap: 8px; }
+            .input-group input, .input-group button { width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -114,17 +112,17 @@
             <div class="feature-card">
                 <div class="feature-icon">1</div>
                 <h3>Upload File</h3>
-                <p>Isi form dan upload dokumen PDF/DOCX kamu dari HP atau laptop tanpa ribet colok flashdisk.</p>
+                <p>Isi form dan upload dokumen PDF/DOCX kamu tanpa ribet.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">2</div>
                 <h3>Pantau Antrian</h3>
-                <p>Cek status pesanan secara real-time dan lihat estimasi jam selesainya dokumenmu.</p>
+                <p>Cek status pesanan secara real-time dan lihat estimasi jam selesainya.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">3</div>
                 <h3>Ambil Dokumen</h3>
-                <p>Datang ke toko fisik hanya untuk mengambil dokumen yang sudah pasti siap dan selesai.</p>
+                <p>Datang ke toko fisik hanya untuk mengambil dokumen yang sudah siap.</p>
             </div>
         </div>
     </div>
@@ -180,7 +178,7 @@
         </div>
     </div>
 
-    <!-- HALAMAN INVOICE / PEMBAYARAN QRIS -->
+    <!-- HALAMAN INVOICE -->
     <div id="page-invoice" class="page-section">
         <div class="form-container">
             <div class="invoice-card">
@@ -218,7 +216,7 @@
             <h2 style="margin: 0 0 24px 0; color: #1e293b; font-size: 24px; text-align: center;">Lacak Pesanan Anda</h2>
             <div class="box-section" style="border-color: #bfdbfe; background: #eff6ff; margin: 0;">
                 <h3 style="color: #1e40af;">📍 Masukkan Detail Pesanan</h3>
-                <p>Masukkan ID Pesanan (KC-xxx) atau Nomor WhatsApp Anda untuk melihat status saat ini.</p>
+                <p>Masukkan ID Pesanan (KC-xxx) atau Nomor WhatsApp Anda.</p>
                 
                 <div class="input-group">
                     <input type="text" id="trackInput" placeholder="Contoh: KC-178753... atau No WA">
@@ -231,8 +229,8 @@
 </div>
 
 <!-- MODAL KONFIRMASI PESANAN -->
-<div id="confirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); justify-content: center; align-items: center; padding: 20px; z-index: 999; backdrop-filter: blur(4px);">
-    <div style="background: white; padding: 32px; border-radius: 20px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); position: relative;">
+<div id="confirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); justify-content: center; align-items: center; padding: 20px; z-index: 9999; backdrop-filter: blur(4px);">
+    <div style="background: white; padding: 32px; border-radius: 20px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); position: relative; animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;">
         <h3 style="margin-top: 0; color: #1e293b; font-size: 22px;">📋 Konfirmasi Pesanan</h3>
         <p style="font-size: 13px; color: #64748b; margin-bottom: 20px;">Pastikan data dokumen dan produk yang kamu pilih sudah sesuai.</p>
         
@@ -244,8 +242,8 @@
         </div>
 
         <div style="display: flex; gap: 10px;">
-            <button type="button" onclick="closeConfirmModal()" style="flex: 1; background: #94a3b8; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">Batalkan</button>
-            <button type="button" id="btnProceedInvoice" style="flex: 1; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">Lanjutkan 🚀</button>
+            <button type="button" onclick="closeConfirmModal()" style="flex: 1; background: #94a3b8; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s;">Batalkan</button>
+            <button type="button" id="btnProceedInvoice" style="flex: 1; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s;">Lanjutkan 🚀</button>
         </div>
     </div>
 </div>

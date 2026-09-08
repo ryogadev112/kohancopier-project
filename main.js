@@ -82,7 +82,7 @@ function closeConfirmModal() {
 
 const btnProceedInvoice = document.getElementById('btnProceedInvoice');
 if (btnProceedInvoice) {
-    btnProceedInvoice.addEventListener('click', function() {
+    btnProceedInvoice.onclick = function() {
         if (!tempOrderData) return;
 
         let riwayat = JSON.parse(localStorage.getItem('kohancopier_orders')) || [];
@@ -106,7 +106,7 @@ if (btnProceedInvoice) {
 
         orderForm.reset();
         updatePrice();
-    });
+    };
 }
 
 function lacakStatusPesanan() {

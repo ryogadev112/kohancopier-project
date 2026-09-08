@@ -48,7 +48,9 @@ function updatePrice() {
     if (kategori === 'stiker') {
         const jenisStiker = jenisStikerSelect ? jenisStikerSelect.value : 'Vinyl';
         const lembar = parseInt(jumlahLembarStikerInput ? jumlahLembarStikerInput.value : 1) || 1;
-        const hargaPerLembar = jenisStiker === 'Vinyl' ? 15000 : 10000;
+        
+        // Harga update: Vinyl Rp 25.000, Kromo Rp 15.000 per lembar A3+
+        const hargaPerLembar = jenisStiker === 'Vinyl' ? 25000 : 15000;
         total = lembar * hargaPerLembar;
     } else {
         const hal = parseInt(jumlahHalamanInput ? jumlahHalamanInput.value : 1) || 1;
@@ -150,7 +152,7 @@ if (orderForm) {
                 const jenisStiker = document.getElementById('jenisStiker').value;
                 const jumlahLembar = document.getElementById('jumlahLembarStiker').value;
                 const finishing = document.getElementById('finishingStiker').value;
-                const hargaPerLembar = jenisStiker === 'Vinyl' ? 15000 : 10000;
+                const hargaPerLembar = jenisStiker === 'Vinyl' ? 25000 : 15000;
                 totalHarga = jumlahLembar * hargaPerLembar;
 
                 detailText = `Stiker ${jenisStiker} - ${jumlahLembar} Lembar A3+ (${finishing})`;
@@ -257,7 +259,7 @@ function lacakStatusPesanan() {
             html += `<p style="margin:4px 0;"><b>ID:</b> ${o.orderId} | <b>Nama:</b> ${o.nama} | <b>Status:</b> <span style="color:#d97706; font-weight:bold;">${o.status}</span></p>`;
             let desc = o.kategori === 'stiker' 
                 ? `Stiker ${o.jenisStiker} - ${o.jumlahLembar} Lembar A3+ (${o.finishing})`
-                : `${o.jumlahHalaman} Hal ${o.jumlahCopy ? x + o.jumlahCopy + ' Rangkap' : ''} (${o.jenisCetak})`;
+                : `${o.jumlahHalaman} Hal ${o.jumlahCopy ? 'x ' + o.jumlahCopy + ' Rangkap' : ''} (${o.jenisCetak})`;
             html += `<p style="margin:4px 0; color:#64748b;">Detail: ${desc} - Total: Rp ${o.totalHarga.toLocaleString('id-ID')}</p><hr style="border:0; border-top:1px solid #eee; margin:8px 0;">`;
         });
         html += '</div>';

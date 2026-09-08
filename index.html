@@ -84,6 +84,17 @@
             .input-group { flex-direction: column; gap: 8px; }
             .input-group input, .input-group button { width: 100%; }
         }
+
+        /* --- STYLING BARU UNTUK UI FORM --- */
+        .form-section-title { font-size: 16px; color: #1e40af; font-weight: 700; margin: 24px 0 16px 0; padding-bottom: 8px; border-bottom: 2px dashed #bfdbfe; display: flex; align-items: center; gap: 8px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+        .radio-group { display: flex; gap: 12px; margin-bottom: 16px; }
+        .radio-card { flex: 1; position: relative; }
+        .radio-card input { display: none; }
+        .radio-card label { display: flex; flex-direction: column; align-items: center; padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: 0.2s; background: white; text-align: center; font-weight: 600; color: #64748b; font-size: 14px; }
+        .radio-card input:checked + label { border-color: #2563eb; background: #eff6ff; color: #1e40af; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1); }
+        .radio-card .icon { font-size: 28px; margin-bottom: 8px; }
     </style>
 </head>
 <body>
@@ -103,8 +114,8 @@
     <div id="page-home" class="page-section active">
         <div class="hero-banner">
             <h1>Cetak Dokumen Tanpa Antre!</h1>
-            <p>Platform cetak dokumen pintar. Pesan secara online dari mana saja, dan pantau estimasi waktu selesainya secara live.</p>
-            <button class="btn-primary" onclick="switchPage('order')">Pesan Sekarang &nbsp; 🚀</button>
+            <p>Platform cetak dokumen pintar. Pesan secara online dari mana saja, lalu pantau status dokumenmu secara real-time.</p>
+            <button class="btn-primary" onclick="switchPage('order')">Mulai Print Sekarang &nbsp; 🚀</button>
         </div>
 
         <h2 class="section-title">3 Langkah Mudah Mencetak</h2>
@@ -127,52 +138,86 @@
         </div>
     </div>
 
-    <!-- HALAMAN PESAN -->
+    <!-- HALAMAN PESAN (FORM BARU 3 TAHAP) -->
     <div id="page-order" class="page-section">
         <div class="form-container">
             <form id="orderForm">
-                <h2 style="margin: 0 0 24px 0; color: #1e293b; font-size: 24px; text-align: center;">Form Cetak Dokumen</h2>
+                <h2 style="margin: 0 0 16px 0; color: #1e293b; font-size: 24px; text-align: center;">Mulai Pesanan</h2>
+                <p style="text-align: center; color: #64748b; font-size: 14px; margin-bottom: 24px;">Lengkapi detail di bawah untuk melihat estimasi harga.</p>
+                
+                <div class="form-section-title">📂 1. Detail Dokumen</div>
                 
                 <div class="form-group">
-                    <label for="nama">Nama Lengkap</label>
-                    <input type="text" id="nama" placeholder="Masukkan nama Anda" required>
+                    <label for="file">Upload File Dokumen (PDF/DOCX) *</label>
+                    <input type="file" id="file" required>
+                    <span style="font-size: 12px; color: #94a3b8; display: block; margin-top: 4px;">Maksimal ukuran file: 10MB</span>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="jumlahHalaman">Total Halaman File *</label>
+                        <input type="number" id="jumlahHalaman" min="1" value="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="jumlahCopy">Cetak Berapa Rangkap? *</label>
+                        <input type="number" id="jumlahCopy" min="1" value="1" required>
+                    </div>
+                </div>
+
+                <div class="form-section-title">🖨️ 2. Spesifikasi Cetak</div>
+
+                <div class="form-group">
+                    <label>Format Warna *</label>
+                    <div class="radio-group">
+                        <div class="radio-card">
+                            <input type="radio" name="jenisCetak" id="cetakBW" value="Hitam Putih" checked>
+                            <label for="cetakBW">
+                                <span class="icon">⚫⚪</span>
+                                Hitam Putih<br><small style="font-weight:normal;">Rp 1.000/hal</small>
+                            </label>
+                        </div>
+                        <div class="radio-card">
+                            <input type="radio" name="jenisCetak" id="cetakWarna" value="Warna">
+                            <label for="cetakWarna">
+                                <span class="icon">🎨</span>
+                                Full Warna<br><small style="font-weight:normal;">Rp 2.000/hal</small>
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="phone">Nomor WhatsApp</label>
-                    <input type="tel" id="phone" placeholder="Contoh: 088123456789" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="jumlahHalaman">Jumlah Halaman</label>
-                    <input type="number" id="jumlahHalaman" min="1" value="1" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="jenisCetak">Jenis Cetak</label>
-                    <select id="jenisCetak">
-                        <option value="Hitam Putih">Hitam Putih (Rp 1.000/hal)</option>
-                        <option value="Warna">Warna (Rp 2.000/hal)</option>
+                    <label for="ukuranKertas">Ukuran Kertas *</label>
+                    <select id="ukuranKertas">
+                        <option value="A4">A4 (Standar)</option>
+                        <option value="F4">F4 (Folio)</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="file">Upload File Dokumen (PDF/DOCX)</label>
-                    <input type="file" id="file" required>
+                    <label for="catatan">Instruksi Tambahan (Opsional)</label>
+                    <textarea id="catatan" placeholder="Contoh: Tolong dijilid lakban hitam, halaman 1-5 saja yang dicetak..."></textarea>
+                </div>
+
+                <div class="form-section-title">👤 3. Data Pemesan</div>
+
+                <div class="form-group">
+                    <label for="nama">Nama Lengkap *</label>
+                    <input type="text" id="nama" placeholder="Masukkan nama Anda" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="catatan">Catatan Tambahan (Opsional)</label>
-                    <textarea id="catatan" placeholder="Contoh: Jilid klip di pojok kiri atas"></textarea>
+                    <label for="phone">Nomor WhatsApp *</label>
+                    <input type="tel" id="phone" placeholder="Contoh: 088123456789" required>
                 </div>
 
-                <div class="price-box">
+                <div class="price-box" style="margin-top: 32px;">
                     <span>Estimasi Total Biaya:</span>
                     <strong id="pricePreview">Rp 1.000</strong>
                 </div>
 
                 <button type="submit" id="submitBtn" class="btn-submit">
-                    <span>🚀 Buat Pesanan & Bayar</span>
+                    <span>🚀 Konfirmasi Pesanan</span>
                 </button>
             </form>
         </div>

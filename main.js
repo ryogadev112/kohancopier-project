@@ -1,22 +1,46 @@
 const ADMIN_WA = "6281318541990";
 
+// --- FITUR AUTO-FILL CUSTOMER LAMA ---
+window.addEventListener('DOMContentLoaded', () => {
+    let riwayat = JSON.parse(localStorage.getItem('kohancopier_orders')) || [];
+    if(riwayat.length > 0) {
+        let lastOrder = riwayat[riwayat.length - 1];
+        const inputNama = document.getElementById('nama');
+        const inputPhone = document.getElementById('phone');
+        if (inputNama) inputNama.value = lastOrder.nama || '';
+        if (inputPhone) inputPhone.value = lastOrder.phone || '';
+    }
+});
+
+// --- KALKULASI HARGA REAL-TIME ---
 const jumlahHalamanInput = document.getElementById('jumlahHalaman');
-const jenisCetakSelect = document.getElementById('jenisCetak');
+const jumlahCopyInput = document.getElementById('jumlahCopy');
+const radiosCetak = document.querySelectorAll('input[name="jenisCetak"]');
 const pricePreview = document.getElementById('pricePreview');
 
 function updatePrice() {
     const hal = parseInt(jumlahHalamanInput.value) || 1;
-    const jenis = jenisCetakSelect.value;
+    const copy = parseInt(jumlahCopyInput.value) || 1;
+    
+    const checkedRadio = document.querySelector('input[name="jenisCetak"]:checked');
+    const jenis = checkedRadio ? checkedRadio.value : 'Hitam Putih';
+    
     const hargaPerHal = jenis === 'Warna' ? 2000 : 1000;
-    const total = hal * hargaPerHal;
-    pricePreview.innerText = "Rp " + total.toLocaleString('id-ID');
+    const total = hal * copy * hargaPerHal;
+    
+    if(pricePreview) {
+        pricePreview.innerText = "Rp " + total.toLocaleString('id-ID');
+    }
 }
 
-if (jumlahHalamanInput && jenisCetakSelect) {
+// Pasang Event Listener Form
+if (jumlahHalamanInput && jumlahCopyInput) {
     jumlahHalamanInput.addEventListener('input', updatePrice);
-    jenisCetakSelect.addEventListener('change', updatePrice);
+    jumlahCopyInput.addEventListener('input', updatePrice);
+    radiosCetak.forEach(radio => radio.addEventListener('change', updatePrice));
 }
 
+// --- LOGIKA TIMER INVOICE ---
 let countdownInterval;
 function startInvoiceTimer(durationInSeconds) {
     clearInterval(countdownInterval);
@@ -44,9 +68,10 @@ function startInvoiceTimer(durationInSeconds) {
     }, 1000);
 }
 
+// --- LOGIKA FORM & MODAL ---
 let tempOrderData = null;
-
 const orderForm = document.getElementById('orderForm');
+
 if (orderForm) {
     orderForm.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -54,22 +79,25 @@ if (orderForm) {
         const nama = document.getElementById('nama').value;
         const phone = document.getElementById('phone').value;
         const jumlahHalaman = document.getElementById('jumlahHalaman').value;
-        const jenisCetak = document.getElementById('jenisCetak').value;
+        const jumlahCopy = document.getElementById('jumlahCopy').value;
+        const jenisCetak = document.querySelector('input[name="jenisCetak"]:checked').value;
+        const ukuranKertas = document.getElementById('ukuranKertas').value;
         const catatan = document.getElementById('catatan').value || '-';
         const fileInput = document.getElementById('file');
         const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : 'Tidak ada file';
 
         const orderId = 'KC-' + Math.floor(1000000000 + Math.random() * 9000000000);
         const hargaPerHal = jenisCetak === 'Warna' ? 2000 : 1000;
-        const totalHarga = jumlahHalaman * hargaPerHal;
+        const totalHarga = jumlahHalaman * jumlahCopy * hargaPerHal;
 
         tempOrderData = {
-            orderId, nama, phone, jumlahHalaman, jenisCetak, catatan, fileName, totalHarga, status: 'UNPAID', tanggal: new Date().toLocaleString()
+            orderId, nama, phone, jumlahHalaman, jumlahCopy, jenisCetak, ukuranKertas, catatan, fileName, totalHarga, status: 'UNPAID', tanggal: new Date().toLocaleString()
         };
 
+        // Render ke Modal
         document.getElementById('mNama').innerText = nama;
         document.getElementById('mPhone').innerText = phone;
-        document.getElementById('mDetail').innerText = jumlahHalaman + ' Halaman (' + jenisCetak + ')';
+        document.getElementById('mDetail').innerText = `${jumlahHalaman} Hal x ${jumlahCopy} Rangkap (${jenisCetak} - ${ukuranKertas})`;
         document.getElementById('mTotal').innerText = 'Rp ' + totalHarga.toLocaleString('id-ID');
 
         document.getElementById('confirmModal').style.display = 'flex';
@@ -80,6 +108,7 @@ function closeConfirmModal() {
     document.getElementById('confirmModal').style.display = 'none';
 }
 
+// --- LANJUTKAN KE INVOICE ---
 const btnProceedInvoice = document.getElementById('btnProceedInvoice');
 if (btnProceedInvoice) {
     btnProceedInvoice.onclick = function() {
@@ -91,24 +120,36 @@ if (btnProceedInvoice) {
 
         document.getElementById('invId').innerText = tempOrderData.orderId;
         document.getElementById('invNama').innerText = tempOrderData.nama + ' (' + tempOrderData.phone + ')';
-        document.getElementById('invDetail').innerText = tempOrderData.jumlahHalaman + ' Halaman (' + tempOrderData.jenisCetak + ') - ' + tempOrderData.fileName;
+        document.getElementById('invDetail').innerText = `${tempOrderData.jumlahHalaman} Hal x ${tempOrderData.jumlahCopy} Rangkap (${tempOrderData.jenisCetak} - ${tempOrderData.ukuranKertas})\nFile: ${tempOrderData.fileName}`;
         document.getElementById('invTotal').innerText = 'Rp ' + tempOrderData.totalHarga.toLocaleString('id-ID');
 
-        const pesanWA = `Halo Admin KohanCopier, saya ingin konfirmasi pembayaran QRIS.\n\n*ID Invoice:* ${tempOrderData.orderId}\n*Nama:* ${tempOrderData.nama}\n*Detail:* ${tempOrderData.jumlahHalaman} Hal (${tempOrderData.jenisCetak})\n*Total:* Rp ${tempOrderData.totalHarga.toLocaleString('id-ID')}\n\nBerikut bukti pembayarannya:`;
+        // Update Pesan WA Admin dengan format detail lengkap
+        const pesanWA = `Halo Admin KohanCopier, saya ingin konfirmasi pembayaran QRIS.\n\n*ID Invoice:* ${tempOrderData.orderId}\n*Nama:* ${tempOrderData.nama}\n*Detail:* ${tempOrderData.jumlahHalaman} Hal x ${tempOrderData.jumlahCopy} Rangkap (${tempOrderData.jenisCetak} - ${tempOrderData.ukuranKertas})\n*Catatan:* ${tempOrderData.catatan}\n*Total:* Rp ${tempOrderData.totalHarga.toLocaleString('id-ID')}\n\nBerikut bukti pembayarannya:`;
         document.getElementById('btnInvWA').href = `https://wa.me/${ADMIN_WA}?text=` + encodeURIComponent(pesanWA);
 
         closeConfirmModal();
         const navInvoice = document.getElementById('nav-invoice');
         if (navInvoice) navInvoice.style.display = 'block';
 
-        switchPage('invoice');
+        // Panggil dari fungsi global HTML
+        if(typeof window.switchPage === 'function'){
+            window.switchPage('invoice');
+        }
+        
         startInvoiceTimer(600);
 
+        // Jangan reset nama dan phone karena ini berguna untuk order selanjutnya
+        const currentNama = document.getElementById('nama').value;
+        const currentPhone = document.getElementById('phone').value;
         orderForm.reset();
+        document.getElementById('nama').value = currentNama;
+        document.getElementById('phone').value = currentPhone;
+        
         updatePrice();
     };
 }
 
+// --- LOGIKA LACAK PESANAN ---
 function lacakStatusPesanan() {
     const keyword = document.getElementById('trackInput').value.trim();
     const resultDiv = document.getElementById('trackResult');
@@ -126,7 +167,10 @@ function lacakStatusPesanan() {
         let html = '<div style="background:white; padding:12px; border-radius:8px; border:1px solid #cbd5e1; font-size:13px;">';
         found.forEach(o => {
             html += `<p style="margin:4px 0;"><b>ID:</b> ${o.orderId} | <b>Nama:</b> ${o.nama} | <b>Status:</b> <span style="color:#d97706; font-weight:bold;">${o.status}</span></p>`;
-            html += `<p style="margin:4px 0; color:#64748b;">Detail: ${o.jumlahHalaman} Hal (${o.jenisCetak}) - Total: Rp ${o.totalHarga.toLocaleString('id-ID')}</p><hr style="border:0; border-top:1px solid #eee; margin:8px 0;">`;
+            // Handle pesanan lama yang tidak punya jumlahCopy atau ukuranKertas
+            let copy = o.jumlahCopy ? `${o.jumlahCopy} Rangkap` : '';
+            let kertas = o.ukuranKertas ? `- ${o.ukuranKertas}` : '';
+            html += `<p style="margin:4px 0; color:#64748b;">Detail: ${o.jumlahHalaman} Hal ${copy} (${o.jenisCetak} ${kertas}) - Total: Rp ${o.totalHarga.toLocaleString('id-ID')}</p><hr style="border:0; border-top:1px solid #eee; margin:8px 0;">`;
         });
         html += '</div>';
         resultDiv.innerHTML = html;

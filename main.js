@@ -33,14 +33,13 @@ function updatePrice() {
     }
 }
 
-// Pasang Event Listener Form
 if (jumlahHalamanInput && jumlahCopyInput) {
     jumlahHalamanInput.addEventListener('input', updatePrice);
     jumlahCopyInput.addEventListener('input', updatePrice);
     radiosCetak.forEach(radio => radio.addEventListener('change', updatePrice));
 }
 
-// --- LOGIKA TIMER INVOICE ---
+// --- LOGIKA TIMER INVOICE DENGAN EFEK URGENSI ---
 let countdownInterval;
 function startInvoiceTimer(durationInSeconds) {
     clearInterval(countdownInterval);
@@ -56,6 +55,14 @@ function startInvoiceTimer(durationInSeconds) {
 
         if (timerDisplay) {
             timerDisplay.innerText = "⏱️ " + minutes + ":" + seconds;
+            
+            // Efek Urgensi: Jika waktu di bawah 2 menit (120 detik), ubah warna & buat berkedip
+            if (timer <= 120) {
+                timerDisplay.style.background = "#fee2e2";
+                timerDisplay.style.color = "#dc2626";
+                timerDisplay.style.border = "1px solid #f87171";
+                timerDisplay.style.animation = "pulse 1s infinite";
+            }
         }
 
         if (--timer < 0) {
@@ -63,12 +70,13 @@ function startInvoiceTimer(durationInSeconds) {
             if (timerDisplay) {
                 timerDisplay.innerText = "⏱️ Waktu Habis!";
                 timerDisplay.style.background = "#fee2e2";
+                timerDisplay.style.animation = "none";
             }
         }
     }, 1000);
 }
 
-// --- LOGIKA FORM & MODAL ---
+// --- VALIDASI & SUBMIT FORM DENGAN LOADING STATE ---
 let tempOrderData = null;
 const orderForm = document.getElementById('orderForm');
 
@@ -76,31 +84,59 @@ if (orderForm) {
     orderForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        const nama = document.getElementById('nama').value;
-        const phone = document.getElementById('phone').value;
-        const jumlahHalaman = document.getElementById('jumlahHalaman').value;
-        const jumlahCopy = document.getElementById('jumlahCopy').value;
-        const jenisCetak = document.querySelector('input[name="jenisCetak"]:checked').value;
-        const ukuranKertas = document.getElementById('ukuranKertas').value;
-        const catatan = document.getElementById('catatan').value || '-';
         const fileInput = document.getElementById('file');
-        const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : 'Tidak ada file';
+        const file = fileInput.files[0];
 
-        const orderId = 'KC-' + Math.floor(1000000000 + Math.random() * 9000000000);
-        const hargaPerHal = jenisCetak === 'Warna' ? 2000 : 1000;
-        const totalHarga = jumlahHalaman * jumlahCopy * hargaPerHal;
+        // 1. Validasi Keamanan File (Client-Side Validation)
+        if (file) {
+            const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            if (!allowedTypes.includes(file.type) && !file.name.match(/\.(pdf|docx)$/i)) {
+                alert('❌ Format file tidak didukung! Harap upload file berformat PDF atau DOCX.');
+                return;
+            }
+            // Batasan ukuran maks 10MB
+            if (file.size > 10 * 1024 * 1024) {
+                alert('❌ Ukuran file terlalu besar! Maksimal 10MB.');
+                return;
+            }
+        }
 
-        tempOrderData = {
-            orderId, nama, phone, jumlahHalaman, jumlahCopy, jenisCetak, ukuranKertas, catatan, fileName, totalHarga, status: 'UNPAID', tanggal: new Date().toLocaleString()
-        };
+        const submitBtn = document.getElementById('submitBtn');
+        const originalBtnText = submitBtn.innerHTML;
+        
+        // 2. Loading State pada Tombol
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span>⏳ Memproses Pesanan...</span>`;
 
-        // Render ke Modal
-        document.getElementById('mNama').innerText = nama;
-        document.getElementById('mPhone').innerText = phone;
-        document.getElementById('mDetail').innerText = `${jumlahHalaman} Hal x ${jumlahCopy} Rangkap (${jenisCetak} - ${ukuranKertas})`;
-        document.getElementById('mTotal').innerText = 'Rp ' + totalHarga.toLocaleString('id-ID');
+        setTimeout(() => {
+            const nama = document.getElementById('nama').value;
+            const phone = document.getElementById('phone').value;
+            const jumlahHalaman = document.getElementById('jumlahHalaman').value;
+            const jumlahCopy = document.getElementById('jumlahCopy').value;
+            const jenisCetak = document.querySelector('input[name="jenisCetak"]:checked').value;
+            const ukuranKertas = document.getElementById('ukuranKertas').value;
+            const catatan = document.getElementById('catatan').value || '-';
+            const fileName = file ? file.name : 'Tidak ada file';
 
-        document.getElementById('confirmModal').style.display = 'flex';
+            const orderId = 'KC-' + Math.floor(1000000000 + Math.random() * 9000000000);
+            const hargaPerHal = jenisCetak === 'Warna' ? 2000 : 1000;
+            const totalHarga = jumlahHalaman * jumlahCopy * hargaPerHal;
+
+            tempOrderData = {
+                orderId, nama, phone, jumlahHalaman, jumlahCopy, jenisCetak, ukuranKertas, catatan, fileName, totalHarga, status: 'UNPAID', tanggal: new Date().toLocaleString()
+            };
+
+            document.getElementById('mNama').innerText = nama;
+            document.getElementById('mPhone').innerText = phone;
+            document.getElementById('mDetail').innerText = `${jumlahHalaman} Hal x ${jumlahCopy} Rangkap (${jenisCetak} - ${ukuranKertas})`;
+            document.getElementById('mTotal').innerText = 'Rp ' + totalHarga.toLocaleString('id-ID');
+
+            document.getElementById('confirmModal').style.display = 'flex';
+
+            // Kembalikan tombol ke semula
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }, 500); // Simulasi jeda halus 0.5 detik
     });
 }
 
@@ -108,7 +144,6 @@ function closeConfirmModal() {
     document.getElementById('confirmModal').style.display = 'none';
 }
 
-// --- LANJUTKAN KE INVOICE ---
 const btnProceedInvoice = document.getElementById('btnProceedInvoice');
 if (btnProceedInvoice) {
     btnProceedInvoice.onclick = function() {
@@ -123,7 +158,6 @@ if (btnProceedInvoice) {
         document.getElementById('invDetail').innerText = `${tempOrderData.jumlahHalaman} Hal x ${tempOrderData.jumlahCopy} Rangkap (${tempOrderData.jenisCetak} - ${tempOrderData.ukuranKertas})\nFile: ${tempOrderData.fileName}`;
         document.getElementById('invTotal').innerText = 'Rp ' + tempOrderData.totalHarga.toLocaleString('id-ID');
 
-        // Update Pesan WA Admin dengan format detail lengkap
         const pesanWA = `Halo Admin KohanCopier, saya ingin konfirmasi pembayaran QRIS.\n\n*ID Invoice:* ${tempOrderData.orderId}\n*Nama:* ${tempOrderData.nama}\n*Detail:* ${tempOrderData.jumlahHalaman} Hal x ${tempOrderData.jumlahCopy} Rangkap (${tempOrderData.jenisCetak} - ${tempOrderData.ukuranKertas})\n*Catatan:* ${tempOrderData.catatan}\n*Total:* Rp ${tempOrderData.totalHarga.toLocaleString('id-ID')}\n\nBerikut bukti pembayarannya:`;
         document.getElementById('btnInvWA').href = `https://wa.me/${ADMIN_WA}?text=` + encodeURIComponent(pesanWA);
 
@@ -131,14 +165,12 @@ if (btnProceedInvoice) {
         const navInvoice = document.getElementById('nav-invoice');
         if (navInvoice) navInvoice.style.display = 'block';
 
-        // Panggil dari fungsi global HTML
         if(typeof window.switchPage === 'function'){
             window.switchPage('invoice');
         }
         
         startInvoiceTimer(600);
 
-        // Jangan reset nama dan phone karena ini berguna untuk order selanjutnya
         const currentNama = document.getElementById('nama').value;
         const currentPhone = document.getElementById('phone').value;
         orderForm.reset();
@@ -149,25 +181,32 @@ if (btnProceedInvoice) {
     };
 }
 
-// --- LOGIKA LACAK PESANAN ---
+// --- LACAK PESANAN DENGAN EMPTY STATE YANG INFORMATIF ---
 function lacakStatusPesanan() {
     const keyword = document.getElementById('trackInput').value.trim();
     const resultDiv = document.getElementById('trackResult');
     
+    resultDiv.style.display = 'block';
+
     if (!keyword) {
-        alert('Masukkan ID Pesanan atau No WhatsApp!');
+        resultDiv.innerHTML = '<p style="color: #d97706; font-size: 13px; margin:0; background: #fef3c7; padding: 10px; border-radius: 6px;">⚠️ Masukkan ID Pesanan (contoh: KC-123456) atau Nomor WhatsApp yang digunakan saat memesan.</p>';
         return;
     }
 
     let riwayat = JSON.parse(localStorage.getItem('kohancopier_orders')) || [];
+    
+    // Empty state jika sama sekali belum ada data pesanan di browser
+    if (riwayat.length === 0) {
+        resultDiv.innerHTML = '<p style="color: #64748b; font-size: 13px; margin:0; background: #f1f5f9; padding: 10px; border-radius: 6px;">ℹ️ Belum ada riwayat pesanan yang tersimpan di perangkat ini.</p>';
+        return;
+    }
+
     const found = riwayat.filter(o => o.orderId.toLowerCase().includes(keyword.toLowerCase()) || o.phone.includes(keyword));
 
-    resultDiv.style.display = 'block';
     if (found.length > 0) {
         let html = '<div style="background:white; padding:12px; border-radius:8px; border:1px solid #cbd5e1; font-size:13px;">';
         found.forEach(o => {
             html += `<p style="margin:4px 0;"><b>ID:</b> ${o.orderId} | <b>Nama:</b> ${o.nama} | <b>Status:</b> <span style="color:#d97706; font-weight:bold;">${o.status}</span></p>`;
-            // Handle pesanan lama yang tidak punya jumlahCopy atau ukuranKertas
             let copy = o.jumlahCopy ? `${o.jumlahCopy} Rangkap` : '';
             let kertas = o.ukuranKertas ? `- ${o.ukuranKertas}` : '';
             html += `<p style="margin:4px 0; color:#64748b;">Detail: ${o.jumlahHalaman} Hal ${copy} (${o.jenisCetak} ${kertas}) - Total: Rp ${o.totalHarga.toLocaleString('id-ID')}</p><hr style="border:0; border-top:1px solid #eee; margin:8px 0;">`;
@@ -175,6 +214,6 @@ function lacakStatusPesanan() {
         html += '</div>';
         resultDiv.innerHTML = html;
     } else {
-        resultDiv.innerHTML = '<p style="color: #dc2626; font-size: 13px; margin:0;">Pesanan tidak ditemukan. Pastikan ID atau No WA benar.</p>';
+        resultDiv.innerHTML = '<p style="color: #dc2626; font-size: 13px; margin:0; background: #fee2e2; padding: 10px; border-radius: 6px;">❌ Pesanan tidak ditemukan. Periksa kembali ID Invoice atau Nomor WhatsApp Anda.</p>';
     }
 }

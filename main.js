@@ -1,326 +1,256 @@
-const NOMOR_WA_ADMIN = "6281318541990";
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6hlU7FtCH4-NDlKUkew1NjeBoaui3aR0UhYHDnzfUyTKYyhn45q4xPIpC4AuXm-lxIg/exec";
+const NOMOR_WA_ADMIN = "6281318541990";
 
-// 1. Kalkulator Estimasi Biaya
-function hitungTotalBiaya() {
-    const elJumlah = document.getElementById('jumlahHalaman');
-    const elJenis = document.getElementById('jenisCetak');
-    const previewEl = document.getElementById('pricePreview');
+let countdownInterval = null;
+let remainingSeconds = 600; // 10 menit
 
-    if (!elJumlah || !elJenis || !previewEl) return { total: 1000, formatted: 'Rp 1.000' };
-
-    const jumlahHalaman = parseInt(elJumlah.value) || 1;
-    const jenisCetak = elJenis.value || 'Hitam Putih';
+function startQrisTimer() {
+    clearInterval(countdownInterval);
+    remainingSeconds = 600;
     
-    const hargaPerHal = (jenisCetak === 'Warna') ? 2000 : 1000;
-    const total = jumlahHalaman * hargaPerHal;
-    const formatted = 'Rp ' + total.toLocaleString('id-ID');
+    const timerEl = document.getElementById('qrisTimer');
+    const badgeEl = document.getElementById('floatingTimerBadge');
 
-    previewEl.innerText = formatted;
+    countdownInterval = setInterval(() => {
+        if (remainingSeconds <= 0) {
+            clearInterval(countdownInterval);
+            if (timerEl) timerEl.innerHTML = "⏱️ Waktu Pembayaran Habis!";
+            if (badgeEl) badgeEl.innerText = "Expired";
+            return;
+        }
 
-    return { total, formatted };
+        remainingSeconds--;
+        const minutes = Math.floor(remainingSeconds / 60);
+        const seconds = remainingSeconds % 60;
+        const timeFormatted = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+        if (timerEl) timerEl.innerHTML = `⏱️ ${timeFormatted}`;
+        if (badgeEl) badgeEl.innerText = timeFormatted;
+    }, 1000);
 }
 
-function initCalculator() {
-    const elJumlah = document.getElementById('jumlahHalaman');
-    const elJenis = document.getElementById('jenisCetak');
-
-    if (elJumlah) {
-        elJumlah.addEventListener('input', hitungTotalBiaya);
-        elJumlah.addEventListener('change', hitungTotalBiaya);
-    }
-    if (elJenis) {
-        elJenis.addEventListener('change', hitungTotalBiaya);
-    }
+function closeOrderModal() {
+    const modal = document.getElementById('orderModal');
+    const floatingBtn = document.getElementById('floatingQrisBtn');
     
-    hitungTotalBiaya();
+    if (modal) modal.style.display = 'none';
+    if (floatingBtn && remainingSeconds > 0) {
+        floatingBtn.style.display = 'flex';
+    }
 }
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initCalculator);
-} else {
-    initCalculator();
+function openOrderModal() {
+    const modal = document.getElementById('orderModal');
+    const floatingBtn = document.getElementById('floatingQrisBtn');
+
+    if (modal) modal.style.display = 'flex';
+    if (floatingBtn) floatingBtn.style.display = 'none';
 }
 
-// 2. Lacak Status Antrian, Estimasi Selesai (Jam Live), & Status Selesai
-async function lacakStatusPesanan() {
-    const inputVal = document.getElementById('trackInput')?.value.trim();
-    const trackResultEl = document.getElementById('trackResult');
+document.addEventListener('DOMContentLoaded', () => {
+    const jumlahHalamanInput = document.getElementById('jumlahHalaman');
+    const jenisCetakSelect = document.getElementById('jenisCetak');
+    const pricePreview = document.getElementById('pricePreview');
 
-    if (!inputVal) {
-        alert("Masukkan ID Pesanan atau Nomor WhatsApp!");
-        return;
+    function hitungHarga() {
+        const hal = parseInt(jumlahHalamanInput.value) || 0;
+        const jenis = jenisCetakSelect.value;
+        const tarif = jenis === 'Warna' ? 2000 : 1000;
+        const total = hal * tarif;
+        if (pricePreview) {
+            pricePreview.innerText = 'Rp ' + total.toLocaleString('id-ID');
+        }
     }
 
-    if (!trackResultEl) return;
+    if (jumlahHalamanInput) jumlahHalamanInput.addEventListener('input', hitungHarga);
+    if (jenisCetakSelect) jenisCetakSelect.addEventListener('change', hitungHarga);
 
-    trackResultEl.style.display = 'block';
-    trackResultEl.innerHTML = '<p style="font-size:13px; color:#64748b;">Mengecek status pesanan...</p>';
+    const orderForm = document.getElementById('orderForm');
+    if (orderForm) {
+        orderForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
 
-    try {
-        const res = await fetch(`${GOOGLE_SCRIPT_URL}?t=${Date.now()}`);
-        const data = await res.json();
-        
-        const pendingOrders = data.orders || [];
-        const archivedOrders = data.archived || []; // Mengambil data pesanan yang sudah selesai
-
-        const cleanInput = inputVal.toLowerCase().replace(/\D/g, '');
-        const searchStr = inputVal.toLowerCase();
-
-        // --- CEK 1: APAKAH MASIH ANTRE (PENDING)? ---
-        const targetIndex = pendingOrders.findIndex(o => {
-            const cleanId = String(o.id || '').toLowerCase();
-            const cleanPhone = String(o.phone || '').replace(/\D/g, '');
-            return cleanId.includes(searchStr) || (cleanInput && cleanPhone.endsWith(cleanInput));
-        });
-
-        if (targetIndex !== -1) {
-            // SKENARIO A: MASIH ANTRE (Tampilkan Estimasi & Jam Live)
-            const myOrder = pendingOrders[targetIndex];
-            const queuePos = targetIndex + 1;
-
-            // Hitung halaman di depan
-            let totalHalamanDiDepan = 0;
-            for (let i = 0; i < targetIndex; i++) {
-                totalHalamanDiDepan += (parseInt(pendingOrders[i].jumlahHalaman) || 1);
+            const submitBtn = document.getElementById('submitBtn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span>Sedang Mengirim Pesanan...</span>';
             }
 
-            // Hitung menit
-            const estimasiDetik = (totalHalamanDiDepan * 5) + (targetIndex * 120);
-            let estimasiMenit = Math.max(1, Math.ceil(estimasiDetik / 60));
-            
-            const isNext = queuePos === 1;
-            if (isNext) estimasiMenit = 3; // Max 3 menit jika antrian pertama
+            const nama = document.getElementById('nama').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const jumlahHalaman = document.getElementById('jumlahHalaman').value;
+            const jenisCetak = document.getElementById('jenisCetak').value;
+            const fileInput = document.getElementById('file');
+            const fileName = fileInput.files[0] ? fileInput.files[0].name : 'Dokumen.pdf';
+            const catatan = document.getElementById('catatan').value.trim();
 
-            // Hitung JAM LIVE (Waktu Sekarang + Estimasi Menit)
-            const waktuSelesai = new Date();
-            waktuSelesai.setMinutes(waktuSelesai.getMinutes() + estimasiMenit);
-            const jamText = waktuSelesai.getHours().toString().padStart(2, '0') + ':' + waktuSelesai.getMinutes().toString().padStart(2, '0');
+            const orderId = 'KC-' + Date.now();
+            const tarif = jenisCetak === 'Warna' ? 2000 : 1000;
+            const totalHarga = parseInt(jumlahHalaman) * tarif;
+            const totalHargaFormatted = 'Rp ' + totalHarga.toLocaleString('id-ID');
 
-            const statusBadge = isNext 
-                ? '<span style="background:#ef4444; color:white; padding:4px 10px; border-radius:12px; font-weight:bold; font-size:12px;">🔥 Sedang/Siap Dicetak</span>'
-                : `<span style="background:#3b82f6; color:white; padding:4px 10px; border-radius:12px; font-weight:bold; font-size:12px;">⏳ Antrian #${queuePos}</span>`;
+            const payload = {
+                id: orderId,
+                nama: nama,
+                phone: phone,
+                jumlahHalaman: jumlahHalaman,
+                jenisCetak: jenisCetak,
+                fileName: fileName,
+                catatan: catatan
+            };
 
-            const estimasiTeks = isNext 
-                ? `± 1 - 3 Menit (Sekitar pukul ${jamText} WIB)`
-                : `± ${estimasiMenit} Menit (Sekitar pukul ${jamText} WIB)`;
+            try {
+                const queryParams = new URLSearchParams(payload).toString();
+                await fetch(`${GOOGLE_SCRIPT_URL}?${queryParams}`);
 
-            trackResultEl.innerHTML = `
-                <div style="background:white; padding:14px; border-radius:10px; border:1px solid #bfdbfe; font-size:13px; color:#1e293b;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <strong>${myOrder.nama} <small style="color:#64748b;">(${myOrder.id})</small></strong>
-                        ${statusBadge}
-                    </div>
-                    <hr style="border:none; border-top:1px solid #e2e8f0; margin:8px 0;">
-                    <p style="margin:4px 0;">📄 <b>Dokumen:</b> ${myOrder.fileName} (${myOrder.jumlahHalaman} Hal - ${myOrder.jenisCetak})</p>
-                    <p style="margin:4px 0;">👥 <b>Antrian di Depan:</b> ${targetIndex} Pesanan (${totalHalamanDiDepan} Halaman)</p>
-                    <p style="margin:6px 0 0 0; color:#1d4ed8; font-size:14px; font-weight:bold;">
-                        ⏱️ <b>Estimasi Selesai:</b> ${estimasiTeks}
-                    </p>
-                </div>
-            `;
-            return;
-        }
+                document.getElementById('modalOrderId').innerText = orderId;
+                document.getElementById('modalNama').innerText = nama;
+                document.getElementById('modalDetail').innerText = `${jumlahHalaman} Halaman (${jenisCetak})`;
+                document.getElementById('modalTotalHarga').innerText = totalHargaFormatted;
 
-        // --- CEK 2: APAKAH SUDAH SELESAI (ARCHIVE)? ---
-        const archiveIndex = archivedOrders.findIndex(o => {
-            const cleanId = String(o.id || '').toLowerCase();
-            const cleanPhone = String(o.phone || '').replace(/\D/g, '');
-            return cleanId.includes(searchStr) || (cleanInput && cleanPhone.endsWith(cleanInput));
+                const pesanWA = `Halo Admin KohanCopier, saya sudah membuat pesanan dengan detail berikut:%0A%0A*ID Pesanan:* ${orderId}%0A*Nama:* ${nama}%0A*Total Bayar (QRIS):* ${totalHargaFormatted}%0A*File:* ${fileName}%0A%0ABerikut saya lampirkan bukti pembayarannya. Mohon segera diproses ya!`;
+                
+                const btnGoToWA = document.getElementById('btnGoToWA');
+                if (btnGoToWA) {
+                    btnGoToWA.href = `https://wa.me/${NOMOR_WA_ADMIN}?text=${pesanWA}`;
+                    btnGoToWA.onclick = function() {
+                        closeOrderModal();
+                    };
+                }
+
+                setTimeout(() => {
+                    openOrderModal();
+                    startQrisTimer();
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<span>🚀 Kirim Pesanan Sekarang</span>';
+                    }
+                    orderForm.reset();
+                    hitungHarga();
+                }, 500);
+
+            } catch (err) {
+                console.error('Error:', err);
+                alert('Gagal mengirim pesanan. Silakan coba lagi.');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<span>🚀 Kirim Pesanan Sekarang</span>';
+                }
+            }
         });
-
-        if (archiveIndex !== -1) {
-            // SKENARIO B: SUDAH SELESAI (Tampilan Hijau Sukses)
-            const myOrder = archivedOrders[archiveIndex];
-            trackResultEl.innerHTML = `
-                <div style="background:#f0fdf4; padding:14px; border-radius:10px; border:1px solid #86efac; font-size:13px; color:#166534;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <strong style="color:#15803d;">${myOrder.nama} <small style="color:#166534;">(${myOrder.id})</small></strong>
-                        <span style="background:#22c55e; color:white; padding:4px 10px; border-radius:12px; font-weight:bold; font-size:12px;">✅ Selesai</span>
-                    </div>
-                    <hr style="border:none; border-top:1px solid #bbf7d0; margin:8px 0;">
-                    <p style="margin:4px 0;">📄 <b>Dokumen:</b> ${myOrder.fileName} (${myOrder.jumlahHalaman} Hal - ${myOrder.jenisCetak})</p>
-                    <p style="margin:6px 0 0 0; font-size:14px; font-weight:bold; color:#15803d;">
-                        🎉 Pesanan Anda sudah selesai dicetak dan siap untuk diambil!
-                    </p>
-                </div>
-            `;
-            return;
-        }
-
-        // --- SKENARIO C: TIDAK DITEMUKAN (Tampilan Merah Error) ---
-        trackResultEl.innerHTML = `
-            <div style="background:#fef2f2; padding:12px; border-radius:8px; border:1px solid #fca5a5; color:#b91c1c; font-size:13px;">
-                ❌ <b>Pesanan tidak ditemukan.</b> Pastikan ID Pesanan atau Nomor WhatsApp yang Anda masukkan sudah benar.
-            </div>
-        `;
-
-    } catch (err) {
-        console.error("Tracking error:", err);
-        trackResultEl.innerHTML = '<p style="font-size:13px; color:#ef4444;">Gagal mengambil data pesanan. Coba lagi nanti.</p>';
     }
-}
+});
 
-// 3. Cari Riwayat Pesanan & Fast Re-Order (Returning Customer)
 async function cariRiwayatPesanan() {
-    const searchPhoneInput = document.getElementById('searchPhone')?.value.trim();
-    const historyResultEl = document.getElementById('historyResult');
+    const searchPhone = document.getElementById('searchPhone')?.value.trim();
+    const historyResult = document.getElementById('historyResult');
 
-    if (!searchPhoneInput) {
-        alert("Masukkan nomor WhatsApp terlebih dahulu!");
+    if (!searchPhone) {
+        alert('Masukkan nomor WhatsApp terlebih dahulu!');
         return;
     }
 
-    if (!historyResultEl) return;
-
-    historyResultEl.style.display = 'block';
-    historyResultEl.innerHTML = '<p style="font-size:13px; color:#64748b;">Mencari riwayat pesanan...</p>';
+    if (historyResult) {
+        historyResult.style.display = 'block';
+        historyResult.innerHTML = '<span style="color:#64748b; font-size:13px;">Mencari riwayat...</span>';
+    }
 
     try {
         const res = await fetch(`${GOOGLE_SCRIPT_URL}?t=${Date.now()}`);
         const data = await res.json();
         const allOrders = [...(data.orders || []), ...(data.archived || [])];
 
-        const matchedOrders = allOrders.filter(o => {
-            const cleanPhone = String(o.phone || '').replace(/\D/g, '');
-            const cleanInput = searchPhoneInput.replace(/\D/g, '');
-            return cleanPhone.endsWith(cleanInput) || cleanInput.endsWith(cleanPhone);
-        });
+        const lastOrder = allOrders.reverse().find(o => o.phone && o.phone.includes(searchPhone));
 
-        if (matchedOrders.length === 0) {
-            historyResultEl.innerHTML = '<p style="font-size:13px; color:#ef4444;">Belum ada riwayat pesanan untuk nomor ini.</p>';
-            return;
+        if (lastOrder) {
+            document.getElementById('nama').value = lastOrder.nama || '';
+            document.getElementById('phone').value = lastOrder.phone || '';
+            document.getElementById('jumlahHalaman').value = lastOrder.jumlahHalaman || 1;
+            document.getElementById('jenisCetak').value = lastOrder.jenisCetak || 'Hitam Putih';
+            document.getElementById('catatan').value = lastOrder.catatan || '';
+
+            // Update preview harga
+            const tarif = lastOrder.jenisCetak === 'Warna' ? 2000 : 1000;
+            const total = (parseInt(lastOrder.jumlahHalaman) || 1) * tarif;
+            document.getElementById('pricePreview').innerText = 'Rp ' + total.toLocaleString('id-ID');
+
+            historyResult.innerHTML = '<span style="color:#16a34a; font-size:13px; font-weight:600;">✅ Data dari pesanan terakhir berhasil dimuat ke form!</span>';
+        } else {
+            historyResult.innerHTML = '<span style="color:#dc2626; font-size:13px;">❌ Riwayat dengan nomor tersebut tidak ditemukan.</span>';
         }
-
-        let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
-        matchedOrders.slice(-3).reverse().forEach(item => {
-            html += `
-                <div style="background:white; border:1px solid #e2e8f0; border-radius:8px; padding:10px; display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <strong style="font-size:13px; color:#1e293b;">${item.nama}</strong> 
-                        <span style="font-size:11px; color:#64748b;">(${item.jenisCetak} - ${item.jumlahHalaman} Hal)</span><br>
-                        <small style="font-size:11px; color:#94a3b8;">Catatan: ${item.catatan || '-'}</small>
-                    </div>
-                    <button type="button" onclick="fastReOrder('${encodeURIComponent(item.nama)}', '${encodeURIComponent(item.phone)}', '${encodeURIComponent(item.jenisCetak)}', '${encodeURIComponent(item.catatan)}')" 
-                        style="background:#22c55e; color:white; border:none; padding:6px 12px; border-radius:6px; font-weight:bold; font-size:12px; cursor:pointer;">
-                        ⚡ Pesan Lagi
-                    </button>
-                </div>
-            `;
-        });
-        html += '</div>';
-
-        historyResultEl.innerHTML = html;
-
     } catch (err) {
-        console.error("Error fetching history:", err);
-        historyResultEl.innerHTML = '<p style="font-size:13px; color:#ef4444;">Gagal mengambil riwayat. Coba lagi nanti.</p>';
+        console.error(err);
+        if (historyResult) {
+            historyResult.innerHTML = '<span style="color:#dc2626; font-size:13px;">Gagal memuat riwayat.</span>';
+        }
     }
 }
 
-function fastReOrder(namaEncoded, phoneEncoded, jenisCetakEncoded, catatanEncoded) {
-    const nama = decodeURIComponent(namaEncoded);
-    const phone = decodeURIComponent(phoneEncoded);
-    const jenisCetak = decodeURIComponent(jenisCetakEncoded);
-    const catatan = decodeURIComponent(catatanEncoded);
+async function lacakStatusPesanan() {
+    const keyword = document.getElementById('trackInput')?.value.trim();
+    const trackResult = document.getElementById('trackResult');
 
-    if (document.getElementById('nama')) document.getElementById('nama').value = nama;
-    if (document.getElementById('phone')) document.getElementById('phone').value = phone;
-    if (document.getElementById('jenisCetak')) document.getElementById('jenisCetak').value = jenisCetak;
-    if (document.getElementById('catatan')) document.getElementById('catatan').value = catatan;
+    if (!keyword) {
+        alert('Masukkan ID Pesanan atau Nomor WhatsApp!');
+        return;
+    }
 
-    hitungTotalBiaya();
-    document.getElementById('orderForm')?.scrollIntoView({ behavior: 'smooth' });
-    alert(`Data pesanan ${nama} berhasil diisi otomatis! Silakan upload file baru dan klik Kirim.`);
-}
-
-// 4. Kirim Form Pemesanan
-document.getElementById('orderForm')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const submitBtn = document.getElementById('submitBtn');
-    
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = `<span class="btn-loading"><span class="spinner"></span> <span>Memproses Pesanan...</span></span>`;
+    if (trackResult) {
+        trackResult.style.display = 'block';
+        trackResult.innerHTML = '<span style="color:#64748b; font-size:14px;">Mencari status pesanan...</span>';
     }
 
     try {
-        const nama = document.getElementById('nama')?.value.trim() || '';
-        const phone = document.getElementById('phone')?.value.trim() || '';
-        const jumlahHalaman = document.getElementById('jumlahHalaman')?.value || '1';
-        const jenisCetak = document.getElementById('jenisCetak')?.value || 'Hitam Putih';
-        const catatan = document.getElementById('catatan')?.value.trim() || '-';
-        const fileInput = document.getElementById('file');
-        const fileName = fileInput && fileInput.files && fileInput.files.length > 0 ? fileInput.files[0].name : 'Tidak Ada File';
+        const res = await fetch(`${GOOGLE_SCRIPT_URL}?t=${Date.now()}`);
+        const data = await res.json();
 
-        const { formatted: totalHargaFormatted } = hitungTotalBiaya();
-        const orderId = 'KC-' + Date.now();
+        const activeOrders = data.orders || [];
+        const archivedOrders = data.archived || [];
 
-        const payload = {
-            id: orderId,
-            nama: nama,
-            phone: phone,
-            jumlahHalaman: jumlahHalaman,
-            jenisCetak: jenisCetak,
-            fileName: fileName,
-            catatan: catatan
-        };
+        let foundOrder = null;
+        let isArchived = false;
+        let queueNum = '-';
 
-        const queryParams = new URLSearchParams(payload).toString();
-        fetch(`${GOOGLE_SCRIPT_URL}?${queryParams}`, {
-            method: 'GET',
-            mode: 'no-cors'
-        });
+        const activeIndex = activeOrders.findIndex(o => 
+            (o.id && o.id.toLowerCase().includes(keyword.toLowerCase())) || 
+            (o.phone && o.phone.includes(keyword))
+        );
 
-        const elOrderId = document.getElementById('modalOrderId');
-        const elNama = document.getElementById('modalNama');
-        const elFile = document.getElementById('modalFile');
-        const elDetail = document.getElementById('modalDetail');
-        const elTotal = document.getElementById('modalTotalHarga');
-
-        if (elOrderId) elOrderId.innerText = orderId;
-        if (elNama) elNama.innerText = nama;
-        if (elFile) elFile.innerText = fileName;
-        if (elDetail) elDetail.innerText = `${jumlahHalaman} Halaman (${jenisCetak})`;
-        if (elTotal) elTotal.innerText = totalHargaFormatted;
-
-        setTimeout(() => {
-            const modal = document.getElementById('orderModal');
-            if (modal) modal.style.display = 'flex';
-
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<span>🚀 Kirim Pesanan Sekarang</span>';
+        if (activeIndex !== -1) {
+            foundOrder = activeOrders[activeIndex];
+            queueNum = activeIndex + 1;
+        } else {
+            const arcMatch = archivedOrders.find(o => 
+                (o.id && o.id.toLowerCase().includes(keyword.toLowerCase())) || 
+                (o.phone && o.phone.includes(keyword))
+            );
+            if (arcMatch) {
+                foundOrder = arcMatch;
+                isArchived = true;
             }
-        }, 500);
-
-        const pesanWA = `Halo Admin KohanCopier,\n\nSaya telah membuat pesanan cetak dokumen baru:` +
-            `\n- *ID Pesanan:* ${orderId}` +
-            `\n- *Nama:* ${nama}` +
-            `\n- *No WA:* ${phone}` +
-            `\n- *Jumlah Halaman:* ${jumlahHalaman}` +
-            `\n- *Jenis Cetak:* ${jenisCetak}` +
-            `\n- *Total Biaya:* ${totalHargaFormatted}` +
-            `\n- *Nama File:* ${fileName}` +
-            `\n- *Catatan:* ${catatan}` +
-            `\n\nMohon dicek dan diproses. Terima kasih!`;
-
-        const urlWA = `https://wa.me/${NOMOR_WA_ADMIN}?text=${encodeURIComponent(pesanWA)}`;
-
-        const btnGoToWA = document.getElementById('btnGoToWA');
-        if (btnGoToWA) {
-            btnGoToWA.onclick = function() {
-                window.location.href = urlWA;
-            };
         }
 
-    } catch (error) {
-        console.error("Error processing form:", error);
-        alert("Terjadi kesalahan. Silakan coba lagi.");
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<span>🚀 Kirim Pesanan Sekarang</span>';
+        if (foundOrder) {
+            const statusBadge = isArchived 
+                ? '<span style="background:#dcfce7; color:#16a34a; padding:4px 10px; border-radius:6px; font-weight:bold;">Selesai / Diambil</span>'
+                : `<span style="background:#fef3c7; color:#d97706; padding:4px 10px; border-radius:6px; font-weight:bold;">Pending (Antrian #${queueNum})</span>`;
+
+            trackResult.innerHTML = `
+                <div style="background:white; padding:16px; border-radius:8px; border:1px solid #cbd5e1; text-align:left; font-size:14px; line-height:1.6;">
+                    <p style="margin:4px 0;"><b>ID:</b> ${foundOrder.id}</p>
+                    <p style="margin:4px 0;"><b>Nama:</b> ${foundOrder.nama}</p>
+                    <p style="margin:4px 0;"><b>File:</b> ${foundOrder.fileName}</p>
+                    <p style="margin:4px 0;"><b>Detail:</b> ${foundOrder.jumlahHalaman} Hal (${foundOrder.jenisCetak})</p>
+                    <p style="margin:8px 0 4px 0;"><b>Status:</b><br>${statusBadge}</p>
+                </div>
+            `;
+        } else {
+            trackResult.innerHTML = '<span style="color:#dc2626; font-size:14px;">❌ Pesanan tidak ditemukan. Periksa kembali ID atau No WA Anda.</span>';
+        }
+    } catch (err) {
+        console.error(err);
+        if (trackResult) {
+            trackResult.innerHTML = '<span style="color:#dc2626; font-size:14px;">Gagal melacak pesanan.</span>';
         }
     }
-});
+}

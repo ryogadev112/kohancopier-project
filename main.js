@@ -37,6 +37,7 @@ if (kategoriLayanan) {
 const jumlahHalamanInput = document.getElementById('jumlahHalaman');
 const jumlahCopyInput = document.getElementById('jumlahCopy');
 const radiosCetak = document.querySelectorAll('input[name="jenisCetak"]');
+const ukuranKertasSelect = document.getElementById('ukuranKertas');
 const jenisStikerSelect = document.getElementById('jenisStiker');
 const jumlahLembarStikerInput = document.getElementById('jumlahLembarStiker');
 const pricePreview = document.getElementById('pricePreview');
@@ -49,7 +50,7 @@ function updatePrice() {
         const jenisStiker = jenisStikerSelect ? jenisStikerSelect.value : 'Vinyl';
         const lembar = parseInt(jumlahLembarStikerInput ? jumlahLembarStikerInput.value : 1) || 1;
         
-        // Harga update: Vinyl Rp 25.000, Kromo Rp 15.000 per lembar A3+
+        // Harga stiker: Vinyl Rp 25.000, Kromo Rp 15.000 per lembar A3+
         const hargaPerLembar = jenisStiker === 'Vinyl' ? 25000 : 15000;
         total = lembar * hargaPerLembar;
     } else {
@@ -57,7 +58,15 @@ function updatePrice() {
         const copy = parseInt(jumlahCopyInput ? jumlahCopyInput.value : 1) || 1;
         const checkedRadio = document.querySelector('input[name="jenisCetak"]:checked');
         const jenis = checkedRadio ? checkedRadio.value : 'Hitam Putih';
-        const hargaPerHal = jenis === 'Warna' ? 2000 : 1000;
+        const ukuranKertas = ukuranKertasSelect ? ukuranKertasSelect.value : 'A4';
+        
+        let hargaPerHal = jenis === 'Warna' ? 2000 : 1000;
+        
+        // Jika ukuran A3+, harga dikalikan 2
+        if (ukuranKertas === 'A3+') {
+            hargaPerHal *= 2;
+        }
+
         total = hal * copy * hargaPerHal;
     }
     
@@ -70,6 +79,7 @@ function updatePrice() {
 if (jumlahHalamanInput) jumlahHalamanInput.addEventListener('input', updatePrice);
 if (jumlahCopyInput) jumlahCopyInput.addEventListener('input', updatePrice);
 radiosCetak.forEach(radio => radio.addEventListener('change', updatePrice));
+if (ukuranKertasSelect) ukuranKertasSelect.addEventListener('change', updatePrice);
 if (jenisStikerSelect) jenisStikerSelect.addEventListener('change', updatePrice);
 if (jumlahLembarStikerInput) jumlahLembarStikerInput.addEventListener('input', updatePrice);
 
@@ -164,7 +174,10 @@ if (orderForm) {
                 const jumlahCopy = document.getElementById('jumlahCopy').value;
                 const jenisCetak = document.querySelector('input[name="jenisCetak"]:checked').value;
                 const ukuranKertas = document.getElementById('ukuranKertas').value;
-                const hargaPerHal = jenisCetak === 'Warna' ? 2000 : 1000;
+                
+                let hargaPerHal = jenisCetak === 'Warna' ? 2000 : 1000;
+                if (ukuranKertas === 'A3+') hargaPerHal *= 2;
+                
                 totalHarga = jumlahHalaman * jumlahCopy * hargaPerHal;
 
                 detailText = `${jumlahHalaman} Hal x ${jumlahCopy} Rangkap (${jenisCetak} - ${ukuranKertas})`;
@@ -259,7 +272,7 @@ function lacakStatusPesanan() {
             html += `<p style="margin:4px 0;"><b>ID:</b> ${o.orderId} | <b>Nama:</b> ${o.nama} | <b>Status:</b> <span style="color:#d97706; font-weight:bold;">${o.status}</span></p>`;
             let desc = o.kategori === 'stiker' 
                 ? `Stiker ${o.jenisStiker} - ${o.jumlahLembar} Lembar A3+ (${o.finishing})`
-                : `${o.jumlahHalaman} Hal ${o.jumlahCopy ? 'x ' + o.jumlahCopy + ' Rangkap' : ''} (${o.jenisCetak})`;
+                : `${o.jumlahHalaman} Hal ${o.jumlahCopy ? 'x ' + o.jumlahCopy + ' Rangkap' : ''} (${o.jenisCetak} - ${o.ukuranKertas || 'A4'})`;
             html += `<p style="margin:4px 0; color:#64748b;">Detail: ${desc} - Total: Rp ${o.totalHarga.toLocaleString('id-ID')}</p><hr style="border:0; border-top:1px solid #eee; margin:8px 0;">`;
         });
         html += '</div>';

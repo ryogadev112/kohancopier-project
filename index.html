@@ -56,11 +56,11 @@
 
         .btn-submit { width: 100%; background: #2563eb; color: white; border: none; padding: 16px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
         .btn-submit:hover { background: #1d4ed8; }
-        .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); justify-content: center; align-items: center; padding: 20px; z-index: 999; backdrop-filter: blur(4px); }
-        .modal-content { background: white; padding: 32px; border-radius: 20px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); position: relative; max-height: 90vh; overflow-y: auto; }
-        .btn-wa { display: inline-block; width: 100%; background: #22c55e; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; text-decoration: none; }
+        .invoice-card { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; background: #fef3c7; color: #d97706; margin-bottom: 16px; }
+        .btn-wa { display: block; width: 100%; background: #22c55e; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; text-align: center; text-decoration: none; margin-top: 20px; }
+        .btn-wa:hover { background: #16a34a; }
 
         .footer { background: #1e293b; color: #94a3b8; text-align: center; padding: 24px 20px; font-size: 14px; margin-top: auto; }
     </style>
@@ -73,6 +73,7 @@
         <div class="nav-links">
             <button id="nav-home" class="active" onclick="switchPage('home')">Beranda</button>
             <button id="nav-order" onclick="switchPage('order')">Pesan</button>
+            <button id="nav-invoice" onclick="switchPage('invoice')" style="display:none;">Invoice</button>
             <button id="nav-track" onclick="switchPage('track')">Lacak</button>
         </div>
     </div>
@@ -108,18 +109,8 @@
     <!-- HALAMAN PESAN -->
     <div id="page-order" class="page-section">
         <div class="form-container">
-            <div class="box-section">
-                <h3>🔄 Pelanggan Setia? Pesan Ulang</h3>
-                <p>Masukkan nomor WhatsApp Anda untuk mengisi form otomatis dari pesanan lalu.</p>
-                <div class="input-group">
-                    <input type="tel" id="searchPhone" placeholder="Contoh: 088123456789">
-                    <button type="button" onclick="cariRiwayatPesanan()" style="background: #2563eb;">🔍 Cari</button>
-                </div>
-                <div id="historyResult" style="margin-top: 12px; display: none;"></div>
-            </div>
-
             <form id="orderForm">
-                <h2 style="margin: 32px 0 24px 0; color: #1e293b; font-size: 24px; text-align: center;">Form Cetak Dokumen</h2>
+                <h2 style="margin: 0 0 24px 0; color: #1e293b; font-size: 24px; text-align: center;">Form Cetak Dokumen</h2>
                 
                 <div class="form-group">
                     <label for="nama">Nama Lengkap</label>
@@ -160,9 +151,41 @@
                 </div>
 
                 <button type="submit" id="submitBtn" class="btn-submit">
-                    <span>🚀 Kirim Pesanan Sekarang</span>
+                    <span>🚀 Buat Pesanan & Bayar</span>
                 </button>
             </form>
+        </div>
+    </div>
+
+    <!-- HALAMAN INVOICE / PEMBAYARAN QRIS -->
+    <div id="page-invoice" class="page-section">
+        <div class="form-container">
+            <div class="invoice-card">
+                <div style="text-align: center;">
+                    <span class="status-badge">⏳ MENUNGGU PEMBAYARAN</span>
+                    <h2 style="margin: 0 0 8px 0; font-size: 22px;">Selesaikan Pembayaran QRIS</h2>
+                    <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">Selesaikan pembayaran dalam waktu:</p>
+                    <div id="invoiceTimer" style="background: #fef2f2; color: #dc2626; font-weight: bold; font-size: 18px; padding: 8px 16px; border-radius: 8px; display: inline-block; border: 1px solid #fca5a5; margin-bottom: 20px;">
+                        ⏱️ 10:00
+                    </div>
+                </div>
+
+                <div style="text-align: left; font-size: 13px; line-height: 1.6; color: #334155; background: #f8fafc; padding: 14px 18px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
+                    <p style="margin: 3px 0;"><b>ID Invoice:</b> <span id="invId">-</span></p>
+                    <p style="margin: 3px 0;"><b>Nama Pemesan:</b> <span id="invNama">-</span></p>
+                    <p style="margin: 3px 0;"><b>Detail Cetak:</b> <span id="invDetail">-</span></p>
+                    <p style="margin: 3px 0; font-size: 16px;"><b>Total Bayar:</b> <span id="invTotal" style="color:#2563eb; font-weight:bold;">-</span></p>
+                </div>
+
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="padding: 12px; background: white; border: 1px solid #cbd5e1; border-radius: 12px; display: inline-block;">
+                        <img src="qris.jpeg" alt="QRIS Bukupay" style="width: 100%; max-width: 200px; height: auto; display: block; margin: 0 auto;">
+                        <p style="font-size: 11px; color: #64748b; margin: 6px 0 0 0;">Scan dengan m-banking / e-wallet</p>
+                    </div>
+                </div>
+
+                <a id="btnInvWA" href="#" target="_blank" class="btn-wa">📱 Konfirmasi Pembayaran ke Admin WA</a>
+            </div>
         </div>
     </div>
 
@@ -188,50 +211,17 @@
     © 2026 KohanCopier. All rights reserved.
 </div>
 
-<!-- Modal Gabungan Sukses & QRIS Pembayaran -->
-<div id="orderModal" class="modal">
-    <div class="modal-content">
-        <button type="button" onclick="closeOrderModal()" style="position: absolute; top: 16px; right: 16px; background: #f1f5f9; border: none; font-size: 16px; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-weight: bold; color: #64748b;">✕</button>
-
-        <h2>🎉 Pesanan Berhasil!</h2>
-        <p style="font-size:13px; color:#64748b; margin-top: 4px;">Selesaikan pembayaran QRIS dalam waktu:</p>
-        
-        <div id="qrisTimer" style="background: #fef2f2; color: #dc2626; font-weight: bold; font-size: 16px; padding: 6px 14px; border-radius: 8px; display: inline-block; margin-bottom: 14px; border: 1px solid #fca5a5;">
-            ⏱️ 10:00
-        </div>
-
-        <div style="text-align:left; font-size:13px; line-height:1.6; color:#334155; background: #f8fafc; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
-            <p style="margin:2px 0;"><b>ID Pesanan:</b> <span id="modalOrderId">-</span></p>
-            <p style="margin:2px 0;"><b>Nama:</b> <span id="modalNama">-</span></p>
-            <p style="margin:2px 0;"><b>Detail:</b> <span id="modalDetail">-</span></p>
-            <p style="margin:2px 0; font-size: 15px;"><b>Total Bayar:</b> <span id="modalTotalHarga" style="color:#2563eb; font-weight:bold;">-</span></p>
-        </div>
-
-        <!-- Gambar QRIS Bukupay (Pastikan nama file gambar di folder project sama dengan src di bawah) -->
-        <div style="margin: 16px 0; padding: 10px; background: white; border: 1px solid #cbd5e1; border-radius: 12px; display: inline-block;">
-            <img src="qris.jpeg" alt="QRIS Bukupay" style="width: 100%; max-width: 200px; height: auto; display: block; margin: 0 auto;">
-            <p style="font-size: 11px; color: #64748b; margin: 6px 0 0 0;">Scan dengan m-banking/e-wallet</p>
-        </div>
-
-        <button id="btnGoToWA" class="btn-wa">📱 Konfirmasi Pembayaran ke Admin WA</button>
-    </div>
-</div>
-
-<!-- Floating Button Kanan Bawah untuk Buka QRIS -->
-<button id="floatingQrisBtn" type="button" onclick="openOrderModal()" style="display: none; position: fixed; bottom: 24px; right: 24px; background: #2563eb; color: white; border: none; padding: 12px 18px; border-radius: 30px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,0.3); z-index: 998; align-items: center; gap: 8px;">
-    <span>🏷️ QRIS Pembayaran</span>
-    <span id="floatingTimerBadge" style="background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 10px; font-size: 12px;">10:00</span>
-</button>
-
 <script src="main.js"></script>
 <script>
     function switchPage(pageId) {
         document.getElementById('nav-home').classList.remove('active');
         document.getElementById('nav-order').classList.remove('active');
+        document.getElementById('nav-invoice').classList.remove('active');
         document.getElementById('nav-track').classList.remove('active');
 
         document.getElementById('page-home').classList.remove('active');
         document.getElementById('page-order').classList.remove('active');
+        document.getElementById('page-invoice').classList.remove('active');
         document.getElementById('page-track').classList.remove('active');
 
         document.getElementById('nav-' + pageId).classList.add('active');

@@ -44,6 +44,8 @@ function startInvoiceTimer(durationInSeconds) {
     }, 1000);
 }
 
+let tempOrderData = null;
+
 const orderForm = document.getElementById('orderForm');
 if (orderForm) {
     orderForm.addEventListener('submit', function(e) {
@@ -61,26 +63,47 @@ if (orderForm) {
         const hargaPerHal = jenisCetak === 'Warna' ? 2000 : 1000;
         const totalHarga = jumlahHalaman * hargaPerHal;
 
-        const orderData = {
+        tempOrderData = {
             orderId, nama, phone, jumlahHalaman, jenisCetak, catatan, fileName, totalHarga, status: 'UNPAID', tanggal: new Date().toLocaleString()
         };
+
+        document.getElementById('mNama').innerText = nama;
+        document.getElementById('mPhone').innerText = phone;
+        document.getElementById('mDetail').innerText = jumlahHalaman + ' Halaman (' + jenisCetak + ')';
+        document.getElementById('mTotal').innerText = 'Rp ' + totalHarga.toLocaleString('id-ID');
+
+        document.getElementById('confirmModal').style.display = 'flex';
+    });
+}
+
+function closeConfirmModal() {
+    document.getElementById('confirmModal').style.display = 'none';
+}
+
+const btnProceedInvoice = document.getElementById('btnProceedInvoice');
+if (btnProceedInvoice) {
+    btnProceedInvoice.addEventListener('click', function() {
+        if (!tempOrderData) return;
+
         let riwayat = JSON.parse(localStorage.getItem('kohancopier_orders')) || [];
-        riwayat.push(orderData);
+        riwayat.push(tempOrderData);
         localStorage.setItem('kohancopier_orders', JSON.stringify(riwayat));
 
-        document.getElementById('invId').innerText = orderId;
-        document.getElementById('invNama').innerText = nama + ' (' + phone + ')';
-        document.getElementById('invDetail').innerText = jumlahHalaman + ' Halaman (' + jenisCetak + ') - ' + fileName;
-        document.getElementById('invTotal').innerText = 'Rp ' + totalHarga.toLocaleString('id-ID');
+        document.getElementById('invId').innerText = tempOrderData.orderId;
+        document.getElementById('invNama').innerText = tempOrderData.nama + ' (' + tempOrderData.phone + ')';
+        document.getElementById('invDetail').innerText = tempOrderData.jumlahHalaman + ' Halaman (' + tempOrderData.jenisCetak + ') - ' + tempOrderData.fileName;
+        document.getElementById('invTotal').innerText = 'Rp ' + tempOrderData.totalHarga.toLocaleString('id-ID');
 
-        const pesanWA = `Halo Admin KohanCopier, saya ingin konfirmasi pembayaran QRIS.\n\n*ID Invoice:* ${orderId}\n*Nama:* ${nama}\n*Detail:* ${jumlahHalaman} Hal (${jenisCetak})\n*Total:* Rp ${totalHarga.toLocaleString('id-ID')}\n\nBerikut bukti pembayarannya:`;
+        const pesanWA = `Halo Admin KohanCopier, saya ingin konfirmasi pembayaran QRIS.\n\n*ID Invoice:* ${tempOrderData.orderId}\n*Nama:* ${tempOrderData.nama}\n*Detail:* ${tempOrderData.jumlahHalaman} Hal (${tempOrderData.jenisCetak})\n*Total:* Rp ${tempOrderData.totalHarga.toLocaleString('id-ID')}\n\nBerikut bukti pembayarannya:`;
         document.getElementById('btnInvWA').href = `https://wa.me/${ADMIN_WA}?text=` + encodeURIComponent(pesanWA);
 
+        closeConfirmModal();
         const navInvoice = document.getElementById('nav-invoice');
         if (navInvoice) navInvoice.style.display = 'block';
 
         switchPage('invoice');
         startInvoiceTimer(600);
+
         orderForm.reset();
         updatePrice();
     });

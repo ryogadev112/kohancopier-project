@@ -5,59 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KohanCopier - Cetak Dokumen & Stiker Online</title>
     <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f8fafc; margin: 0; padding: 0; color: #1e293b; display: flex; flex-direction: column; min-height: 100vh; }
+        /* --- DESIGN TOKENS & WARNA (THEMING) --- */
+        :root {
+            --bg-body: #f8fafc;
+            --bg-surface: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --input-bg: #f8fafc;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --hero-bg: #eff6ff;
+            --hero-border: #bfdbfe;
+            --box-bg: #f8fafc;
+            --shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #0f172a;
+            --bg-surface: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --input-bg: #0f172a;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --hero-bg: #1e293b;
+            --hero-border: #334155;
+            --box-bg: #1e293b;
+            --shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+        body { background-color: var(--bg-body); margin: 0; padding: 0; color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; }
         
         .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; width: 100%; flex: 1; }
-        .form-container { max-width: 600px; margin: 0 auto; background: white; padding: 32px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .form-container { max-width: 600px; margin: 0 auto; background: var(--bg-surface); padding: 32px; border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border-color); }
 
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0; }
-        .nav-logo { font-size: 24px; font-weight: 800; color: #2563eb; cursor: pointer; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); }
+        .nav-logo { font-size: 24px; font-weight: 800; color: var(--primary); cursor: pointer; }
+        
+        .nav-right { display: flex; align-items: center; gap: 12px; }
         .nav-links { display: flex; gap: 8px; }
-        .nav-links button { background: transparent; color: #64748b; border: none; padding: 10px 16px; font-weight: 600; font-size: 15px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
-        .nav-links button:hover { color: #1e293b; background: #f1f5f9; }
-        .nav-links button.active { color: #2563eb; font-weight: 700; }
+        .nav-links button { background: transparent; color: var(--text-muted); border: none; padding: 10px 16px; font-weight: 600; font-size: 15px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
+        .nav-links button:hover { color: var(--text-main); background: var(--border-color); }
+        .nav-links button.active { color: var(--primary); font-weight: 700; }
+
+        .btn-theme { background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+        .btn-theme:hover { background: var(--border-color); }
 
         .page-section { display: none; animation: fadeIn 0.4s ease; padding-bottom: 40px; }
         .page-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .hero-banner { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 20px; padding: 60px 20px; text-align: center; margin-bottom: 48px; }
-        .hero-banner h1 { margin: 0 0 16px 0; color: #1e293b; font-size: 36px; font-weight: 800; }
-        .hero-banner p { color: #64748b; font-size: 18px; max-width: 600px; margin: 0 auto 32px auto; line-height: 1.6; }
-        .btn-primary { background: #2563eb; color: white; border: none; padding: 14px 32px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); }
-        .btn-primary:hover { background: #1d4ed8; transform: translateY(-2px); }
+        .hero-banner { background: var(--hero-bg); border: 1px solid var(--hero-border); border-radius: 20px; padding: 60px 20px; text-align: center; margin-bottom: 48px; }
+        .hero-banner h1 { margin: 0 0 16px 0; color: var(--text-main); font-size: 36px; font-weight: 800; }
+        .hero-banner p { color: var(--text-muted); font-size: 18px; max-width: 600px; margin: 0 auto 32px auto; line-height: 1.6; }
+        .btn-primary { background: var(--primary); color: white; border: none; padding: 14px 32px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
 
-        .section-title { text-align: center; margin-bottom: 32px; font-size: 24px; color: #1e293b; font-weight: 700; }
+        .section-title { text-align: center; margin-bottom: 32px; font-size: 24px; color: var(--text-main); font-weight: 700; }
         .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
-        .feature-card { background: white; padding: 40px 24px; border-radius: 16px; border: 1px solid #e2e8f0; text-align: center; transition: 0.3s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
-        .feature-card:hover { border-color: #bfdbfe; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); transform: translateY(-4px); }
-        .feature-icon { font-size: 48px; margin-bottom: 20px; color: #2563eb; font-weight: bold; }
-        .feature-card h3 { margin: 0 0 12px 0; font-size: 20px; color: #1e293b; }
-        .feature-card p { margin: 0; color: #64748b; font-size: 15px; line-height: 1.5; }
+        .feature-card { background: var(--bg-surface); padding: 40px 24px; border-radius: 16px; border: 1px solid var(--border-color); text-align: center; transition: 0.3s; box-shadow: var(--shadow); }
+        .feature-card:hover { border-color: var(--primary); transform: translateY(-4px); }
+        .feature-icon { font-size: 48px; margin-bottom: 20px; color: var(--primary); font-weight: bold; }
+        .feature-card h3 { margin: 0 0 12px 0; font-size: 20px; color: var(--text-main); }
+        .feature-card p { margin: 0; color: var(--text-muted); font-size: 15px; line-height: 1.5; }
 
-        .box-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
-        .box-section h3 { margin-top: 0; font-size: 16px; display: flex; align-items: center; gap: 8px; color: #1e293b; }
-        .box-section p { font-size: 14px; color: #64748b; margin-bottom: 16px; }
+        .box-section { background: var(--box-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+        .box-section h3 { margin-top: 0; font-size: 16px; display: flex; align-items: center; gap: 8px; color: var(--text-main); }
+        .box-section p { font-size: 14px; color: var(--text-muted); margin-bottom: 16px; }
         
         .input-group { display: flex; gap: 8px; }
-        .input-group input { flex: 1; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; }
+        .input-group input { flex: 1; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 15px; background: var(--input-bg); color: var(--text-main); }
         .input-group button { color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; }
 
         .form-group { margin-bottom: 20px; text-align: left; }
-        .form-group label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 8px; color: #334155; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; background: #f8fafc; transition: 0.2s; }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #2563eb; background: white; }
+        .form-group label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 8px; color: var(--text-main); }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 15px; background: var(--input-bg); color: var(--text-main); transition: 0.2s; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); background: var(--bg-surface); }
         .form-group textarea { resize: vertical; height: 100px; }
         
-        .price-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .price-box span { font-weight: 600; color: #1e40af; }
-        .price-box strong { font-size: 20px; color: #1d4ed8; }
+        .price-box { background: var(--hero-bg); border: 1px solid var(--hero-border); border-radius: 10px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .price-box span { font-weight: 600; color: var(--primary); }
+        .price-box strong { font-size: 20px; color: var(--primary-hover); }
 
-        .btn-submit { width: 100%; background: #2563eb; color: white; border: none; padding: 16px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
-        .btn-submit:hover { background: #1d4ed8; }
+        .btn-submit { width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
+        .btn-submit:hover { background: var(--primary-hover); }
 
-        .invoice-card { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .invoice-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 28px; box-shadow: var(--shadow); }
         .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; background: #fef3c7; color: #d97706; margin-bottom: 16px; }
         .btn-wa { display: block; width: 100%; background: #22c55e; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; text-align: center; text-decoration: none; margin-top: 20px; }
         .btn-wa:hover { background: #16a34a; }
@@ -73,11 +109,12 @@
             100% { opacity: 1; transform: scale(1); }
         }
 
-        .footer { background: #1e293b; color: #94a3b8; text-align: center; padding: 24px 20px; font-size: 14px; margin-top: auto; }
+        .footer { background: var(--bg-surface); border-top: 1px solid var(--border-color); color: var(--text-muted); text-align: center; padding: 24px 20px; font-size: 14px; margin-top: auto; }
 
         @media (max-width: 768px) {
             .container { padding: 0 12px; }
             .navbar { padding: 16px 0; margin-bottom: 16px; flex-direction: column; gap: 12px; align-items: stretch; text-align: center; }
+            .nav-right { justify-content: center; width: 100%; flex-wrap: wrap; }
             .nav-links { justify-content: center; flex-wrap: wrap; gap: 4px; }
             .nav-links button { padding: 8px 12px; font-size: 13px; }
             
@@ -90,14 +127,14 @@
             .input-group input, .input-group button { width: 100%; }
         }
 
-        .form-section-title { font-size: 16px; color: #1e40af; font-weight: 700; margin: 24px 0 16px 0; padding-bottom: 8px; border-bottom: 2px dashed #bfdbfe; display: flex; align-items: center; gap: 8px; }
+        .form-section-title { font-size: 16px; color: var(--primary); font-weight: 700; margin: 24px 0 16px 0; padding-bottom: 8px; border-bottom: 2px dashed var(--border-color); display: flex; align-items: center; gap: 8px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
         .radio-group { display: flex; gap: 12px; margin-bottom: 16px; }
         .radio-card { flex: 1; position: relative; }
         .radio-card input { display: none; }
-        .radio-card label { display: flex; flex-direction: column; align-items: center; padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: 0.2s; background: white; text-align: center; font-weight: 600; color: #64748b; font-size: 14px; }
-        .radio-card input:checked + label { border-color: #2563eb; background: #eff6ff; color: #1e40af; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1); }
+        .radio-card label { display: flex; flex-direction: column; align-items: center; padding: 16px; border: 2px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: 0.2s; background: var(--bg-surface); text-align: center; font-weight: 600; color: var(--text-muted); font-size: 14px; }
+        .radio-card input:checked + label { border-color: var(--primary); background: var(--hero-bg); color: var(--primary); box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1); }
         .radio-card .icon { font-size: 28px; margin-bottom: 8px; }
     </style>
 </head>
@@ -106,15 +143,17 @@
 <div class="container">
     <div class="navbar">
         <div class="nav-logo" onclick="switchPage('home')">🖨️ KohanCopier</div>
-        <div class="nav-links">
-            <button id="nav-home" class="active" onclick="switchPage('home')">Beranda</button>
-            <button id="nav-order" onclick="switchPage('order')">Pesan</button>
-            <button id="nav-invoice" onclick="switchPage('invoice')" style="display:none;">Invoice</button>
-            <button id="nav-track" onclick="switchPage('track')">Lacak</button>
+        <div class="nav-right">
+            <div class="nav-links">
+                <button id="nav-home" class="active" onclick="switchPage('home')">Beranda</button>
+                <button id="nav-order" onclick="switchPage('order')">Pesan</button>
+                <button id="nav-invoice" onclick="switchPage('invoice')" style="display:none;">Invoice</button>
+                <button id="nav-track" onclick="switchPage('track')">Lacak</button>
+            </div>
+            <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()" title="Ubah Tema">🌙</button>
         </div>
     </div>
 
-    <!-- HALAMAN BERANDA -->
     <div id="page-home" class="page-section active">
         <div class="hero-banner">
             <h1>Cetak Dokumen & Stiker Tanpa Antre!</h1>
@@ -142,12 +181,11 @@
         </div>
     </div>
 
-    <!-- HALAMAN PESAN -->
     <div id="page-order" class="page-section">
         <div class="form-container">
             <form id="orderForm">
-                <h2 style="margin: 0 0 16px 0; color: #1e293b; font-size: 24px; text-align: center;">Mulai Pesanan</h2>
-                <p style="text-align: center; color: #64748b; font-size: 14px; margin-bottom: 24px;">Pilih kategori layanan cetak yang kamu inginkan.</p>
+                <h2 style="margin: 0 0 16px 0; font-size: 24px; text-align: center;">Mulai Pesanan</h2>
+                <p style="text-align: center; color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Pilih kategori layanan cetak yang kamu inginkan.</p>
                 
                 <div class="form-section-title">📦 Kategori Layanan *</div>
                 <div class="form-group">
@@ -162,10 +200,9 @@
                 <div class="form-group">
                     <label for="file">Upload File (PDF/DOCX/PNG/JPG/CDR) *</label>
                     <input type="file" id="file" required>
-                    <span style="font-size: 12px; color: #94a3b8; display: block; margin-top: 4px;">Maksimal ukuran file: 10MB</span>
+                    <span style="font-size: 12px; color: var(--text-muted); display: block; margin-top: 4px;">Maksimal ukuran file: 10MB</span>
                 </div>
 
-                <!-- FORM KHUSUS DOKUMEN -->
                 <div id="sectionDokumen">
                     <div class="grid-2">
                         <div class="form-group">
@@ -207,7 +244,6 @@
                     </div>
                 </div>
 
-                <!-- FORM KHUSUS STIKER -->
                 <div id="sectionStiker" style="display: none;">
                     <div class="form-group">
                         <label for="jenisStiker">Pilihan Bahan Stiker *</label>
@@ -261,28 +297,27 @@
         </div>
     </div>
 
-    <!-- HALAMAN INVOICE -->
     <div id="page-invoice" class="page-section">
         <div class="form-container">
             <div class="invoice-card">
                 <div style="text-align: center;">
                     <span class="status-badge">⏳ MENUNGGU PEMBAYARAN</span>
                     <h2 style="margin: 0 0 8px 0; font-size: 22px;">Selesaikan Pembayaran QRIS</h2>
-                    <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">Selesaikan pembayaran dalam waktu:</p>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Selesaikan pembayaran dalam waktu:</p>
                     <div id="invoiceTimer" style="background: #fef2f2; color: #dc2626; font-weight: bold; font-size: 18px; padding: 8px 16px; border-radius: 8px; display: inline-block; border: 1px solid #fca5a5; margin-bottom: 20px;">
                         ⏱️ 10:00
                     </div>
                 </div>
 
-                <div style="text-align: left; font-size: 13px; line-height: 1.6; color: #334155; background: #f8fafc; padding: 14px 18px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
+                <div style="text-align: left; font-size: 13px; line-height: 1.6; color: var(--text-main); background: var(--box-bg); padding: 14px 18px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 20px;">
                     <p style="margin: 3px 0;"><b>ID Invoice:</b> <span id="invId">-</span></p>
                     <p style="margin: 3px 0;"><b>Nama Pemesan:</b> <span id="invNama">-</span></p>
                     <p style="margin: 3px 0;"><b>Detail Cetak:</b> <span id="invDetail">-</span></p>
-                    <p style="margin: 3px 0; font-size: 16px;"><b>Total Bayar:</b> <span id="invTotal" style="color:#2563eb; font-weight:bold;">-</span></p>
+                    <p style="margin: 3px 0; font-size: 16px;"><b>Total Bayar:</b> <span id="invTotal" style="color:var(--primary); font-weight:bold;">-</span></p>
                 </div>
 
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <div style="padding: 12px; background: white; border: 1px solid #cbd5e1; border-radius: 12px; display: inline-block;">
+                    <div style="padding: 12px; background: white; border: 1px solid var(--border-color); border-radius: 12px; display: inline-block;">
                         <img src="qris.jpeg" alt="QRIS Bukupay" style="width: 100%; max-width: 200px; height: auto; display: block; margin: 0 auto;">
                         <p style="font-size: 11px; color: #64748b; margin: 6px 0 0 0;">Scan dengan m-banking / e-wallet</p>
                     </div>
@@ -293,17 +328,16 @@
         </div>
     </div>
 
-    <!-- HALAMAN LACAK -->
     <div id="page-track" class="page-section">
         <div class="form-container">
-            <h2 style="margin: 0 0 24px 0; color: #1e293b; font-size: 24px; text-align: center;">Lacak Pesanan Anda</h2>
-            <div class="box-section" style="border-color: #bfdbfe; background: #eff6ff; margin: 0;">
-                <h3 style="color: #1e40af;">📍 Masukkan Detail Pesanan</h3>
+            <h2 style="margin: 0 0 24px 0; font-size: 24px; text-align: center;">Lacak Pesanan Anda</h2>
+            <div class="box-section" style="margin: 0;">
+                <h3>📍 Masukkan Detail Pesanan</h3>
                 <p>Masukkan ID Pesanan (KC-xxx) atau Nomor WhatsApp Anda.</p>
                 
                 <div class="input-group">
                     <input type="text" id="trackInput" placeholder="Contoh: KC-178753... atau No WA">
-                    <button type="button" onclick="lacakStatusPesanan()" style="background: #2563eb;">📍 Lacak</button>
+                    <button type="button" onclick="lacakStatusPesanan()" style="background: var(--primary);">📍 Lacak</button>
                 </div>
                 <div id="trackResult" style="margin-top: 16px; display: none;"></div>
             </div>
@@ -311,22 +345,21 @@
     </div>
 </div>
 
-<!-- MODAL KONFIRMASI PESANAN -->
 <div id="confirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); justify-content: center; align-items: center; padding: 20px; z-index: 9999; backdrop-filter: blur(4px);">
-    <div style="background: white; padding: 32px; border-radius: 20px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); position: relative; animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;">
-        <h3 style="margin-top: 0; color: #1e293b; font-size: 22px;">📋 Konfirmasi Pesanan</h3>
-        <p style="font-size: 13px; color: #64748b; margin-bottom: 20px;">Pastikan data pesanan kamu sudah sesuai.</p>
+    <div style="background: var(--bg-surface); padding: 32px; border-radius: 20px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); position: relative; animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; border: 1px solid var(--border-color);">
+        <h3 style="margin-top: 0; font-size: 22px;">📋 Konfirmasi Pesanan</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Pastikan data pesanan kamu sudah sesuai.</p>
         
-        <div style="text-align: left; font-size: 13px; line-height: 1.6; color: #334155; background: #f8fafc; padding: 14px 18px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
+        <div style="text-align: left; font-size: 13px; line-height: 1.6; background: var(--box-bg); padding: 14px 18px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 20px;">
             <p style="margin: 3px 0;"><b>Nama:</b> <span id="mNama">-</span></p>
             <p style="margin: 3px 0;"><b>No WhatsApp:</b> <span id="mPhone">-</span></p>
             <p style="margin: 3px 0;"><b>Detail:</b> <span id="mDetail">-</span></p>
-            <p style="margin: 3px 0; font-size: 15px;"><b>Total Pembayaran:</b> <span id="mTotal" style="color:#2563eb; font-weight:bold;">-</span></p>
+            <p style="margin: 3px 0; font-size: 15px;"><b>Total Pembayaran:</b> <span id="mTotal" style="color:var(--primary); font-weight:bold;">-</span></p>
         </div>
 
         <div style="display: flex; gap: 10px;">
             <button type="button" onclick="closeConfirmModal()" style="flex: 1; background: #94a3b8; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s;">Batalkan</button>
-            <button type="button" id="btnProceedInvoice" style="flex: 1; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s;">Lanjutkan 🚀</button>
+            <button type="button" id="btnProceedInvoice" style="flex: 1; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s;">Lanjutkan 🚀</button>
         </div>
     </div>
 </div>
@@ -337,6 +370,35 @@
 
 <script src="main.js"></script>
 <script>
+    // --- SKrip TOGGLE THEME & NAVIGASI ---
+    function toggleTheme() {
+        const html = document.documentElement;
+        const currentTheme = html.getAttribute('data-theme');
+        const themeBtn = document.getElementById('themeToggleBtn');
+        
+        if (currentTheme === 'dark') {
+            html.removeAttribute('data-theme');
+            localStorage.setItem('kohancopier_theme', 'light');
+            if(themeBtn) themeBtn.innerText = '🌙';
+        } else {
+            html.setAttribute('data-theme', 'dark');
+            localStorage.setItem('kohancopier_theme', 'dark');
+            if(themeBtn) themeBtn.innerText = '☀️';
+        }
+    }
+
+    // Muat tema yang tersimpan saat halaman dibuka
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('kohancopier_theme');
+        const themeBtn = document.getElementById('themeToggleBtn');
+        if (savedTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            if(themeBtn) themeBtn.innerText = '☀️';
+        } else {
+            if(themeBtn) themeBtn.innerText = '🌙';
+        }
+    });
+
     function switchPage(pageId) {
         document.getElementById('nav-home').classList.remove('active');
         document.getElementById('nav-order').classList.remove('active');

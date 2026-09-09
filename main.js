@@ -1,5 +1,40 @@
 const ADMIN_WA = "6285316121981";
 
+// --- CEK STATUS TOKO LIVE (BUKA / TUTUP) ---
+function checkLiveStoreStatus() {
+    const badge = document.getElementById('liveStoreBadge');
+    if (!badge) return;
+
+    const now = new Date();
+    const day = now.getDay(); // 0: Minggu, 1: Senin, 2: Selasa, 3: Rabu, 4: Kamis, 5: Jumat, 6: Sabtu
+    const currentHour = now.getHours() + now.getMinutes() / 60;
+
+    const jamBukaToko = {
+        0: { buka: 0, tutup: 0, libur: true },
+        1: { buka: 6, tutup: 17, libur: false },
+        2: { buka: 9, tutup: 18, libur: false },
+        3: { buka: 9, tutup: 18, libur: false },
+        4: { buka: 6, tutup: 17, libur: false },
+        5: { buka: 6, tutup: 17, libur: false },
+        6: { buka: 7, tutup: 12, libur: false }
+    };
+
+    const hariIni = jamBukaToko[day];
+    let isOpen = false;
+
+    if (!hariIni.libur && currentHour >= hariIni.buka && currentHour < hariIni.tutup) {
+        isOpen = true;
+    }
+
+    if (isOpen) {
+        badge.className = "store-badge open";
+        badge.innerHTML = "🟢 Toko Buka";
+    } else {
+        badge.className = "store-badge closed";
+        badge.innerHTML = "🔴 Toko Tutup";
+    }
+}
+
 // --- GENERATE SLOT WAKTU AMBIL SESUAI JAM OPERASIONAL ---
 function generateJadwalAmbil() {
     const selectAmbil = document.getElementById('waktuAmbil');
@@ -9,10 +44,9 @@ function generateJadwalAmbil() {
     selectAmbil.innerHTML = '';
 
     const now = new Date();
-    const day = now.getDay(); // 0: Minggu, 1: Senin, 2: Selasa, 3: Rabu, 4: Kamis, 5: Jumat, 6: Sabtu
+    const day = now.getDay();
     const currentHour = now.getHours() + now.getMinutes() / 60;
 
-    // Aturan jam operasional Kohan Copier
     const jamBukaToko = {
         0: { nama: 'Minggu', buka: 0, tutup: 0, libur: true },
         1: { nama: 'Senin', buka: 6, tutup: 17, libur: false },
@@ -27,11 +61,9 @@ function generateJadwalAmbil() {
     let optionsHtml = '';
 
     if (hariIni.libur || currentHour >= hariIni.tutup) {
-        // Jika hari Minggu atau sudah lewat jam tutup hari ini
         if (infoJamBuka) infoJamBuka.innerText = `⚠️ Toko ${hariIni.libur ? 'libur (Minggu)' : 'sudah tutup hari ini'}. Pesanan akan disiapkan untuk hari berikutnya.`;
         optionsHtml += `<option value="Besok (Hari Buka) - Jam Operasional">Besok (Sesuai Jam Buka Toko)</option>`;
     } else {
-        // Toko buka hari ini
         if (infoJamBuka) infoJamBuka.innerText = `ℹ️ Jam Operasional Hari Ini (${hariIni.nama}): ${String(hariIni.buka).padStart(2,'0')}.00 – ${String(hariIni.tutup).padStart(2,'0')}.00 WIB`;
         
         optionsHtml += `<option value="Hari ini - Secepatnya (Sesuai Antrean)">Hari ini - Secepatnya (Sesuai Antrean)</option>`;
@@ -48,8 +80,9 @@ function generateJadwalAmbil() {
     selectAmbil.innerHTML = optionsHtml;
 }
 
-// --- FITUR AUTO-FILL CUSTOMER LAMA & GENERATE JADWAL ---
+// --- INIT EVENT LISTENERS ---
 window.addEventListener('DOMContentLoaded', () => {
+    checkLiveStoreStatus();
     generateJadwalAmbil();
 
     let riwayat = JSON.parse(localStorage.getItem('kohancopier_orders')) || [];
@@ -99,8 +132,6 @@ function updatePrice() {
     if (kategori === 'stiker') {
         const jenisStiker = jenisStikerSelect ? jenisStikerSelect.value : 'Vinyl';
         const lembar = parseInt(jumlahLembarStikerInput ? jumlahLembarStikerInput.value : 1) || 1;
-        
-        // Harga stiker: Vinyl Rp 25.000, Kromo Rp 15.000 per lembar A3+
         const hargaPerLembar = jenisStiker === 'Vinyl' ? 25000 : 15000;
         total = lembar * hargaPerLembar;
     } else {
@@ -111,11 +142,7 @@ function updatePrice() {
         const ukuranKertas = ukuranKertasSelect ? ukuranKertasSelect.value : 'A4';
         
         let hargaPerHal = jenis === 'Warna' ? 2000 : 1000;
-        
-        // Jika ukuran A3+, harga dikalikan 2
-        if (ukuranKertas === 'A3+') {
-            hargaPerHal *= 2;
-        }
+        if (ukuranKertas === 'A3+') hargaPerHal *= 2;
 
         total = hal * copy * hargaPerHal;
     }
@@ -125,7 +152,6 @@ function updatePrice() {
     }
 }
 
-// Event Listeners untuk kalkulasi harga
 if (jumlahHalamanInput) jumlahHalamanInput.addEventListener('input', updatePrice);
 if (jumlahCopyInput) jumlahCopyInput.addEventListener('input', updatePrice);
 radiosCetak.forEach(radio => radio.addEventListener('change', updatePrice));

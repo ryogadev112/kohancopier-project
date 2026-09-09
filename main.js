@@ -19,7 +19,6 @@ function renderOrderHistory() {
     }
 
     let html = '<div style="display: flex; flex-direction: column; gap: 16px;">';
-    // Urutkan dari yang terbaru (reverse)
     riwayat.slice().reverse().forEach(o => {
         let desc = o.kategori === 'stiker' 
             ? `Stiker ${o.jenisStiker} - ${o.jumlahLembar} Lbr A3+ (${o.finishing})`
@@ -50,7 +49,7 @@ function renderOrderHistory() {
     container.innerHTML = html;
 }
 
-// --- CEK STATUS TOKO LIVE (BUKA / TUTUP) ---
+// --- CEK STATUS TOKO LIVE ---
 function checkLiveStoreStatus() {
     const badge = document.getElementById('liveStoreBadge');
     if (!badge) return;
@@ -85,7 +84,7 @@ function checkLiveStoreStatus() {
     }
 }
 
-// --- GENERATE SLOT WAKTU AMBIL SESUAI JAM OPERASIONAL ---
+// --- GENERATE SLOT WAKTU AMBIL ---
 function generateJadwalAmbil() {
     const selectAmbil = document.getElementById('waktuAmbil');
     const infoJamBuka = document.getElementById('infoJamBuka');
@@ -145,25 +144,63 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// --- TOGGLE TAMPILAN FORM (DOKUMEN VS STIKER) ---
+// --- TOGGLE TAMPILAN FORM (DOKUMEN VS STIKER) & PANDUAN FILE ---
 const kategoriLayanan = document.getElementById('kategoriLayanan');
 const sectionDokumen = document.getElementById('sectionDokumen');
 const sectionStiker = document.getElementById('sectionStiker');
+const fileLabel = document.getElementById('fileLabel');
+const fileHelper = document.getElementById('fileHelper');
+const fileInput = document.getElementById('file');
 
 function handleKategoriChange() {
     if (!kategoriLayanan) return;
     if (kategoriLayanan.value === 'stiker') {
         sectionDokumen.style.display = 'none';
         sectionStiker.style.display = 'block';
+        if (fileLabel) fileLabel.innerText = "Upload File Desain Stiker (PNG/JPG/CDR/PDF) *";
+        if (fileHelper) fileHelper.innerHTML = "💡 <b>Tips Stiker:</b> Gunakan file resolusi tinggi (PNG transparan atau CDR/PDF) agar hasil potong tajam. Maksimal 10MB.";
     } else {
         sectionDokumen.style.display = 'block';
         sectionStiker.style.display = 'none';
+        if (fileLabel) fileLabel.innerText = "Upload File Dokumen (PDF/DOCX) *";
+        if (fileHelper) fileHelper.innerHTML = "Format: PDF atau DOCX. Maksimal 10MB.";
     }
     updatePrice();
 }
 
 if (kategoriLayanan) {
     kategoriLayanan.addEventListener('change', handleKategoriChange);
+}
+
+// --- VALIDASI FILE INSTAN (LIVE CHECK) ---
+if (fileInput) {
+    fileInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        const kategori = kategoriLayanan ? kategoriLayanan.value : 'dokumen';
+        
+        // Cek ukuran max 10MB
+        if (file.size > 10 * 1024 * 1024) {
+            fileHelper.innerHTML = `❌ <span style="color: #dc2626;">File terlalu besar (${fileSizeMB} MB)! Maksimal ukuran file adalah 10MB.</span>`;
+            this.value = ''; // Reset input
+            return;
+        }
+
+        // Cek ekstensi file
+        const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/png', 'image/jpeg'];
+        const isAllowed = allowedTypes.includes(file.type) || file.name.match(/\.(pdf|docx|png|jpg|jpeg|cdr)$/i);
+
+        if (!isAllowed) {
+            fileHelper.innerHTML = `❌ <span style="color: #dc2626;">Format file tidak didukung! Upload file PDF, DOCX, PNG, JPG, atau CDR.</span>`;
+            this.value = '';
+            return;
+        }
+
+        // Jika lolos validasi
+        fileHelper.innerHTML = `✅ <span style="color: #16a34a; font-weight: bold;">File valid (${file.name} - ${fileSizeMB} MB) siap diproses!</span>`;
+    });
 }
 
 // --- KALKULASI HARGA REAL-TIME ---
@@ -228,7 +265,7 @@ function startInvoiceTimer(durationInSeconds) {
             if (timer <= 120) {
                 timerDisplay.style.background = "#fee2e2";
                 timerDisplay.style.color = "#dc2626";
-                timerDisplay.style.border = "1px solid #f87171";
+                timerDisplay.style.border = "1px solid #fca5a5";
                 timerDisplay.style.animation = "pulse 1s infinite";
             }
         }
@@ -255,16 +292,9 @@ if (orderForm) {
         const fileInput = document.getElementById('file');
         const file = fileInput.files[0];
 
-        if (file) {
-            const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/png', 'image/jpeg'];
-            if (!allowedTypes.includes(file.type) && !file.name.match(/\.(pdf|docx|png|jpg|jpeg|cdr)$/i)) {
-                alert('❌ Format file tidak didukung! Harap upload file PDF, DOCX, atau Gambar/Desain.');
-                return;
-            }
-            if (file.size > 10 * 1024 * 1024) {
-                alert('❌ Ukuran file terlalu besar! Maksimal 10MB.');
-                return;
-            }
+        if (!file) {
+            alert('❌ Harap upload file terlebih dahulu!');
+            return;
         }
 
         const submitBtn = document.getElementById('submitBtn');

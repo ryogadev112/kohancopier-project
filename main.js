@@ -1,7 +1,57 @@
 const ADMIN_WA = "6285316121981";
 
-// --- FITUR AUTO-FILL CUSTOMER LAMA ---
+// --- GENERATE SLOT WAKTU AMBIL SESUAI JAM OPERASIONAL ---
+function generateJadwalAmbil() {
+    const selectAmbil = document.getElementById('waktuAmbil');
+    const infoJamBuka = document.getElementById('infoJamBuka');
+    if (!selectAmbil) return;
+
+    selectAmbil.innerHTML = '';
+
+    const now = new Date();
+    const day = now.getDay(); // 0: Minggu, 1: Senin, 2: Selasa, 3: Rabu, 4: Kamis, 5: Jumat, 6: Sabtu
+    const currentHour = now.getHours() + now.getMinutes() / 60;
+
+    // Aturan jam operasional Kohan Copier
+    const jamBukaToko = {
+        0: { nama: 'Minggu', buka: 0, tutup: 0, libur: true },
+        1: { nama: 'Senin', buka: 6, tutup: 17, libur: false },
+        2: { nama: 'Selasa', buka: 9, tutup: 18, libur: false },
+        3: { nama: 'Rabu', buka: 9, tutup: 18, libur: false },
+        4: { nama: 'Kamis', buka: 6, tutup: 17, libur: false },
+        5: { nama: 'Jumat', buka: 6, tutup: 17, libur: false },
+        6: { nama: 'Sabtu', buka: 7, tutup: 12, libur: false }
+    };
+
+    const hariIni = jamBukaToko[day];
+    let optionsHtml = '';
+
+    if (hariIni.libur || currentHour >= hariIni.tutup) {
+        // Jika hari Minggu atau sudah lewat jam tutup hari ini
+        if (infoJamBuka) infoJamBuka.innerText = `⚠️ Toko ${hariIni.libur ? 'libur (Minggu)' : 'sudah tutup hari ini'}. Pesanan akan disiapkan untuk hari berikutnya.`;
+        optionsHtml += `<option value="Besok (Hari Buka) - Jam Operasional">Besok (Sesuai Jam Buka Toko)</option>`;
+    } else {
+        // Toko buka hari ini
+        if (infoJamBuka) infoJamBuka.innerText = `ℹ️ Jam Operasional Hari Ini (${hariIni.nama}): ${String(hariIni.buka).padStart(2,'0')}.00 – ${String(hariIni.tutup).padStart(2,'0')}.00 WIB`;
+        
+        optionsHtml += `<option value="Hari ini - Secepatnya (Sesuai Antrean)">Hari ini - Secepatnya (Sesuai Antrean)</option>`;
+        
+        if (hariIni.tutup > 12 && currentHour < 12) {
+            optionsHtml += `<option value="Hari ini - Siang (12:00 - 15:00)">Hari ini - Siang (12:00 - 15:00)</option>`;
+        }
+        if (hariIni.tutup > 15 && currentHour < 15) {
+            optionsHtml += `<option value="Hari ini - Sore (15:00 - ${String(hariIni.tutup).padStart(2,'0')}:00)">Hari ini - Sore (15:00 - ${String(hariIni.tutup).padStart(2,'0')}:00)</option>`;
+        }
+        optionsHtml += `<option value="Besok Pagi">Besok Pagi</option>`;
+    }
+
+    selectAmbil.innerHTML = optionsHtml;
+}
+
+// --- FITUR AUTO-FILL CUSTOMER LAMA & GENERATE JADWAL ---
 window.addEventListener('DOMContentLoaded', () => {
+    generateJadwalAmbil();
+
     let riwayat = JSON.parse(localStorage.getItem('kohancopier_orders')) || [];
     if(riwayat.length > 0) {
         let lastOrder = riwayat[riwayat.length - 1];
@@ -244,6 +294,7 @@ if (btnProceedInvoice) {
         document.getElementById('phone').value = currentPhone;
         handleKategoriChange();
         updatePrice();
+        generateJadwalAmbil();
     };
 }
 
@@ -276,7 +327,6 @@ function lacakStatusPesanan() {
                 ? `Stiker ${o.jenisStiker} - ${o.jumlahLembar} Lembar A3+ (${o.finishing})`
                 : `${o.jumlahHalaman} Hal ${o.jumlahCopy ? 'x ' + o.jumlahCopy + ' Rangkap' : ''} (${o.jenisCetak} - ${o.ukuranKertas || 'A4'})`;
             
-            // Tambahkan jadwal ambil ke hasil pelacakan
             let jadwalAmbil = o.waktuAmbil || 'Secepatnya';
             html += `<p style="margin:4px 0; color:#64748b;">Detail: ${desc}<br>Ambil: <b>${jadwalAmbil}</b><br>Total: Rp ${o.totalHarga.toLocaleString('id-ID')}</p><hr style="border:0; border-top:1px solid #eee; margin:8px 0;">`;
         });

@@ -1,12 +1,62 @@
 const ADMIN_WA = "6285316121981";
 
+// --- RENDER DAFTAR RIWAYAT PESANAN SAYA ---
+function renderOrderHistory() {
+    const container = document.getElementById('historyListContainer');
+    if (!container) return;
+
+    let riwayat = JSON.parse(localStorage.getItem('kohancopier_orders')) || [];
+
+    if (riwayat.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: var(--text-muted);">
+                <p style="font-size: 15px; margin: 0 0 8px 0;">ℹ️ Belum ada riwayat pesanan.</p>
+                <p style="font-size: 13px; margin: 0;">Yuk buat pesanan pertamamu sekarang!</p>
+                <button onclick="switchPage('order')" class="btn-primary" style="margin-top: 16px; padding: 10px 20px; font-size: 14px;">Mulai Pesan 🚀</button>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '<div style="display: flex; flex-direction: column; gap: 16px;">';
+    // Urutkan dari yang terbaru (reverse)
+    riwayat.slice().reverse().forEach(o => {
+        let desc = o.kategori === 'stiker' 
+            ? `Stiker ${o.jenisStiker} - ${o.jumlahLembar} Lbr A3+ (${o.finishing})`
+            : `${o.jumlahHalaman} Hal x ${o.jumlahCopy} Rangkap (${o.jenisCetak} - ${o.ukuranKertas || 'A4'})`;
+
+        html += `
+            <div style="background: var(--box-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px;">
+                    <div>
+                        <span style="font-weight: 700; color: var(--primary);">${o.orderId}</span>
+                        <span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">${o.tanggal || ''}</span>
+                    </div>
+                    <span style="font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 20px; background: #fef3c7; color: #d97706;">${o.status || 'UNPAID'}</span>
+                </div>
+                <div style="font-size: 13px; color: var(--text-main); line-height: 1.5;">
+                    <p style="margin: 2px 0;"><b>Pemesan:</b> ${o.nama} (${o.phone})</p>
+                    <p style="margin: 2px 0;"><b>Detail:</b> ${desc}</p>
+                    <p style="margin: 2px 0;"><b>Ambil:</b> ${o.waktuAmbil || 'Secepatnya'}</p>
+                    <p style="margin: 2px 0; font-size: 14px; margin-top: 6px;"><b>Total:</b> <span style="color: var(--primary); font-weight: bold;">Rp ${o.totalHarga.toLocaleString('id-ID')}</span></p>
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 4px;">
+                    <a href="https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(`Halo Admin KohanCopier, saya ingin konfirmasi pesanan ID: ${o.orderId} atas nama ${o.nama}`)}" target="_blank" style="flex: 1; text-align: center; background: #22c55e; color: white; padding: 8px; border-radius: 8px; font-size: 13px; font-weight: bold; text-decoration: none;">📱 Hubungi WA Admin</a>
+                </div>
+            </div>
+        `;
+    });
+    html += '</div>';
+    container.innerHTML = html;
+}
+
 // --- CEK STATUS TOKO LIVE (BUKA / TUTUP) ---
 function checkLiveStoreStatus() {
     const badge = document.getElementById('liveStoreBadge');
     if (!badge) return;
 
     const now = new Date();
-    const day = now.getDay(); // 0: Minggu, 1: Senin, 2: Selasa, 3: Rabu, 4: Kamis, 5: Jumat, 6: Sabtu
+    const day = now.getDay();
     const currentHour = now.getHours() + now.getMinutes() / 60;
 
     const jamBukaToko = {

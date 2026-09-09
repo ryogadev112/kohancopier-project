@@ -44,7 +44,6 @@
         .navbar { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); }
         .nav-logo { font-size: 24px; font-weight: 800; color: var(--primary); cursor: pointer; display: flex; align-items: center; gap: 10px; }
         
-        /* Indikator Status Toko Live di Navbar */
         .store-badge { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; }
         .store-badge.open { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
         .store-badge.closed { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
@@ -162,6 +161,7 @@
                 <button id="nav-home" class="active" onclick="switchPage('home')">Beranda</button>
                 <button id="nav-order" onclick="switchPage('order')">Pesan</button>
                 <button id="nav-invoice" onclick="switchPage('invoice')" style="display:none;">Invoice</button>
+                <button id="nav-history" onclick="switchPage('history')">Pesanan Saya</button>
                 <button id="nav-track" onclick="switchPage('track')">Lacak</button>
             </div>
             <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()" title="Ubah Tema">🌙</button>
@@ -379,6 +379,17 @@
         </div>
     </div>
 
+    <!-- HALAMAN RIWAYAT PESANAN SAYA -->
+    <div id="page-history" class="page-section">
+        <div class="form-container" style="max-width: 700px;">
+            <h2 style="margin: 0 0 8px 0; font-size: 24px; text-align: center;">📦 Riwayat Pesanan Saya</h2>
+            <p style="text-align: center; color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Daftar pesanan yang pernah kamu buat di perangkat ini.</p>
+            <div id="historyListContainer">
+                <!-- Diisi otomatis oleh JavaScript -->
+            </div>
+        </div>
+    </div>
+
     <!-- HALAMAN LACAK -->
     <div id="page-track" class="page-section">
         <div class="form-container">
@@ -452,18 +463,22 @@
     });
 
     function switchPage(pageId) {
-        document.getElementById('nav-home').classList.remove('active');
-        document.getElementById('nav-order').classList.remove('active');
-        document.getElementById('nav-invoice').classList.remove('active');
-        document.getElementById('nav-track').classList.remove('active');
+        ['home', 'order', 'invoice', 'history', 'track'].forEach(id => {
+            const nav = document.getElementById('nav-' + id);
+            const page = document.getElementById('page-' + id);
+            if (nav) nav.classList.remove('active');
+            if (page) page.classList.remove('active');
+        });
 
-        document.getElementById('page-home').classList.remove('active');
-        document.getElementById('page-order').classList.remove('active');
-        document.getElementById('page-invoice').classList.remove('active');
-        document.getElementById('page-track').classList.remove('active');
+        const targetNav = document.getElementById('nav-' + pageId);
+        const targetPage = document.getElementById('page-' + pageId);
+        if (targetNav) targetNav.classList.add('active');
+        if (targetPage) targetPage.classList.add('active');
 
-        document.getElementById('nav-' + pageId).classList.add('active');
-        document.getElementById('page-' + pageId).classList.add('active');
+        if (pageId === 'history' && typeof renderOrderHistory === 'function') {
+            renderOrderHistory();
+        }
+
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 </script>

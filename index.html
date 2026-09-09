@@ -303,7 +303,20 @@
                     <textarea id="catatan" placeholder="Contoh: Jilid lakban hitam, atau instruksi potong stiker bulat..."></textarea>
                 </div>
 
-                <div class="form-section-title">👤 2. Data Pemesan</div>
+                <!-- FITUR BARU: JADWAL PENGAMBILAN -->
+                <div class="form-section-title">🕒 2. Jadwal Pengambilan</div>
+                <div class="form-group">
+                    <label for="waktuAmbil">Kapan pesanan akan diambil di toko? *</label>
+                    <select id="waktuAmbil" required>
+                        <option value="Secepatnya (Sesuai Antrean)">Secepatnya (Sesuai antrean normal)</option>
+                        <option value="Hari ini - Siang (12:00 - 15:00)">Hari ini - Siang (12:00 - 15:00)</option>
+                        <option value="Hari ini - Sore (15:00 - 17:00)">Hari ini - Sore (15:00 - 17:00)</option>
+                        <option value="Besok Pagi">Besok Pagi (Setelah toko buka)</option>
+                    </select>
+                    <span style="font-size: 12px; color: var(--text-muted); display: block; margin-top: 4px;">*Pastikan mengambil pesanan sesuai jam operasional toko.</span>
+                </div>
+
+                <div class="form-section-title">👤 3. Data Pemesan</div>
 
                 <div class="form-group">
                     <label for="nama">Nama Lengkap *</label>
@@ -386,6 +399,7 @@
         <div style="text-align: left; font-size: 13px; line-height: 1.6; background: var(--box-bg); padding: 14px 18px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 20px;">
             <p style="margin: 3px 0;"><b>Nama:</b> <span id="mNama">-</span></p>
             <p style="margin: 3px 0;"><b>No WhatsApp:</b> <span id="mPhone">-</span></p>
+            <p style="margin: 3px 0;"><b>Waktu Ambil:</b> <span id="mAmbil">-</span></p>
             <p style="margin: 3px 0;"><b>Detail:</b> <span id="mDetail">-</span></p>
             <p style="margin: 3px 0; font-size: 15px;"><b>Total Pembayaran:</b> <span id="mTotal" style="color:var(--primary); font-weight:bold;">-</span></p>
         </div>

@@ -150,6 +150,7 @@ if (orderForm) {
         setTimeout(() => {
             const nama = document.getElementById('nama').value;
             const phone = document.getElementById('phone').value;
+            const waktuAmbil = document.getElementById('waktuAmbil').value;
             const kategori = kategoriLayanan.value;
             const catatan = document.getElementById('catatan').value || '-';
             const fileName = file ? file.name : 'Tidak ada file';
@@ -167,7 +168,7 @@ if (orderForm) {
 
                 detailText = `Stiker ${jenisStiker} - ${jumlahLembar} Lembar A3+ (${finishing})`;
                 tempOrderData = {
-                    orderId, nama, phone, kategori, jenisStiker, jumlahLembar, finishing, catatan, fileName, totalHarga, status: 'UNPAID', tanggal: new Date().toLocaleString()
+                    orderId, nama, phone, waktuAmbil, kategori, jenisStiker, jumlahLembar, finishing, catatan, fileName, totalHarga, status: 'UNPAID', tanggal: new Date().toLocaleString()
                 };
             } else {
                 const jumlahHalaman = document.getElementById('jumlahHalaman').value;
@@ -182,12 +183,13 @@ if (orderForm) {
 
                 detailText = `${jumlahHalaman} Hal x ${jumlahCopy} Rangkap (${jenisCetak} - ${ukuranKertas})`;
                 tempOrderData = {
-                    orderId, nama, phone, kategori, jumlahHalaman, jumlahCopy, jenisCetak, ukuranKertas, catatan, fileName, totalHarga, status: 'UNPAID', tanggal: new Date().toLocaleString()
+                    orderId, nama, phone, waktuAmbil, kategori, jumlahHalaman, jumlahCopy, jenisCetak, ukuranKertas, catatan, fileName, totalHarga, status: 'UNPAID', tanggal: new Date().toLocaleString()
                 };
             }
 
             document.getElementById('mNama').innerText = nama;
             document.getElementById('mPhone').innerText = phone;
+            document.getElementById('mAmbil').innerText = waktuAmbil;
             document.getElementById('mDetail').innerText = detailText;
             document.getElementById('mTotal').innerText = 'Rp ' + totalHarga.toLocaleString('id-ID');
 
@@ -219,10 +221,10 @@ if (btnProceedInvoice) {
             ? `Stiker ${tempOrderData.jenisStiker} - ${tempOrderData.jumlahLembar} Lembar A3+ (${tempOrderData.finishing})`
             : `${tempOrderData.jumlahHalaman} Hal x ${tempOrderData.jumlahCopy} Rangkap (${tempOrderData.jenisCetak} - ${tempOrderData.ukuranKertas})`;
 
-        document.getElementById('invDetail').innerText = `${detailInv}\nFile: ${tempOrderData.fileName}`;
+        document.getElementById('invDetail').innerText = `${detailInv}\nFile: ${tempOrderData.fileName}\nAmbil: ${tempOrderData.waktuAmbil}`;
         document.getElementById('invTotal').innerText = 'Rp ' + tempOrderData.totalHarga.toLocaleString('id-ID');
 
-        const pesanWA = `Halo Admin KohanCopier, saya ingin konfirmasi pembayaran QRIS.\n\n*ID Invoice:* ${tempOrderData.orderId}\n*Nama:* ${tempOrderData.nama}\n*Detail:* ${detailInv}\n*Catatan:* ${tempOrderData.catatan}\n*Total:* Rp ${tempOrderData.totalHarga.toLocaleString('id-ID')}\n\nBerikut bukti pembayarannya:`;
+        const pesanWA = `Halo Admin KohanCopier, saya ingin konfirmasi pembayaran QRIS.\n\n*ID Invoice:* ${tempOrderData.orderId}\n*Nama:* ${tempOrderData.nama}\n*Waktu Ambil:* ${tempOrderData.waktuAmbil}\n*Detail:* ${detailInv}\n*Catatan:* ${tempOrderData.catatan}\n*Total:* Rp ${tempOrderData.totalHarga.toLocaleString('id-ID')}\n\nBerikut bukti pembayarannya:`;
         document.getElementById('btnInvWA').href = `https://wa.me/${ADMIN_WA}?text=` + encodeURIComponent(pesanWA);
 
         closeConfirmModal();
@@ -273,7 +275,10 @@ function lacakStatusPesanan() {
             let desc = o.kategori === 'stiker' 
                 ? `Stiker ${o.jenisStiker} - ${o.jumlahLembar} Lembar A3+ (${o.finishing})`
                 : `${o.jumlahHalaman} Hal ${o.jumlahCopy ? 'x ' + o.jumlahCopy + ' Rangkap' : ''} (${o.jenisCetak} - ${o.ukuranKertas || 'A4'})`;
-            html += `<p style="margin:4px 0; color:#64748b;">Detail: ${desc} - Total: Rp ${o.totalHarga.toLocaleString('id-ID')}</p><hr style="border:0; border-top:1px solid #eee; margin:8px 0;">`;
+            
+            // Tambahkan jadwal ambil ke hasil pelacakan
+            let jadwalAmbil = o.waktuAmbil || 'Secepatnya';
+            html += `<p style="margin:4px 0; color:#64748b;">Detail: ${desc}<br>Ambil: <b>${jadwalAmbil}</b><br>Total: Rp ${o.totalHarga.toLocaleString('id-ID')}</p><hr style="border:0; border-top:1px solid #eee; margin:8px 0;">`;
         });
         html += '</div>';
         resultDiv.innerHTML = html;

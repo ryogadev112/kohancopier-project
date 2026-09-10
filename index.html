@@ -227,7 +227,7 @@
                 <div class="form-section-title">📦 Kategori Layanan *</div>
                 <div class="form-group">
                     <select id="kategoriLayanan">
-                        <option value="dokumen">Cetak Dokumen / Buku (HVS / F4 / A3+)</option>
+                        <option value="dokumen">Cetak Dokumen / Buku (HVS / F4 / A3+ / Custom)</option>
                         <option value="stiker">Cetak Logo & Stiker (A3+ / Roll)</option>
                     </select>
                 </div>
@@ -279,7 +279,14 @@
                             <option value="A4">A4 (Standar)</option>
                             <option value="F4">F4 (Folio)</option>
                             <option value="A3+">A3+ (Extra / 2x Lipat)</option>
+                            <option value="Custom">Custom Ukuran (Foto / Bebas)</option>
                         </select>
+                    </div>
+
+                    <!-- KOTAK INPUT CUSTOM UKURAN -->
+                    <div class="form-group" id="groupCustomUkuran" style="display: none;">
+                        <label for="detailCustomUkuran">Tuliskan Ukuran Kertas Custom *</label>
+                        <input type="text" id="detailCustomUkuran" placeholder="Contoh: 4x4 cm, 3x4, atau 10x15 cm">
                     </div>
                 </div>
 

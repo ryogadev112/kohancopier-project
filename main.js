@@ -153,6 +153,8 @@ const fileHelper = document.getElementById('fileHelper');
 const fileInput = document.getElementById('file');
 const jenisStikerSelect = document.getElementById('jenisStiker');
 const jumlahLembarStikerInput = document.getElementById('jumlahLembarStiker');
+const ukuranKertasSelect = document.getElementById('ukuranKertas');
+const groupCustomUkuran = document.getElementById('groupCustomUkuran');
 
 function handleKategoriChange() {
     if (!kategoriLayanan) return;
@@ -174,7 +176,22 @@ if (kategoriLayanan) {
     kategoriLayanan.addEventListener('change', handleKategoriChange);
 }
 
-// --- UPDATE LABEL JUMLAH STIKER BERDASARKAN JENISNYA (A3+ VS ROLL) ---
+// --- TOGGLE INPUT CUSTOM UKURAN KERTAS ---
+function handleUkuranKertasChange() {
+    if (!ukuranKertasSelect || !groupCustomUkuran) return;
+    if (ukuranKertasSelect.value === 'Custom') {
+        groupCustomUkuran.style.display = 'block';
+    } else {
+        groupCustomUkuran.style.display = 'none';
+    }
+    updatePrice();
+}
+
+if (ukuranKertasSelect) {
+    ukuranKertasSelect.addEventListener('change', handleUkuranKertasChange);
+}
+
+// --- UPDATE LABEL JUMLAH STIKER (A3+ VS ROLL) ---
 function handleJenisStikerChange() {
     const jenisStiker = jenisStikerSelect ? jenisStikerSelect.value : 'Vinyl';
     const labelJumlah = document.getElementById('labelJumlahStiker');
@@ -224,7 +241,6 @@ if (fileInput) {
 const jumlahHalamanInput = document.getElementById('jumlahHalaman');
 const jumlahCopyInput = document.getElementById('jumlahCopy');
 const radiosCetak = document.querySelectorAll('input[name="jenisCetak"]');
-const ukuranKertasSelect = document.getElementById('ukuranKertas');
 const pricePreview = document.getElementById('pricePreview');
 
 function updatePrice() {
@@ -235,9 +251,9 @@ function updatePrice() {
         const jenisStiker = jenisStikerSelect ? jenisStikerSelect.value : 'Vinyl';
         const jumlah = parseInt(jumlahLembarStikerInput ? jumlahLembarStikerInput.value : 1) || 1;
         
-        let hargaSatuan = 25000; // Vinyl
+        let hargaSatuan = 25000;
         if (jenisStiker === 'Kromo') hargaSatuan = 15000;
-        if (jenisStiker === 'Roll') hargaSatuan = 50000; // Rp 50.000 per meter
+        if (jenisStiker === 'Roll') hargaSatuan = 50000;
 
         total = jumlah * hargaSatuan;
     } else {
@@ -351,10 +367,13 @@ if (orderForm) {
                 const jumlahHalaman = document.getElementById('jumlahHalaman').value;
                 const jumlahCopy = document.getElementById('jumlahCopy').value;
                 const jenisCetak = document.querySelector('input[name="jenisCetak"]:checked').value;
-                const ukuranKertas = document.getElementById('ukuranKertas').value;
+                
+                const ukuranKertasBase = ukuranKertasSelect.value;
+                const customUkuranText = document.getElementById('detailCustomUkuran').value || 'Custom';
+                const ukuranKertas = ukuranKertasBase === 'Custom' ? `Custom (${customUkuranText})` : ukuranKertasBase;
                 
                 let hargaPerHal = jenisCetak === 'Warna' ? 2000 : 1000;
-                if (ukuranKertas === 'A3+') hargaPerHal *= 2;
+                if (ukuranKertasBase === 'A3+') hargaPerHal *= 2;
                 
                 totalHarga = jumlahHalaman * jumlahCopy * hargaPerHal;
 

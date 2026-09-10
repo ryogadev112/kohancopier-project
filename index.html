@@ -228,7 +228,7 @@
                 <div class="form-group">
                     <select id="kategoriLayanan">
                         <option value="dokumen">Cetak Dokumen / Buku (HVS / F4 / A3+)</option>
-                        <option value="stiker">Cetak Logo & Stiker (A3+ Vinyl / Kromo)</option>
+                        <option value="stiker">Cetak Logo & Stiker (A3+ / Roll)</option>
                     </select>
                 </div>
 
@@ -286,15 +286,16 @@
                 <!-- FORM KHUSUS STIKER -->
                 <div id="sectionStiker" style="display: none;">
                     <div class="form-group">
-                        <label for="jenisStiker">Pilihan Bahan Stiker *</label>
+                        <label for="jenisStiker">Pilihan Bahan & Jenis Stiker *</label>
                         <select id="jenisStiker">
-                            <option value="Vinyl">Stiker Vinyl (Anti Air / Outdoor - Rp 25.000/lbr A3+)</option>
-                            <option value="Kromo">Stiker Kromo (Bahan Kertas / Label - Rp 15.000/lbr A3+)</option>
+                            <option value="Vinyl">Stiker Vinyl A3+ (Anti Air / Outdoor - Rp 25.000/lbr)</option>
+                            <option value="Kromo">Stiker Kromo A3+ (Bahan Kertas / Label - Rp 15.000/lbr)</option>
+                            <option value="Roll">Stiker Roll / Meteran (Label Gulung - Rp 50.000/meter)</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="jumlahLembarStiker">Jumlah Lembar A3+ *</label>
+                        <label id="labelJumlahStiker" for="jumlahLembarStiker">Jumlah Lembar A3+ *</label>
                         <input type="number" id="jumlahLembarStiker" min="1" value="1">
                     </div>
 
@@ -303,7 +304,7 @@
                         <select id="finishingStiker">
                             <option value="Kiss Cut">Kiss Cut (Cabut satuan / mudah dilepas)</option>
                             <option value="Die Cut">Die Cut (Putus sesuai bentuk)</option>
-                            <option value="Tanpa Potong">Tanpa Potong (Lembaran A3+ utuh)</option>
+                            <option value="Tanpa Potong">Tanpa Potong (Lembaran / Rol utuh)</option>
                         </select>
                     </div>
                 </div>

@@ -1,4 +1,4 @@
-const ADMIN_WA = "6281318541990";
+const ADMIN_WA = "6285316121981";
 
 // --- RENDER DAFTAR RIWAYAT PESANAN SAYA ---
 function renderOrderHistory() {
@@ -21,7 +21,7 @@ function renderOrderHistory() {
     let html = '<div style="display: flex; flex-direction: column; gap: 16px;">';
     riwayat.slice().reverse().forEach(o => {
         let desc = o.kategori === 'stiker' 
-            ? `Stiker ${o.jenisStiker} - ${o.jumlahLembar} Lbr A3+ (${o.finishing})`
+            ? `Stiker ${o.jenisStiker} - ${o.jumlahLembar} ${o.jenisStiker === 'Roll' ? 'Meter' : 'Lbr A3+'} (${o.finishing})`
             : `${o.jumlahHalaman} Hal x ${o.jumlahCopy} Rangkap (${o.jenisCetak} - ${o.ukuranKertas || 'A4'})`;
 
         html += `
@@ -151,6 +151,8 @@ const sectionStiker = document.getElementById('sectionStiker');
 const fileLabel = document.getElementById('fileLabel');
 const fileHelper = document.getElementById('fileHelper');
 const fileInput = document.getElementById('file');
+const jenisStikerSelect = document.getElementById('jenisStiker');
+const jumlahLembarStikerInput = document.getElementById('jumlahLembarStiker');
 
 function handleKategoriChange() {
     if (!kategoriLayanan) return;
@@ -172,6 +174,25 @@ if (kategoriLayanan) {
     kategoriLayanan.addEventListener('change', handleKategoriChange);
 }
 
+// --- UPDATE LABEL JUMLAH STIKER BERDASARKAN JENISNYA (A3+ VS ROLL) ---
+function handleJenisStikerChange() {
+    const jenisStiker = jenisStikerSelect ? jenisStikerSelect.value : 'Vinyl';
+    const labelJumlah = document.getElementById('labelJumlahStiker');
+    
+    if (labelJumlah) {
+        if (jenisStiker === 'Roll') {
+            labelJumlah.innerText = "Panjang Stiker (dalam Meter) *";
+        } else {
+            labelJumlah.innerText = "Jumlah Lembar A3+ *";
+        }
+    }
+    updatePrice();
+}
+
+if (jenisStikerSelect) {
+    jenisStikerSelect.addEventListener('change', handleJenisStikerChange);
+}
+
 // --- VALIDASI FILE INSTAN (LIVE CHECK) ---
 if (fileInput) {
     fileInput.addEventListener('change', function() {
@@ -179,16 +200,13 @@ if (fileInput) {
         if (!file) return;
 
         const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
-        const kategori = kategoriLayanan ? kategoriLayanan.value : 'dokumen';
         
-        // Cek ukuran max 10MB
         if (file.size > 10 * 1024 * 1024) {
             fileHelper.innerHTML = `❌ <span style="color: #dc2626;">File terlalu besar (${fileSizeMB} MB)! Maksimal ukuran file adalah 10MB.</span>`;
-            this.value = ''; // Reset input
+            this.value = '';
             return;
         }
 
-        // Cek ekstensi file
         const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/png', 'image/jpeg'];
         const isAllowed = allowedTypes.includes(file.type) || file.name.match(/\.(pdf|docx|png|jpg|jpeg|cdr)$/i);
 
@@ -198,7 +216,6 @@ if (fileInput) {
             return;
         }
 
-        // Jika lolos validasi
         fileHelper.innerHTML = `✅ <span style="color: #16a34a; font-weight: bold;">File valid (${file.name} - ${fileSizeMB} MB) siap diproses!</span>`;
     });
 }
@@ -208,8 +225,6 @@ const jumlahHalamanInput = document.getElementById('jumlahHalaman');
 const jumlahCopyInput = document.getElementById('jumlahCopy');
 const radiosCetak = document.querySelectorAll('input[name="jenisCetak"]');
 const ukuranKertasSelect = document.getElementById('ukuranKertas');
-const jenisStikerSelect = document.getElementById('jenisStiker');
-const jumlahLembarStikerInput = document.getElementById('jumlahLembarStiker');
 const pricePreview = document.getElementById('pricePreview');
 
 function updatePrice() {
@@ -218,9 +233,13 @@ function updatePrice() {
 
     if (kategori === 'stiker') {
         const jenisStiker = jenisStikerSelect ? jenisStikerSelect.value : 'Vinyl';
-        const lembar = parseInt(jumlahLembarStikerInput ? jumlahLembarStikerInput.value : 1) || 1;
-        const hargaPerLembar = jenisStiker === 'Vinyl' ? 25000 : 15000;
-        total = lembar * hargaPerLembar;
+        const jumlah = parseInt(jumlahLembarStikerInput ? jumlahLembarStikerInput.value : 1) || 1;
+        
+        let hargaSatuan = 25000; // Vinyl
+        if (jenisStiker === 'Kromo') hargaSatuan = 15000;
+        if (jenisStiker === 'Roll') hargaSatuan = 50000; // Rp 50.000 per meter
+
+        total = jumlah * hargaSatuan;
     } else {
         const hal = parseInt(jumlahHalamanInput ? jumlahHalamanInput.value : 1) || 1;
         const copy = parseInt(jumlahCopyInput ? jumlahCopyInput.value : 1) || 1;
@@ -243,7 +262,6 @@ if (jumlahHalamanInput) jumlahHalamanInput.addEventListener('input', updatePrice
 if (jumlahCopyInput) jumlahCopyInput.addEventListener('input', updatePrice);
 radiosCetak.forEach(radio => radio.addEventListener('change', updatePrice));
 if (ukuranKertasSelect) ukuranKertasSelect.addEventListener('change', updatePrice);
-if (jenisStikerSelect) jenisStikerSelect.addEventListener('change', updatePrice);
 if (jumlahLembarStikerInput) jumlahLembarStikerInput.addEventListener('input', updatePrice);
 
 // --- LOGIKA TIMER INVOICE ---
@@ -265,7 +283,7 @@ function startInvoiceTimer(durationInSeconds) {
             if (timer <= 120) {
                 timerDisplay.style.background = "#fee2e2";
                 timerDisplay.style.color = "#dc2626";
-                timerDisplay.style.border = "1px solid #fca5a5";
+                timerDisplay.style.border = "1px solid #f87171";
                 timerDisplay.style.animation = "pulse 1s infinite";
             }
         }
@@ -316,15 +334,18 @@ if (orderForm) {
             let totalHarga = 0;
 
             if (kategori === 'stiker') {
-                const jenisStiker = document.getElementById('jenisStiker').value;
-                const jumlahLembar = document.getElementById('jumlahLembarStiker').value;
+                const jenisStiker = jenisStikerSelect.value;
+                const jumlah = document.getElementById('jumlahLembarStiker').value;
                 const finishing = document.getElementById('finishingStiker').value;
-                const hargaPerLembar = jenisStiker === 'Vinyl' ? 25000 : 15000;
-                totalHarga = jumlahLembar * hargaPerLembar;
+                
+                let hargaSatuan = 25000;
+                if (jenisStiker === 'Kromo') hargaSatuan = 15000;
+                if (jenisStiker === 'Roll') hargaSatuan = 50000;
+                totalHarga = jumlah * hargaSatuan;
 
-                detailText = `Stiker ${jenisStiker} - ${jumlahLembar} Lembar A3+ (${finishing})`;
+                detailText = `Stiker ${jenisStiker} - ${jumlah} ${jenisStiker === 'Roll' ? 'Meter' : 'Lembar A3+'} (${finishing})`;
                 tempOrderData = {
-                    orderId, nama, phone, waktuAmbil, kategori, jenisStiker, jumlahLembar, finishing, catatan, fileName, totalHarga, status: 'UNPAID', tanggal: new Date().toLocaleString()
+                    orderId, nama, phone, waktuAmbil, kategori, jenisStiker, jumlahLembar: jumlah, finishing, catatan, fileName, totalHarga, status: 'UNPAID', tanggal: new Date().toLocaleString()
                 };
             } else {
                 const jumlahHalaman = document.getElementById('jumlahHalaman').value;
@@ -374,7 +395,7 @@ if (btnProceedInvoice) {
         document.getElementById('invNama').innerText = tempOrderData.nama + ' (' + tempOrderData.phone + ')';
         
         let detailInv = tempOrderData.kategori === 'stiker' 
-            ? `Stiker ${tempOrderData.jenisStiker} - ${tempOrderData.jumlahLembar} Lembar A3+ (${tempOrderData.finishing})`
+            ? `Stiker ${tempOrderData.jenisStiker} - ${tempOrderData.jumlahLembar} ${tempOrderData.jenisStiker === 'Roll' ? 'Meter' : 'Lembar A3+'} (${tempOrderData.finishing})`
             : `${tempOrderData.jumlahHalaman} Hal x ${tempOrderData.jumlahCopy} Rangkap (${tempOrderData.jenisCetak} - ${tempOrderData.ukuranKertas})`;
 
         document.getElementById('invDetail').innerText = `${detailInv}\nFile: ${tempOrderData.fileName}\nAmbil: ${tempOrderData.waktuAmbil}`;
@@ -430,7 +451,7 @@ function lacakStatusPesanan() {
         found.forEach(o => {
             html += `<p style="margin:4px 0;"><b>ID:</b> ${o.orderId} | <b>Nama:</b> ${o.nama} | <b>Status:</b> <span style="color:#d97706; font-weight:bold;">${o.status}</span></p>`;
             let desc = o.kategori === 'stiker' 
-                ? `Stiker ${o.jenisStiker} - ${o.jumlahLembar} Lembar A3+ (${o.finishing})`
+                ? `Stiker ${o.jenisStiker} - ${o.jumlahLembar} ${o.jenisStiker === 'Roll' ? 'Meter' : 'Lembar A3+'} (${o.finishing})`
                 : `${o.jumlahHalaman} Hal ${o.jumlahCopy ? 'x ' + o.jumlahCopy + ' Rangkap' : ''} (${o.jenisCetak} - ${o.ukuranKertas || 'A4'})`;
             
             let jadwalAmbil = o.waktuAmbil || 'Secepatnya';

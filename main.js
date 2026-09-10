@@ -1,4 +1,4 @@
-const ADMIN_WA = "6285316121981";
+const ADMIN_WA = "6281318541990";
 
 // --- RENDER DAFTAR RIWAYAT PESANAN SAYA ---
 function renderOrderHistory() {

@@ -40,6 +40,11 @@
             --shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
+        /* Mengubah peta Google Maps menjadi gelap secara otomatis saat Dark Mode aktif */
+        [data-theme="dark"] iframe {
+            filter: invert(90%) hue-rotate(180deg) brightness(95%) contrast(90%);
+        }
+
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
         body { background-color: var(--bg-body); margin: 0; padding: 0; color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; }
         
@@ -160,7 +165,7 @@
                 <button id="nav-home" class="active" onclick="switchPage('home')">Beranda</button>
                 <button id="nav-order" onclick="switchPage('order')">Pesan</button>
                 <button id="nav-invoice" onclick="switchPage('invoice')" style="display:none;">Invoice</button>
-                <button id="nav-track" onclick="switchPage('track')">Lacak</button>
+                <button id="nav-track" onclick="switchPage('track')">Lacak & Riwayat</button>
             </div>
             <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()" title="Ubah Tema">🌙</button>
         </div>
@@ -209,9 +214,17 @@
                 Minggu: Tutup</p>
                 <a href="https://maps.google.com/?q=Jl.+SMPN+1+No.24+Majasetra+Majalaya+Bandung" target="_blank" class="btn-maps">🗺️ Buka di Google Maps</a>
             </div>
-            <div style="background: var(--box-bg); border: 2px dashed var(--border-color); border-radius: 12px; overflow: hidden; height: 200px; display: flex; align-items: center; justify-content: center; position: relative;">
-                <!-- Foto Lokasi Toko Sesuai Request -->
-                <img src="848766.jpg" alt="Lokasi Toko Kohan Copier" style="width: 100%; height: 100%; object-fit: cover;">
+            <div style="background: var(--box-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; height: 240px; position: relative;">
+                <!-- Google Maps Embed Live yang responsif terhadap Light & Dark Mode -->
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3959.9577317765116!2d107.753555!3d-7.043111!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e68c17b5e0c51cd%3A0x8e8334863c0a7e6b!2sJl.%20SMPN%201%20No.24%2C%20Majasetra%2C%20Kec.%20Majalaya%2C%20Kabupaten%20Bandung%2C%20Jawa%20Barat%2040392!5e0!3m2!1sid!2sid!4v1710000000000!5m2!1sid!2sid" 
+                    width="100%" 
+                    height="100%" 
+                    style="border:0; width: 100%; height: 100%;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
             </div>
         </div>
     </div>
@@ -235,7 +248,7 @@
                 
                 <div class="form-group">
                     <label for="file" id="fileLabel">Upload File Dokumen (PDF/DOCX) *</label>
-                    <!-- Menerapkan accept filter agar device hanya menampilkan file yang didukung -->
+                    <!-- Filter accept agar device hanya menampilkan file yang didukung dan menyembunyikan file terlarang seperti .exe -->
                     <input type="file" id="file" accept=".pdf,.docx,.doc,.png,.jpg,.jpeg,.cdr" required>
                     <span id="fileHelper" style="font-size: 12px; color: var(--text-muted); display: block; margin-top: 4px;">Format: PDF (Auto-deteksi halaman), DOCX, Gambar, CDR. Maksimal 10MB.</span>
                 </div>
@@ -386,7 +399,7 @@
         </div>
     </div>
 
-    <!-- HALAMAN LACAK (MERANGKAP SEBAGAI RIWAYAT PESANAN BERDASARKAN NO WA) -->
+    <!-- HALAMAN LACAK & RIWAYAT PESANAN BERDASARKAN NO WA -->
     <div id="page-track" class="page-section">
         <div class="form-container">
             <h2 style="margin: 0 0 24px 0; font-size: 24px; text-align: center;">Lacak & Riwayat Pesanan</h2>

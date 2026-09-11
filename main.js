@@ -294,8 +294,14 @@ if (btnProceedInvoice) {
         btnProceedInvoice.innerText = "⏳ Mengunggah...";
 
         try {
-            // 1. Generate Nomor Antrean Unik (Format: KHN-123)
-            const noAntrian = 'KHN-' + Math.floor(100 + Math.random() * 900);
+            // 1. CEK JUMLAH PESANAN SAAT INI UNTUK ANTREAN (KHN-001, KHN-002, dst)
+            const { count, error: countError } = await supabaseClient
+                .from('orders')
+                .select('*', { count: 'exact', head: true });
+
+            let nextNumber = (count || 0) + 1;
+            const formattedNumber = String(nextNumber).padStart(3, '0');
+            const noAntrian = `KHN-${formattedNumber}`;
 
             // 2. Upload file ke Supabase Storage
             const file = tempOrderData.file;

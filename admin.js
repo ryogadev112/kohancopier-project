@@ -102,22 +102,22 @@ async function loadOrders() {
 
         html += `
             <tr>
-                <td style="font-weight: bold; color: #38bdf8; font-size: 15px;">${o.no_antrian || '-'}</td>
-                <td style="font-size: 12px; color: #94a3b8;">${dateStr}</td>
+                <td style="font-weight: bold; color: var(--primary); font-size: 15px;">${o.no_antrian || '-'}</td>
+                <td style="font-size: 12px; color: var(--text-muted);">${dateStr}</td>
                 <td>
                     <b>${o.nama}</b><br>
-                    <span style="font-size: 12px; color: #94a3b8;">${o.phone}</span><br>
+                    <span style="font-size: 12px; color: var(--text-muted);">${o.phone}</span><br>
                     <a href="https://wa.me/${o.phone}" target="_blank" style="display:inline-block; margin-top:4px; padding:2px 8px; background:#22c55e; color:white; border-radius:4px; text-decoration:none; font-size:11px; font-weight:bold;">📱 Chat WA</a>
                 </td>
                 <td>${o.detail_cetak}</td>
-                <td style="font-style: italic; color: #cbd5e1;">${o.catatan || '-'}</td>
-                <td style="color: #38bdf8; font-weight: bold;">${o.waktu_ambil}</td>
-                <td style="color: #4ade80; font-weight: bold;">Rp ${Number(o.total_harga).toLocaleString('id-ID')}</td>
+                <td style="font-style: italic; color: var(--text-muted);">${o.catatan || '-'}</td>
+                <td style="color: var(--primary); font-weight: bold;">${o.waktu_ambil}</td>
+                <td style="color: #16a34a; font-weight: bold;">Rp ${Number(o.total_harga).toLocaleString('id-ID')}</td>
                 <td>
-                    ${o.file_url ? `<a href="${o.file_url}" target="_blank" style="padding:6px 12px; background:#16a34a; color:white; border-radius:6px; text-decoration:none; font-weight:bold; font-size:12px;" download>📥 Download File</a>` : '<span style="color:#94a3b8;">Tanpa File</span>'}
+                    ${o.file_url ? `<a href="${o.file_url}" target="_blank" style="padding:6px 12px; background:#16a34a; color:white; border-radius:6px; text-decoration:none; font-weight:bold; font-size:12px;" download>📥 Download File</a>` : '<span style="color:var(--text-muted);">Tanpa File</span>'}
                 </td>
                 <td>
-                    <select onchange="updateStatus(${o.id}, this.value)" style="padding:6px; border-radius:6px; background:#0f172a; color:white; border:1px solid #475569; font-weight:bold; cursor:pointer;">
+                    <select onchange="updateStatus(${o.id}, this.value)" style="padding:6px; border-radius:6px; background:var(--input-bg); color:var(--text-main); border:1px solid var(--border-color); font-weight:bold; cursor:pointer;">
                         <option value="Menunggu Pembayaran (UNPAID)" ${o.status.includes('UNPAID') ? 'selected' : ''}>⏳ UNPAID</option>
                         <option value="🖨️ DIPROSES" ${o.status.includes('DIPROSES') ? 'selected' : ''}>🖨️ DIPROSES</option>
                         <option value="✅ SIAP DIAMBIL" ${o.status.includes('SIAP') ? 'selected' : ''}>✅ SIAP DIAMBIL</option>
@@ -126,7 +126,7 @@ async function loadOrders() {
                 </td>
                 <td>
                     <button onclick="deleteOrder(${o.id}, '${o.status.replace(/'/g, "\\'")}')" 
-                            style="padding:6px 12px; border-radius:6px; border:none; font-weight:bold; font-size:12px; cursor:${isSafeToDelete ? 'pointer' : 'not-allowed'}; background:${isSafeToDelete ? '#dc2626' : '#475569'}; color:${isSafeToDelete ? 'white' : '#94a3b8'};"
+                            style="padding:6px 12px; border-radius:6px; border:none; font-weight:bold; font-size:12px; cursor:${isSafeToDelete ? 'pointer' : 'not-allowed'}; background:${isSafeToDelete ? '#dc2626' : '#94a3b8'}; color:white;"
                             title="${isSafeToDelete ? 'Hapus Pesanan' : 'Ubah status ke SIAP DIAMBIL / SELESAI untuk menghapus'}">
                         🗑️ Hapus
                     </button>
@@ -148,7 +148,7 @@ async function updateStatus(id, newStatus) {
     if (error) {
         alert('❌ Gagal mengubah status pesanan.');
     } else {
-        loadOrders(); // Refresh otomatis agar tombol Hapus ter-update statusnya
+        loadOrders();
     }
 }
 
@@ -171,7 +171,7 @@ async function deleteOrder(id, status) {
             alert('❌ Gagal menghapus pesanan: ' + error.message);
         } else {
             alert('✅ Pesanan berhasil dihapus.');
-            loadOrders(); // Refresh tabel
+            loadOrders();
         }
     }
 }

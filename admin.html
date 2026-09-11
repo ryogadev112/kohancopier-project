@@ -7,8 +7,36 @@
     <!-- Supabase JS Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; min-height: 100vh; }
+        :root {
+            --bg-body: #f8fafc;
+            --bg-surface: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --input-bg: #f8fafc;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --table-header: #f1f5f9;
+            --table-hover: #f1f5f9;
+            --card-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #0f172a;
+            --bg-surface: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --input-bg: #0f172a;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --table-header: #0f172a;
+            --table-hover: #26334d;
+            --card-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+        body { background: var(--bg-body); color: var(--text-main); margin: 0; padding: 20px; min-height: 100vh; }
         
         /* LAYAR LOGIN */
         .login-wrapper {
@@ -18,39 +46,43 @@
             min-height: 80vh;
         }
         .login-card {
-            background: #1e293b;
+            background: var(--bg-surface);
             padding: 32px;
             border-radius: 16px;
-            border: 1px solid #334155;
+            border: 1px solid var(--border-color);
             width: 100%;
             max-width: 400px;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+            box-shadow: var(--card-shadow);
             text-align: center;
+            position: relative;
         }
-        .login-card h2 { margin-top: 0; color: #3b82f6; font-size: 22px; }
+        .login-card h2 { margin-top: 0; color: var(--primary); font-size: 22px; }
         .form-group { margin-bottom: 16px; text-align: left; }
-        .form-group label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px; }
-        .form-group input { width: 100%; padding: 12px; border: 1px solid #334155; border-radius: 8px; background: #0f172a; color: white; font-size: 14px; }
-        .form-group input:focus { outline: none; border-color: #3b82f6; }
-        .btn-login { width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; }
-        .btn-login:hover { background: #1d4ed8; }
+        .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--input-bg); color: var(--text-main); font-size: 14px; }
+        .form-group input:focus { outline: none; border-color: var(--primary); }
+        .btn-login { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; }
+        .btn-login:hover { background: var(--primary-hover); }
         .error-msg { color: #ef4444; font-size: 13px; margin-top: 12px; display: none; }
 
         /* DASHBOARD UTAMA (Hidden default) */
-        .dashboard-wrapper { display: none; max-width: 1200px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #334155; }
-        h1 { margin: 0; font-size: 22px; color: #3b82f6; }
+        .dashboard-wrapper { display: none; max-width: 1300px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }
+        h1 { margin: 0; font-size: 22px; color: var(--primary); }
         .header-actions { display: flex; gap: 10px; align-items: center; }
-        .btn-action { background: #334155; color: white; border: 1px solid #475569; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
-        .btn-action:hover { background: #475569; }
-        .btn-logout { background: #dc2626; border-color: #ef4444; }
+        .btn-action { background: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
+        .btn-action:hover { background: var(--border-color); }
+        .btn-logout { background: #dc2626; color: white; border-color: #ef4444; }
         .btn-logout:hover { background: #b91c1c; }
 
+        .btn-theme { background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+        .btn-theme:hover { background: var(--border-color); }
+
         .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; background: #1e293b; border-radius: 12px; overflow: hidden; border: 1px solid #334155; }
-        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #334155; font-size: 13px; }
-        th { background: #0f172a; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 12px; }
-        tr:hover { background: #26334d; }
+        table { width: 100%; border-collapse: collapse; background: var(--bg-surface); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); }
+        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+        th { background: var(--table-header); color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 12px; }
+        tr:hover { background: var(--table-hover); }
     </style>
 </head>
 <body>
@@ -58,8 +90,11 @@
     <!-- SECTION 1: LAYAR LOGIN ADMIN -->
     <div id="loginSection" class="login-wrapper">
         <div class="login-card">
+            <div style="position: absolute; top: 16px; right: 16px;">
+                <button id="themeToggleBtnLogin" class="btn-theme" onclick="toggleTheme()" title="Ubah Tema">🌙</button>
+            </div>
             <h2>🔐 Login Admin Toko</h2>
-            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 24px;">Masukkan kredensial resmi KohanCopier.</p>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 24px;">Masukkan kredensial resmi KohanCopier.</p>
             <form id="loginForm">
                 <div class="form-group">
                     <label for="adminEmail">Email Admin</label>
@@ -80,9 +115,10 @@
         <div class="header">
             <div>
                 <h1>🖨️ Dashboard Admin - KohanCopier</h1>
-                <span id="adminUserLabel" style="font-size: 12px; color: #94a3b8;">Login sebagai: -</span>
+                <span id="adminUserLabel" style="font-size: 12px; color: var(--text-muted);">Login sebagai: -</span>
             </div>
             <div class="header-actions">
+                <button id="themeToggleBtnDash" class="btn-theme" onclick="toggleTheme()" title="Ubah Tema">🌙</button>
                 <button class="btn-action" onclick="loadOrders()">🔄 Refresh Data</button>
                 <button class="btn-action btn-logout" onclick="logoutAdmin()">🚪 Logout</button>
             </div>
@@ -106,7 +142,7 @@
                 </thead>
                 <tbody id="adminTableBody">
                     <tr>
-                        <td colspan="8" style="text-align: center; padding: 20px;">⏳ Memuat data pesanan...</td>
+                        <td colspan="10" style="text-align: center; padding: 20px;">⏳ Memuat data pesanan...</td>
                     </tr>
                 </tbody>
             </table>
@@ -114,5 +150,42 @@
     </div>
 
     <script src="admin.js"></script>
+    <script>
+        // FUNGSI GANTI TEMA LIGHT / DARK
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const btnLogin = document.getElementById('themeToggleBtnLogin');
+            const btnDash = document.getElementById('themeToggleBtnDash');
+            
+            if (currentTheme === 'dark') {
+                html.removeAttribute('data-theme');
+                localStorage.setItem('kohancopier_admin_theme', 'light');
+                if(btnLogin) btnLogin.innerText = '🌙';
+                if(btnDash) btnDash.innerText = '🌙';
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('kohancopier_admin_theme', 'dark');
+                if(btnLogin) btnLogin.innerText = '☀️';
+                if(btnDash) btnDash.innerText = '☀️';
+            }
+        }
+
+        // LOAD TEMA TERSIMPAN
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('kohancopier_admin_theme');
+            const btnLogin = document.getElementById('themeToggleBtnLogin');
+            const btnDash = document.getElementById('themeToggleBtnDash');
+            
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                if(btnLogin) btnLogin.innerText = '☀️';
+                if(btnDash) btnDash.innerText = '☀️';
+            } else {
+                if(btnLogin) btnLogin.innerText = '🌙';
+                if(btnDash) btnDash.innerText = '🌙';
+            }
+        });
+    </script>
 </body>
 </html>

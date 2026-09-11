@@ -1,54 +1,5 @@
 const ADMIN_WA = "6285316121981";
 
-// --- RENDER DAFTAR RIWAYAT PESANAN SAYA ---
-function renderOrderHistory() {
-    const container = document.getElementById('historyListContainer');
-    if (!container) return;
-
-    let riwayat = JSON.parse(localStorage.getItem('kohancopier_orders')) || [];
-
-    if (riwayat.length === 0) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 30px; color: var(--text-muted);">
-                <p style="font-size: 15px; margin: 0 0 8px 0;">ℹ️ Belum ada riwayat pesanan.</p>
-                <p style="font-size: 13px; margin: 0;">Yuk buat pesanan pertamamu sekarang!</p>
-                <button onclick="switchPage('order')" class="btn-primary" style="margin-top: 16px; padding: 10px 20px; font-size: 14px;">Mulai Pesan 🚀</button>
-            </div>
-        `;
-        return;
-    }
-
-    let html = '<div style="display: flex; flex-direction: column; gap: 16px;">';
-    riwayat.slice().reverse().forEach(o => {
-        let desc = o.kategori === 'stiker' 
-            ? `Stiker ${o.jenisStiker} - ${o.jumlahLembar} ${o.jenisStiker === 'Roll' ? 'Meter' : 'Lbr A3+'} (${o.finishing})`
-            : `${o.jumlahHalaman} Hal x ${o.jumlahCopy} Rangkap (${o.jenisCetak} - ${o.ukuranKertas || 'A4'})`;
-
-        html += `
-            <div style="background: var(--box-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px;">
-                    <div>
-                        <span style="font-weight: 700; color: var(--primary);">${o.orderId}</span>
-                        <span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">${o.tanggal || ''}</span>
-                    </div>
-                    <span style="font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 20px; background: #fef3c7; color: #d97706;">${o.status || 'UNPAID'}</span>
-                </div>
-                <div style="font-size: 13px; color: var(--text-main); line-height: 1.5;">
-                    <p style="margin: 2px 0;"><b>Pemesan:</b> ${o.nama} (${o.phone})</p>
-                    <p style="margin: 2px 0;"><b>Detail:</b> ${desc}</p>
-                    <p style="margin: 2px 0;"><b>Ambil:</b> ${o.waktuAmbil || 'Secepatnya'}</p>
-                    <p style="margin: 2px 0; font-size: 14px; margin-top: 6px;"><b>Total:</b> <span style="color: var(--primary); font-weight: bold;">Rp ${o.totalHarga.toLocaleString('id-ID')}</span></p>
-                </div>
-                <div style="display: flex; gap: 8px; margin-top: 4px;">
-                    <a href="https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(`Halo Admin KohanCopier, saya ingin konfirmasi pesanan ID: ${o.orderId} atas nama ${o.nama}`)}" target="_blank" style="flex: 1; text-align: center; background: #22c55e; color: white; padding: 8px; border-radius: 8px; font-size: 13px; font-weight: bold; text-decoration: none;">📱 Hubungi WA Admin</a>
-                </div>
-            </div>
-        `;
-    });
-    html += '</div>';
-    container.innerHTML = html;
-}
-
 // --- CEK STATUS TOKO LIVE ---
 function checkLiveStoreStatus() {
     const badge = document.getElementById('liveStoreBadge');
@@ -129,7 +80,6 @@ function generateJadwalAmbil() {
     selectAmbil.innerHTML = optionsHtml;
 }
 
-// --- INIT EVENT LISTENERS ---
 window.addEventListener('DOMContentLoaded', () => {
     checkLiveStoreStatus();
     generateJadwalAmbil();
@@ -144,7 +94,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// --- TOGGLE TAMPILAN FORM (DOKUMEN VS STIKER) & PANDUAN FILE ---
+// --- TOGGLE TAMPILAN FORM (DOKUMEN VS STIKER) ---
 const kategoriLayanan = document.getElementById('kategoriLayanan');
 const sectionDokumen = document.getElementById('sectionDokumen');
 const sectionStiker = document.getElementById('sectionStiker');
@@ -155,6 +105,7 @@ const jenisStikerSelect = document.getElementById('jenisStiker');
 const jumlahLembarStikerInput = document.getElementById('jumlahLembarStiker');
 const ukuranKertasSelect = document.getElementById('ukuranKertas');
 const groupCustomUkuran = document.getElementById('groupCustomUkuran');
+const jumlahHalamanInput = document.getElementById('jumlahHalaman');
 
 function handleKategoriChange() {
     if (!kategoriLayanan) return;
@@ -167,7 +118,7 @@ function handleKategoriChange() {
         sectionDokumen.style.display = 'block';
         sectionStiker.style.display = 'none';
         if (fileLabel) fileLabel.innerText = "Upload File Dokumen (PDF/DOCX) *";
-        if (fileHelper) fileHelper.innerHTML = "Format: PDF atau DOCX. Maksimal 10MB.";
+        if (fileHelper) fileHelper.innerHTML = "Format: PDF (Auto-deteksi halaman), DOCX. Maksimal 10MB.";
     }
     updatePrice();
 }
@@ -176,7 +127,6 @@ if (kategoriLayanan) {
     kategoriLayanan.addEventListener('change', handleKategoriChange);
 }
 
-// --- TOGGLE INPUT CUSTOM UKURAN KERTAS ---
 function handleUkuranKertasChange() {
     if (!ukuranKertasSelect || !groupCustomUkuran) return;
     if (ukuranKertasSelect.value === 'Custom') {
@@ -191,7 +141,6 @@ if (ukuranKertasSelect) {
     ukuranKertasSelect.addEventListener('change', handleUkuranKertasChange);
 }
 
-// --- UPDATE LABEL JUMLAH STIKER (A3+ VS ROLL) ---
 function handleJenisStikerChange() {
     const jenisStiker = jenisStikerSelect ? jenisStikerSelect.value : 'Vinyl';
     const labelJumlah = document.getElementById('labelJumlahStiker');
@@ -210,9 +159,9 @@ if (jenisStikerSelect) {
     jenisStikerSelect.addEventListener('change', handleJenisStikerChange);
 }
 
-// --- VALIDASI FILE INSTAN (LIVE CHECK) ---
+// --- VALIDASI FILE & AUTO-BACA JUMLAH HALAMAN PDF ---
 if (fileInput) {
-    fileInput.addEventListener('change', function() {
+    fileInput.addEventListener('change', async function() {
         const file = this.files[0];
         if (!file) return;
 
@@ -224,21 +173,38 @@ if (fileInput) {
             return;
         }
 
-        const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/png', 'image/jpeg'];
-        const isAllowed = allowedTypes.includes(file.type) || file.name.match(/\.(pdf|docx|png|jpg|jpeg|cdr)$/i);
+        const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword', 'image/png', 'image/jpeg'];
+        const isAllowed = allowedTypes.includes(file.type) || file.name.match(/\.(pdf|docx|doc|png|jpg|jpeg|cdr)$/i);
 
         if (!isAllowed) {
-            fileHelper.innerHTML = `❌ <span style="color: #dc2626;">Format file tidak didukung! Upload file PDF, DOCX, PNG, JPG, atau CDR.</span>`;
+            fileHelper.innerHTML = `❌ <span style="color: #dc2626;">Format file tidak didukung!</span>`;
             this.value = '';
             return;
         }
 
-        fileHelper.innerHTML = `✅ <span style="color: #16a34a; font-weight: bold;">File valid (${file.name} - ${fileSizeMB} MB) siap diproses!</span>`;
+        // Jika file berformat PDF, baca otomatis jumlah halamannya menggunakan PDF.js
+        if (file.type === 'application/pdf' || file.name.match(/\.pdf$/i)) {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                const totalPages = pdf.numPages;
+                
+                if (jumlahHalamanInput) {
+                    jumlahHalamanInput.value = totalPages;
+                    updatePrice();
+                }
+                fileHelper.innerHTML = `✅ <span style="color: #16a34a; font-weight: bold;">PDF valid (${file.name} - ${totalPages} Halaman) siap diproses!</span>`;
+            } catch (err) {
+                console.error("Gagal membaca halaman PDF:", err);
+                fileHelper.innerHTML = `✅ <span style="color: #16a34a; font-weight: bold;">File valid (${file.name} - ${fileSizeMB} MB) siap diproses!</span>`;
+            }
+        } else {
+            fileHelper.innerHTML = `✅ <span style="color: #16a34a; font-weight: bold;">File valid (${file.name} - ${fileSizeMB} MB) siap diproses!</span>`;
+        }
     });
 }
 
 // --- KALKULASI HARGA REAL-TIME ---
-const jumlahHalamanInput = document.getElementById('jumlahHalaman');
 const jumlahCopyInput = document.getElementById('jumlahCopy');
 const radiosCetak = document.querySelectorAll('input[name="jenisCetak"]');
 const pricePreview = document.getElementById('pricePreview');
@@ -280,7 +246,7 @@ radiosCetak.forEach(radio => radio.addEventListener('change', updatePrice));
 if (ukuranKertasSelect) ukuranKertasSelect.addEventListener('change', updatePrice);
 if (jumlahLembarStikerInput) jumlahLembarStikerInput.addEventListener('input', updatePrice);
 
-// --- LOGIKA TIMER INVOICE ---
+// --- TIMER INVOICE ---
 let countdownInterval;
 function startInvoiceTimer(durationInSeconds) {
     clearInterval(countdownInterval);
@@ -300,7 +266,6 @@ function startInvoiceTimer(durationInSeconds) {
                 timerDisplay.style.background = "#fee2e2";
                 timerDisplay.style.color = "#dc2626";
                 timerDisplay.style.border = "1px solid #f87171";
-                timerDisplay.style.animation = "pulse 1s infinite";
             }
         }
 
@@ -309,13 +274,12 @@ function startInvoiceTimer(durationInSeconds) {
             if (timerDisplay) {
                 timerDisplay.innerText = "⏱️ Waktu Habis!";
                 timerDisplay.style.background = "#fee2e2";
-                timerDisplay.style.animation = "none";
             }
         }
     }, 1000);
 }
 
-// --- SUBMIT FORM & VALIDASI ---
+// --- SUBMIT FORM (TANPA ID PESANAN, BERBASIS NOMOR WA) ---
 let tempOrderData = null;
 const orderForm = document.getElementById('orderForm');
 
@@ -339,12 +303,11 @@ if (orderForm) {
 
         setTimeout(() => {
             const nama = document.getElementById('nama').value;
-            const phone = document.getElementById('phone').value;
+            const phone = document.getElementById('phone').value.trim();
             const waktuAmbil = document.getElementById('waktuAmbil').value;
             const kategori = kategoriLayanan.value;
             const catatan = document.getElementById('catatan').value || '-';
             const fileName = file ? file.name : 'Tidak ada file';
-            const orderId = 'KC-' + Math.floor(1000000000 + Math.random() * 9000000000);
 
             let detailText = '';
             let totalHarga = 0;
@@ -361,7 +324,7 @@ if (orderForm) {
 
                 detailText = `Stiker ${jenisStiker} - ${jumlah} ${jenisStiker === 'Roll' ? 'Meter' : 'Lembar A3+'} (${finishing})`;
                 tempOrderData = {
-                    orderId, nama, phone, waktuAmbil, kategori, jenisStiker, jumlahLembar: jumlah, finishing, catatan, fileName, totalHarga, status: 'UNPAID', tanggal: new Date().toLocaleString()
+                    phone, nama, waktuAmbil, kategori, jenisStiker, jumlahLembar: jumlah, finishing, catatan, fileName, totalHarga, status: 'Menunggu Pembayaran (UNPAID)', tanggal: new Date().toLocaleString()
                 };
             } else {
                 const jumlahHalaman = document.getElementById('jumlahHalaman').value;
@@ -379,7 +342,7 @@ if (orderForm) {
 
                 detailText = `${jumlahHalaman} Hal x ${jumlahCopy} Rangkap (${jenisCetak} - ${ukuranKertas})`;
                 tempOrderData = {
-                    orderId, nama, phone, waktuAmbil, kategori, jumlahHalaman, jumlahCopy, jenisCetak, ukuranKertas, catatan, fileName, totalHarga, status: 'UNPAID', tanggal: new Date().toLocaleString()
+                    phone, nama, waktuAmbil, kategori, jumlahHalaman, jumlahCopy, jenisCetak, ukuranKertas, catatan, fileName, totalHarga, status: 'Menunggu Pembayaran (UNPAID)', tanggal: new Date().toLocaleString()
                 };
             }
 
@@ -410,8 +373,8 @@ if (btnProceedInvoice) {
         riwayat.push(tempOrderData);
         localStorage.setItem('kohancopier_orders', JSON.stringify(riwayat));
 
-        document.getElementById('invId').innerText = tempOrderData.orderId;
-        document.getElementById('invNama').innerText = tempOrderData.nama + ' (' + tempOrderData.phone + ')';
+        document.getElementById('invPhone').innerText = tempOrderData.phone;
+        document.getElementById('invNama').innerText = tempOrderData.nama;
         
         let detailInv = tempOrderData.kategori === 'stiker' 
             ? `Stiker ${tempOrderData.jenisStiker} - ${tempOrderData.jumlahLembar} ${tempOrderData.jenisStiker === 'Roll' ? 'Meter' : 'Lembar A3+'} (${tempOrderData.finishing})`
@@ -420,7 +383,7 @@ if (btnProceedInvoice) {
         document.getElementById('invDetail').innerText = `${detailInv}\nFile: ${tempOrderData.fileName}\nAmbil: ${tempOrderData.waktuAmbil}`;
         document.getElementById('invTotal').innerText = 'Rp ' + tempOrderData.totalHarga.toLocaleString('id-ID');
 
-        const pesanWA = `Halo Admin KohanCopier, saya ingin konfirmasi pembayaran QRIS.\n\n*ID Invoice:* ${tempOrderData.orderId}\n*Nama:* ${tempOrderData.nama}\n*Waktu Ambil:* ${tempOrderData.waktuAmbil}\n*Detail:* ${detailInv}\n*Catatan:* ${tempOrderData.catatan}\n*Total:* Rp ${tempOrderData.totalHarga.toLocaleString('id-ID')}\n\nBerikut bukti pembayarannya:`;
+        const pesanWA = `Halo Admin KohanCopier, saya ingin konfirmasi pembayaran QRIS.\n\n*No WA:* ${tempOrderData.phone}\n*Nama:* ${tempOrderData.nama}\n*Waktu Ambil:* ${tempOrderData.waktuAmbil}\n*Detail:* ${detailInv}\n*Catatan:* ${tempOrderData.catatan}\n*Total:* Rp ${tempOrderData.totalHarga.toLocaleString('id-ID')}\n\nBerikut bukti pembayarannya:`;
         document.getElementById('btnInvWA').href = `https://wa.me/${ADMIN_WA}?text=` + encodeURIComponent(pesanWA);
 
         closeConfirmModal();
@@ -444,7 +407,7 @@ if (btnProceedInvoice) {
     };
 }
 
-// --- LACAK PESANAN ---
+// --- LACAK & RIWAYAT PESANAN BERDASARKAN NO WA (DENGAN SENSOR 4 ANGKA TERAKHIR) ---
 function lacakStatusPesanan() {
     const keyword = document.getElementById('trackInput').value.trim();
     const resultDiv = document.getElementById('trackResult');
@@ -452,7 +415,7 @@ function lacakStatusPesanan() {
     resultDiv.style.display = 'block';
 
     if (!keyword) {
-        resultDiv.innerHTML = '<p style="color: #d97706; font-size: 13px; margin:0; background: #fef3c7; padding: 10px; border-radius: 6px;">⚠️ Masukkan ID Pesanan (contoh: KC-123456) atau Nomor WhatsApp yang digunakan saat memesan.</p>';
+        resultDiv.innerHTML = '<p style="color: #d97706; font-size: 13px; margin:0; background: #fef3c7; padding: 10px; border-radius: 6px;">⚠️ Masukkan Nomor WhatsApp Anda.</p>';
         return;
     }
 
@@ -463,22 +426,40 @@ function lacakStatusPesanan() {
         return;
     }
 
-    const found = riwayat.filter(o => o.orderId.toLowerCase().includes(keyword.toLowerCase()) || o.phone.includes(keyword));
+    const found = riwayat.filter(o => o.phone.includes(keyword));
 
     if (found.length > 0) {
         let html = '<div style="background:white; padding:12px; border-radius:8px; border:1px solid #cbd5e1; font-size:13px;">';
         found.forEach(o => {
-            html += `<p style="margin:4px 0;"><b>ID:</b> ${o.orderId} | <b>Nama:</b> ${o.nama} | <b>Status:</b> <span style="color:#d97706; font-weight:bold;">${o.status}</span></p>`;
+            // Sensor 4 angka terakhir nomor WhatsApp menjadi xxxx
+            let maskedPhone = o.phone;
+            if (maskedPhone.length > 4) {
+                maskedPhone = maskedPhone.slice(0, -4) + 'XXXX';
+            } else {
+                maskedPhone = 'XXXX';
+            }
+
             let desc = o.kategori === 'stiker' 
                 ? `Stiker ${o.jenisStiker} - ${o.jumlahLembar} ${o.jenisStiker === 'Roll' ? 'Meter' : 'Lembar A3+'} (${o.finishing})`
                 : `${o.jumlahHalaman} Hal ${o.jumlahCopy ? 'x ' + o.jumlahCopy + ' Rangkap' : ''} (${o.jenisCetak} - ${o.ukuranKertas || 'A4'})`;
             
             let jadwalAmbil = o.waktuAmbil || 'Secepatnya';
-            html += `<p style="margin:4px 0; color:#64748b;">Detail: ${desc}<br>Ambil: <b>${jadwalAmbil}</b><br>Total: Rp ${o.totalHarga.toLocaleString('id-ID')}</p><hr style="border:0; border-top:1px solid #eee; margin:8px 0;">`;
+            let statusPesanan = o.status || 'Menunggu Pembayaran (UNPAID)';
+
+            html += `
+                <div style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #eee;">
+                    <p style="margin: 2px 0;"><b>Pemesan:</b> ${o.nama} (${maskedPhone})</p>
+                    <p style="margin: 2px 0;"><b>Status:</b> <span style="color:#d97706; font-weight:bold; background:#fef3c7; padding: 2px 8px; border-radius: 4px; display:inline-block;">${statusPesanan}</span></p>
+                    <p style="margin: 2px 0; color:#64748b;"><b>Detail:</b> ${desc}</p>
+                    <p style="margin: 2px 0; color:#64748b;"><b>Ambil:</b> ${jadwalAmbil}</p>
+                    <p style="margin: 2px 0; font-size: 14px;"><b>Total:</b> <span style="color: var(--primary); font-weight: bold;">Rp ${o.totalHarga.toLocaleString('id-ID')}</span></p>
+                    <a href="https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(`Halo Admin KohanCopier, saya ingin konfirmasi pesanan atas nama ${o.nama} (${o.phone})`)}" target="_blank" style="display:inline-block; margin-top:6px; background: #22c55e; color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; text-decoration: none;">📱 Hubungi WA Admin</a>
+                </div>
+            `;
         });
         html += '</div>';
         resultDiv.innerHTML = html;
     } else {
-        resultDiv.innerHTML = '<p style="color: #dc2626; font-size: 13px; margin:0; background: #fee2e2; padding: 10px; border-radius: 6px;">❌ Pesanan tidak ditemukan. Periksa kembali ID Invoice atau Nomor WhatsApp Anda.</p>';
+        resultDiv.innerHTML = '<p style="color: #dc2626; font-size: 13px; margin:0; background: #fee2e2; padding: 10px; border-radius: 6px;">❌ Tidak ada riwayat pesanan dengan Nomor WhatsApp tersebut.</p>';
     }
 }

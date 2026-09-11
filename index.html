@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KohanCopier - Cetak Dokumen & Stiker Online</title>
+    <!-- Library PDF.js untuk membaca total halaman PDF secara otomatis -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+    </script>
     <style>
         :root {
             --bg-body: #f8fafc;
@@ -112,12 +117,6 @@
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(1.02); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
         .footer { background: var(--bg-surface); border-top: 1px solid var(--border-color); color: var(--text-muted); text-align: center; padding: 24px 20px; font-size: 14px; margin-top: auto; }
 
         @media (max-width: 768px) {
@@ -161,7 +160,6 @@
                 <button id="nav-home" class="active" onclick="switchPage('home')">Beranda</button>
                 <button id="nav-order" onclick="switchPage('order')">Pesan</button>
                 <button id="nav-invoice" onclick="switchPage('invoice')" style="display:none;">Invoice</button>
-                <button id="nav-history" onclick="switchPage('history')">Pesanan Saya</button>
                 <button id="nav-track" onclick="switchPage('track')">Lacak</button>
             </div>
             <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()" title="Ubah Tema">🌙</button>
@@ -196,7 +194,7 @@
         </div>
 
         <!-- INFORMASI TOKO FISIK -->
-        <h2 class="section-title">📍 Kunjungi Toko Fisik Kami</h2>
+        <h2 class="section-title">📍 Kunjungi langsung toko kami sekarang!!!</h2>
         <div class="store-info-card">
             <div class="store-info-details">
                 <h3>🏠 Kohan Copier</h3>
@@ -211,8 +209,9 @@
                 Minggu: Tutup</p>
                 <a href="https://maps.google.com/?q=Jl.+SMPN+1+No.24+Majasetra+Majalaya+Bandung" target="_blank" class="btn-maps">🗺️ Buka di Google Maps</a>
             </div>
-            <div style="background: var(--box-bg); border: 2px dashed var(--border-color); border-radius: 12px; height: 180px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); text-align: center; padding: 12px;">
-                <span>📍 Lokasi Majalaya, Bandung<br><small>Dekat SMPN 1 Majalaya</small></span>
+            <div style="background: var(--box-bg); border: 2px dashed var(--border-color); border-radius: 12px; overflow: hidden; height: 200px; display: flex; align-items: center; justify-content: center; position: relative;">
+                <!-- Foto Lokasi Toko Sesuai Request -->
+                <img src="848766.jpg" alt="Lokasi Toko Kohan Copier" style="width: 100%; height: 100%; object-fit: cover;">
             </div>
         </div>
     </div>
@@ -236,8 +235,9 @@
                 
                 <div class="form-group">
                     <label for="file" id="fileLabel">Upload File Dokumen (PDF/DOCX) *</label>
-                    <input type="file" id="file" required>
-                    <span id="fileHelper" style="font-size: 12px; color: var(--text-muted); display: block; margin-top: 4px;">Format: PDF atau DOCX. Maksimal 10MB.</span>
+                    <!-- Menerapkan accept filter agar device hanya menampilkan file yang didukung -->
+                    <input type="file" id="file" accept=".pdf,.docx,.doc,.png,.jpg,.jpeg,.cdr" required>
+                    <span id="fileHelper" style="font-size: 12px; color: var(--text-muted); display: block; margin-top: 4px;">Format: PDF (Auto-deteksi halaman), DOCX, Gambar, CDR. Maksimal 10MB.</span>
                 </div>
 
                 <!-- FORM KHUSUS DOKUMEN -->
@@ -283,7 +283,6 @@
                         </select>
                     </div>
 
-                    <!-- KOTAK INPUT CUSTOM UKURAN -->
                     <div class="form-group" id="groupCustomUkuran" style="display: none;">
                         <label for="detailCustomUkuran">Tuliskan Ukuran Kertas Custom *</label>
                         <input type="text" id="detailCustomUkuran" placeholder="Contoh: 4x4 cm, 3x4, atau 10x15 cm">
@@ -369,7 +368,7 @@
                 </div>
 
                 <div style="text-align: left; font-size: 13px; line-height: 1.6; color: var(--text-main); background: var(--box-bg); padding: 14px 18px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 20px;">
-                    <p style="margin: 3px 0;"><b>ID Invoice:</b> <span id="invId">-</span></p>
+                    <p style="margin: 3px 0;"><b>No WhatsApp:</b> <span id="invPhone">-</span></p>
                     <p style="margin: 3px 0;"><b>Nama Pemesan:</b> <span id="invNama">-</span></p>
                     <p style="margin: 3px 0;"><b>Detail Cetak:</b> <span id="invDetail">-</span></p>
                     <p style="margin: 3px 0; font-size: 16px;"><b>Total Bayar:</b> <span id="invTotal" style="color:var(--primary); font-weight:bold;">-</span></p>
@@ -387,28 +386,17 @@
         </div>
     </div>
 
-    <!-- HALAMAN RIWAYAT PESANAN SAYA -->
-    <div id="page-history" class="page-section">
-        <div class="form-container" style="max-width: 700px;">
-            <h2 style="margin: 0 0 8px 0; font-size: 24px; text-align: center;">📦 Riwayat Pesanan Saya</h2>
-            <p style="text-align: center; color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Daftar pesanan yang pernah kamu buat di perangkat ini.</p>
-            <div id="historyListContainer">
-                <!-- Diisi otomatis oleh JavaScript -->
-            </div>
-        </div>
-    </div>
-
-    <!-- HALAMAN LACAK -->
+    <!-- HALAMAN LACAK (MERANGKAP SEBAGAI RIWAYAT PESANAN BERDASARKAN NO WA) -->
     <div id="page-track" class="page-section">
         <div class="form-container">
-            <h2 style="margin: 0 0 24px 0; font-size: 24px; text-align: center;">Lacak Pesanan Anda</h2>
+            <h2 style="margin: 0 0 24px 0; font-size: 24px; text-align: center;">Lacak & Riwayat Pesanan</h2>
             <div class="box-section" style="margin: 0;">
-                <h3>📍 Masukkan Detail Pesanan</h3>
-                <p>Masukkan ID Pesanan (KC-xxx) atau Nomor WhatsApp Anda.</p>
+                <h3>📍 Masukkan Nomor WhatsApp</h3>
+                <p>Masukkan Nomor WhatsApp Anda untuk melihat riwayat dan status pesanan.</p>
                 
                 <div class="input-group">
-                    <input type="text" id="trackInput" placeholder="Contoh: KC-178753... atau No WA">
-                    <button type="button" onclick="lacakStatusPesanan()" style="background: var(--primary);">📍 Lacak</button>
+                    <input type="text" id="trackInput" placeholder="Contoh: 088123456789">
+                    <button type="button" onclick="lacakStatusPesanan()" style="background: var(--primary);">📍 Cari</button>
                 </div>
                 <div id="trackResult" style="margin-top: 16px; display: none;"></div>
             </div>
@@ -471,7 +459,7 @@
     });
 
     function switchPage(pageId) {
-        ['home', 'order', 'invoice', 'history', 'track'].forEach(id => {
+        ['home', 'order', 'invoice', 'track'].forEach(id => {
             const nav = document.getElementById('nav-' + id);
             const page = document.getElementById('page-' + id);
             if (nav) nav.classList.remove('active');
@@ -482,10 +470,6 @@
         const targetPage = document.getElementById('page-' + pageId);
         if (targetNav) targetNav.classList.add('active');
         if (targetPage) targetPage.classList.add('active');
-
-        if (pageId === 'history' && typeof renderOrderHistory === 'function') {
-            renderOrderHistory();
-        }
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }

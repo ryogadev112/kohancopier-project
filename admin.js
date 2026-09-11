@@ -4,9 +4,76 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Fungsi memuat seluruh pesanan dari Supabase Database
+const loginSection = document.getElementById('loginSection');
+const dashboardSection = document.getElementById('dashboardSection');
+const loginForm = document.getElementById('loginForm');
+const loginError = document.getElementById('loginError');
+const btnLoginSubmit = document.getElementById('btnLoginSubmit');
+const adminUserLabel = document.getElementById('adminUserLabel');
+
+// --- CEK SESI LOGIN SAAT HALAMAN DIBUKA ---
+window.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    
+    if (session) {
+        showDashboard(session.user);
+    } else {
+        showLoginForm();
+    }
+});
+
+function showLoginForm() {
+    if (loginSection) loginSection.style.display = 'flex';
+    if (dashboardSection) dashboardSection.style.display = 'none';
+}
+
+function showDashboard(user) {
+    if (loginSection) loginSection.style.display = 'none';
+    if (dashboardSection) dashboardSection.style.display = 'block';
+    if (adminUserLabel) adminUserLabel.innerText = `Login sebagai: ${user.email}`;
+    loadOrders();
+}
+
+// --- FUNGSI LOGIN SUPABASE AUTH ---
+if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        loginError.style.display = 'none';
+        btnLoginSubmit.disabled = true;
+        btnLoginSubmit.innerText = "⏳ Memverifikasi...";
+
+        const email = document.getElementById('adminEmail').value.trim();
+        const password = document.getElementById('adminPassword').value;
+
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
+
+        if (error) {
+            loginError.innerText = "❌ Email atau Password salah!";
+            loginError.style.display = 'block';
+            btnLoginSubmit.disabled = false;
+            btnLoginSubmit.innerText = "Masuk ke Dasbor 🚀";
+        } else {
+            btnLoginSubmit.disabled = false;
+            btnLoginSubmit.innerText = "Masuk ke Dasbor 🚀";
+            showDashboard(data.user);
+        }
+    });
+}
+
+// --- FUNGSI LOGOUT ---
+async function logoutAdmin() {
+    if (confirm("Apakah Anda yakin ingin keluar dari Dashboard Admin?")) {
+        await supabaseClient.auth.signOut();
+        showLoginForm();
+    }
+}
+
+// --- MEMUAT DATA PESANAN DARI SUPABASE ---
 async function loadOrders() {
-    const tbody = document.getElementById('adminTableBody') || document.querySelector('tbody');
+    const tbody = document.getElementById('adminTableBody');
     if (!tbody) return;
 
     tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">⏳ Memuat data pesanan...</td></tr>';
@@ -60,7 +127,7 @@ async function loadOrders() {
     tbody.innerHTML = html;
 }
 
-// Fungsi update status pesanan
+// --- FUNGSI UPDATE STATUS PESANAN ---
 async function updateStatus(id, newStatus) {
     const { error } = await supabaseClient
         .from('orders')
@@ -73,8 +140,3 @@ async function updateStatus(id, newStatus) {
         alert('✅ Status pesanan berhasil diperbarui!');
     }
 }
-
-// Panggil data saat halaman selesai di-load
-window.addEventListener('DOMContentLoaded', () => {
-    loadOrders();
-});

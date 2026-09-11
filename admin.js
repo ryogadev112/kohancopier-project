@@ -76,7 +76,7 @@ async function loadOrders() {
     const tbody = document.getElementById('adminTableBody');
     if (!tbody) return;
 
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">⏳ Memuat data pesanan...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 20px;">⏳ Memuat data pesanan...</td></tr>';
 
     const { data: orders, error } = await supabaseClient
         .from('orders')
@@ -84,12 +84,12 @@ async function loadOrders() {
         .order('id', { ascending: false });
 
     if (error) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color:#ef4444; padding: 20px;">❌ Gagal memuat data dari database.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color:#ef4444; padding: 20px;">❌ Gagal memuat data dari database.</td></tr>';
         return;
     }
 
     if (!orders || orders.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">Belum ada pesanan masuk.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 20px;">Belum ada pesanan masuk.</td></tr>';
         return;
     }
 
@@ -99,6 +99,7 @@ async function loadOrders() {
         
         html += `
             <tr>
+                <td style="font-weight: bold; color: #38bdf8; font-size: 15px;">${o.no_antrian || '-'}</td>
                 <td style="font-size: 12px; color: #94a3b8;">${dateStr}</td>
                 <td>
                     <b>${o.nama}</b><br>

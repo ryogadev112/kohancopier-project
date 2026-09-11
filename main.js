@@ -294,7 +294,10 @@ if (btnProceedInvoice) {
         btnProceedInvoice.innerText = "⏳ Mengunggah...";
 
         try {
-            // 1. Upload file ke Supabase Storage
+            // 1. Generate Nomor Antrean Unik (Format: KHN-123)
+            const noAntrian = 'KHN-' + Math.floor(100 + Math.random() * 900);
+
+            // 2. Upload file ke Supabase Storage
             const file = tempOrderData.file;
             const fileExt = file.name.split('.').pop();
             const fileNameCloud = `${Date.now()}_${tempOrderData.phone}.${fileExt}`;
@@ -306,7 +309,7 @@ if (btnProceedInvoice) {
 
             if (uploadError) throw uploadError;
 
-            // 2. Dapatkan Public URL File
+            // 3. Dapatkan Public URL File
             const { data: urlData } = supabaseClient
                 .storage
                 .from('kohan-files')
@@ -314,11 +317,12 @@ if (btnProceedInvoice) {
 
             const filePublicUrl = urlData.publicUrl;
 
-            // 3. Simpan data ke Database Supabase
+            // 4. Simpan data ke Database Supabase
             const { error: dbError } = await supabaseClient
                 .from('orders')
                 .insert([
                     {
+                        no_antrian: noAntrian,
                         nama: tempOrderData.nama,
                         phone: tempOrderData.phone,
                         kategori: tempOrderData.kategori,
@@ -337,10 +341,10 @@ if (btnProceedInvoice) {
             // Render ke invoice
             document.getElementById('invPhone').innerText = tempOrderData.phone;
             document.getElementById('invNama').innerText = tempOrderData.nama;
-            document.getElementById('invDetail').innerText = `${tempOrderData.detailText}\nFile: ${file.name}\nAmbil: ${tempOrderData.waktuAmbil}`;
+            document.getElementById('invDetail').innerText = `[NO ANTREAN: ${noAntrian}]\n${tempOrderData.detailText}\nFile: ${file.name}\nAmbil: ${tempOrderData.waktuAmbil}`;
             document.getElementById('invTotal').innerText = 'Rp ' + tempOrderData.totalHarga.toLocaleString('id-ID');
 
-            const pesanWA = `Halo Admin KohanCopier, saya ingin konfirmasi pembayaran QRIS.\n\n*No WA:* ${tempOrderData.phone}\n*Nama:* ${tempOrderData.nama}\n*Waktu Ambil:* ${tempOrderData.waktuAmbil}\n*Detail:* ${tempOrderData.detailText}\n*Catatan:* ${tempOrderData.catatan}\n*Total:* Rp ${tempOrderData.totalHarga.toLocaleString('id-ID')}\n\nBerikut bukti pembayarannya:`;
+            const pesanWA = `Halo Admin KohanCopier, saya ingin konfirmasi pembayaran QRIS.\n\n*No Antrean:* ${noAntrian}\n*No WA:* ${tempOrderData.phone}\n*Nama:* ${tempOrderData.nama}\n*Waktu Ambil:* ${tempOrderData.waktuAmbil}\n*Detail:* ${tempOrderData.detailText}\n*Catatan:* ${tempOrderData.catatan}\n*Total:* Rp ${tempOrderData.totalHarga.toLocaleString('id-ID')}\n\nBerikut bukti pembayarannya:`;
             document.getElementById('btnInvWA').href = `https://wa.me/${ADMIN_WA}?text=` + encodeURIComponent(pesanWA);
 
             closeConfirmModal();
@@ -398,6 +402,7 @@ async function lacakStatusPesanan() {
 
             html += `
                 <div style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #eee;">
+                    <p style="margin: 2px 0;"><b>No Antrean:</b> <span style="color:#2563eb; font-weight:bold;">${o.no_antrian || '-'}</span></p>
                     <p style="margin: 2px 0;"><b>Pemesan:</b> ${o.nama} (${maskedPhone})</p>
                     <p style="margin: 2px 0;"><b>Status:</b> <span style="color:${badgeColor}; font-weight:bold; background:${badgeBg}; padding: 2px 8px; border-radius: 4px; display:inline-block;">${o.status}</span></p>
                     <p style="margin: 2px 0; color:#64748b;"><b>Detail:</b> ${o.detail_cetak}</p>

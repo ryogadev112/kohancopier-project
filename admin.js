@@ -76,7 +76,7 @@ async function loadOrders() {
     const tbody = document.getElementById('adminTableBody');
     if (!tbody) return;
 
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 20px;">⏳ Memuat data pesanan...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 20px;">⏳ Memuat data pesanan...</td></tr>';
 
     const { data: orders, error } = await supabaseClient
         .from('orders')
@@ -84,12 +84,12 @@ async function loadOrders() {
         .order('id', { ascending: false });
 
     if (error) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color:#ef4444; padding: 20px;">❌ Gagal memuat data dari database.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color:#ef4444; padding: 20px;">❌ Gagal memuat data dari database.</td></tr>';
         return;
     }
 
     if (!orders || orders.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 20px;">Belum ada pesanan masuk.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 20px;">Belum ada pesanan masuk.</td></tr>';
         return;
     }
 
@@ -97,6 +97,9 @@ async function loadOrders() {
     orders.forEach(o => {
         const dateStr = new Date(o.created_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' });
         
+        // Proteksi: Cek apakah status aman untuk dihapus (SELESAI atau SIAP DIAMBIL)
+        const isSafeToDelete = o.status.includes('SELESAI') || o.status.includes('SIAP');
+
         html += `
             <tr>
                 <td style="font-weight: bold; color: #38bdf8; font-size: 15px;">${o.no_antrian || '-'}</td>
@@ -121,6 +124,13 @@ async function loadOrders() {
                         <option value="🎉 SELESAI" ${o.status.includes('SELESAI') ? 'selected' : ''}>🎉 SELESAI</option>
                     </select>
                 </td>
+                <td>
+                    <button onclick="deleteOrder(${o.id}, '${o.status.replace(/'/g, "\\'")}')" 
+                            style="padding:6px 12px; border-radius:6px; border:none; font-weight:bold; font-size:12px; cursor:${isSafeToDelete ? 'pointer' : 'not-allowed'}; background:${isSafeToDelete ? '#dc2626' : '#475569'}; color:${isSafeToDelete ? 'white' : '#94a3b8'};"
+                            title="${isSafeToDelete ? 'Hapus Pesanan' : 'Ubah status ke SIAP DIAMBIL / SELESAI untuk menghapus'}">
+                        🗑️ Hapus
+                    </button>
+                </td>
             </tr>
         `;
     });
@@ -138,6 +148,30 @@ async function updateStatus(id, newStatus) {
     if (error) {
         alert('❌ Gagal mengubah status pesanan.');
     } else {
-        alert('✅ Status pesanan berhasil diperbarui!');
+        loadOrders(); // Refresh otomatis agar tombol Hapus ter-update statusnya
+    }
+}
+
+// --- FUNGSI HAPUS PESANAN (DENGAN PROTEKSI STATUS) ---
+async function deleteOrder(id, status) {
+    const isSafe = status.includes('SELESAI') || status.includes('SIAP');
+
+    if (!isSafe) {
+        alert('⚠️ Pesanan tidak dapat dihapus!\n\nUntuk alasan keamanan, ubah status pesanan menjadi "✅ SIAP DIAMBIL" atau "🎉 SELESAI" terlebih dahulu sebelum menghapus.');
+        return;
+    }
+
+    if (confirm('⚠️ Apakah Anda yakin ingin menghapus pesanan ini secara permanen? Data yang dihapus tidak bisa dikembalikan.')) {
+        const { error } = await supabaseClient
+            .from('orders')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            alert('❌ Gagal menghapus pesanan: ' + error.message);
+        } else {
+            alert('✅ Pesanan berhasil dihapus.');
+            loadOrders(); // Refresh tabel
+        }
     }
 }

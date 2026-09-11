@@ -1,133 +1,80 @@
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6hlU7FtCH4-NDlKUkew1NjeBoaui3aR0UhYHDnzfUyTKYyhn45q4xPIpC4AuXm-lxIg/exec";
+// --- KONFIGURASI SUPABASE ---
+const SUPABASE_URL = "https://gputfcshhgppygipxzfh.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwdXRmY3NoaGdwcHlnaXB4emZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxMjQxNDMsImV4cCI6MjEwNDcwMDE0M30.vhd6pH6jkNsbnnZsjgonc8xGc7yk-rQIZSgegiXbmBs";
 
-document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.getElementById('loginForm');
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    if (loginForm) {
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const usernameInput = document.getElementById('username')?.value.trim();
-            const passwordInput = document.getElementById('password')?.value.trim();
-
-            if (usernameInput === 'admin' && passwordInput === 'admin123') {
-                alert('Login Berhasil!');
-                const loginSec = document.getElementById('loginSection');
-                const dashSec = document.getElementById('dashboardSection');
-                
-                if (loginSec) loginSec.style.display = 'none';
-                if (dashSec) dashSec.style.display = 'block';
-                
-                loadOrders();
-            } else {
-                alert('Username atau Password salah!');
-            }
-        });
-    }
-});
-
+// Fungsi memuat seluruh pesanan dari Supabase Database
 async function loadOrders() {
-    const tableBody = document.getElementById('ordersTableBody');
-    if (tableBody) {
-        tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Mengambil data pesanan...</td></tr>';
+    const tbody = document.getElementById('adminTableBody') || document.querySelector('tbody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">⏳ Memuat data pesanan...</td></tr>';
+
+    const { data: orders, error } = await supabaseClient
+        .from('orders')
+        .select('*')
+        .order('id', { ascending: false });
+
+    if (error) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color:#ef4444; padding: 20px;">❌ Gagal memuat data dari database.</td></tr>';
+        return;
     }
 
-    try {
-        const res = await fetch(`${GOOGLE_SCRIPT_URL}?t=${Date.now()}`);
-        const data = await res.json();
+    if (!orders || orders.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">Belum ada pesanan masuk.</td></tr>';
+        return;
+    }
 
-        if (!tableBody) return;
-        tableBody.innerHTML = '';
+    let html = '';
+    orders.forEach(o => {
+        const dateStr = new Date(o.created_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' });
+        
+        html += `
+            <tr>
+                <td style="font-size: 12px; color: #94a3b8;">${dateStr}</td>
+                <td>
+                    <b>${o.nama}</b><br>
+                    <span style="font-size: 12px; color: #94a3b8;">${o.phone}</span><br>
+                    <a href="https://wa.me/${o.phone}" target="_blank" style="display:inline-block; margin-top:4px; padding:2px 8px; background:#22c55e; color:white; border-radius:4px; text-decoration:none; font-size:11px; font-weight:bold;">📱 Chat WA</a>
+                </td>
+                <td>${o.detail_cetak}</td>
+                <td style="font-style: italic; color: #cbd5e1;">${o.catatan || '-'}</td>
+                <td style="color: #38bdf8; font-weight: bold;">${o.waktu_ambil}</td>
+                <td style="color: #4ade80; font-weight: bold;">Rp ${Number(o.total_harga).toLocaleString('id-ID')}</td>
+                <td>
+                    ${o.file_url ? `<a href="${o.file_url}" target="_blank" style="padding:6px 12px; background:#16a34a; color:white; border-radius:6px; text-decoration:none; font-weight:bold; font-size:12px;" download>📥 Download File</a>` : '<span style="color:#94a3b8;">Tanpa File</span>'}
+                </td>
+                <td>
+                    <select onchange="updateStatus(${o.id}, this.value)" style="padding:6px; border-radius:6px; background:#0f172a; color:white; border:1px solid #475569; font-weight:bold; cursor:pointer;">
+                        <option value="Menunggu Pembayaran (UNPAID)" ${o.status.includes('UNPAID') ? 'selected' : ''}>⏳ UNPAID</option>
+                        <option value="🖨️ DIPROSES" ${o.status.includes('DIPROSES') ? 'selected' : ''}>🖨️ DIPROSES</option>
+                        <option value="✅ SIAP DIAMBIL" ${o.status.includes('SIAP') ? 'selected' : ''}>✅ SIAP DIAMBIL</option>
+                        <option value="🎉 SELESAI" ${o.status.includes('SELESAI') ? 'selected' : ''}>🎉 SELESAI</option>
+                    </select>
+                </td>
+            </tr>
+        `;
+    });
 
-        const orderList = Array.isArray(data) ? data : (data.orders || []);
+    tbody.innerHTML = html;
+}
 
-        if (orderList.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: #64748b;">Belum ada pesanan aktif.</td></tr>';
-            return;
-        }
+// Fungsi update status pesanan
+async function updateStatus(id, newStatus) {
+    const { error } = await supabaseClient
+        .from('orders')
+        .update({ status: newStatus })
+        .eq('id', id);
 
-        // Urutkan kronologis dari Antrian #1 (teratas)
-        const activeOrdersWithQueue = orderList.map((order, index) => ({
-            ...order,
-            queueNumber: index + 1
-        }));
-
-        activeOrdersWithQueue.forEach(order => {
-            const id = order.id || '-';
-            const nama = order.nama || '-';
-            const phone = order.phone || '-';
-            const jumlahHalaman = order.jumlahHalaman || '0';
-            const jenisCetak = order.jenisCetak || 'Hitam Putih';
-            const fileName = order.fileName || '-';
-            const queueNum = order.queueNumber;
-
-            const isNext = queueNum === 1;
-            const queueBadgeStyle = isNext 
-                ? 'background: #ef4444; color: white; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 13px; display: inline-block;'
-                : 'background: #3b82f6; color: white; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 12px; display: inline-block;';
-
-            const queueText = isNext ? `🔥 Antrian #${queueNum} (NEXT)` : `🏷️ Antrian #${queueNum}`;
-
-            const row = `
-                <tr style="${isNext ? 'background-color: #fef2f2;' : ''}">
-                    <td>
-                        <span style="${queueBadgeStyle}">${queueText}</span><br>
-                        <small style="color:#64748b; font-size:11px;">ID: ${id}</small>
-                    </td>
-                    <td><b>${nama}</b></td>
-                    <td><a href="https://wa.me/${phone}" target="_blank" style="color: #2563eb; font-weight:600; text-decoration:none;">📱 ${phone}</a></td>
-                    <td>${jumlahHalaman} Hal (${jenisCetak})</td>
-                    <td><span style="background:#fef3c7; color:#d97706; padding:4px 8px; border-radius:6px; font-weight:bold; font-size:12px;">Pending</span></td>
-                    <td>📄 ${fileName}</td>
-                    <td>
-                        <button onclick="archiveOrder('${id}')" style="background:#22c55e; color:white; border:none; padding:8px 14px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:12px;">
-                            ✅ Selesai & Pindah Antrian
-                        </button>
-                    </td>
-                </tr>
-            `;
-            tableBody.innerHTML += row;
-        });
-    } catch (err) {
-        console.error('Error loading orders:', err);
-        if (tableBody) {
-            tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#ef4444;">Gagal mengambil data. Klik "Refresh Data".</td></tr>';
-        }
+    if (error) {
+        alert('❌ Gagal mengubah status pesanan.');
+    } else {
+        alert('✅ Status pesanan berhasil diperbarui!');
     }
 }
 
-function archiveOrder(orderId) {
-    if (!confirm(`Selesaikan cetakan ${orderId}? Nomor antrian berikutnya akan otomatis naik.`)) return;
-
-    const iframeName = 'hidden_archive_iframe_' + Date.now();
-    const iframe = document.createElement('iframe');
-    iframe.name = iframeName;
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-
-    const form = document.createElement('form');
-    form.method = 'GET';
-    form.action = GOOGLE_SCRIPT_URL;
-    form.target = iframeName;
-
-    const inputAction = document.createElement('input');
-    inputAction.type = 'hidden';
-    inputAction.name = 'mode';
-    inputAction.value = 'archive';
-    form.appendChild(inputAction);
-
-    const inputId = document.createElement('input');
-    inputId.type = 'hidden';
-    inputId.name = 'id';
-    inputId.value = orderId;
-    form.appendChild(inputId);
-
-    document.body.appendChild(form);
-    form.submit();
-
-    setTimeout(() => {
-        document.body.removeChild(form);
-        document.body.removeChild(iframe);
-        loadOrders();
-    }, 1200);
-}
+// Panggil data saat halaman selesai di-load
+window.addEventListener('DOMContentLoaded', () => {
+    loadOrders();
+});

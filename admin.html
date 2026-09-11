@@ -3,80 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - KohanCopier</title>
-    <link rel="stylesheet" href="style.css?v=5">
+    <title>Dashboard Admin - KohanCopier</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        .admin-wrapper { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
-        .table-responsive { overflow-x: auto; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; text-align: left; background: #fff; border-radius: 12px; overflow: hidden; }
-        th, td { padding: 14px 16px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
-        th { background-color: #f1f5f9; color: #475569; font-weight: 700; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #334155; }
+        h1 { margin: 0; font-size: 24px; color: #3b82f6; }
+        .btn-refresh { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-refresh:hover { background: #2563eb; }
+        
+        table { width: 100%; border-collapse: collapse; background: #1e293b; border-radius: 12px; overflow: hidden; }
+        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #334155; font-size: 14px; }
+        th { background: #334155; color: #94a3b8; font-weight: 600; }
+        tr:hover { background: #2a374e; }
+        
+        .status-select { padding: 6px 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; font-weight: bold; cursor: pointer; }
+        .btn-download { display: inline-block; background: #16a34a; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; }
+        .btn-download:hover { background: #15803d; }
+        .btn-wa { display: inline-block; background: #22c55e; color: white; padding: 6px 10px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: bold; margin-top: 4px; }
     </style>
 </head>
 <body>
 
-    <header class="navbar">
-        <div class="nav-container">
-            <div class="brand-logo">
-                <span class="logo-icon">🖨️</span>
-                <span class="logo-text">Kohan<span>Copier</span> Admin</span>
-            </div>
-            <a href="/" style="text-decoration: none; font-size: 14px; font-weight: 600; color: #2563eb;">← Halaman Utama</a>
-        </div>
-    </header>
-
-    <div class="admin-wrapper">
-        <section class="card-box" id="loginSection" style="max-width: 480px; margin: 40px auto;">
-            <div class="section-header">
-                <h2>🔐 Login Admin</h2>
-                <p>Masukkan kredensial untuk mengakses dashboard pesanan</p>
-            </div>
-
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" placeholder="Masukkan username admin" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" placeholder="Masukkan password admin" required>
-                </div>
-                <button type="submit" class="btn-primary" style="margin-top: 10px;">Masuk Dashboard</button>
-            </form>
-        </section>
-
-        <section class="card-box" id="dashboardSection" style="display: none;">
-            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <div>
-                    <h2>📋 Dashboard Pesanan Masuk</h2>
-                    <p>Daftar seluruh pesanan cetak dokumen dari pelanggan</p>
-                </div>
-                <button onclick="loadOrders()" class="btn-secondary" style="padding: 10px 18px; font-size: 13px;">🔄 Refresh Data</button>
-            </div>
-
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID Pesanan</th>
-                            <th>Nama Customer</th>
-                            <th>No WhatsApp</th>
-                            <th>Detail Cetak</th>
-                            <th>Status</th>
-                            <th>Nama File</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ordersTableBody">
-                        <tr>
-                            <td colspan="7" style="text-align:center; color: #64748b;">Memuat data pesanan...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+<div class="container">
+    <div class="header">
+        <h1>🖨️ Dashboard Admin - KohanCopier</h1>
+        <button class="btn-refresh" onclick="loadOrders()">🔄 Refresh Data</button>
     </div>
 
-    <script src="admin.js?v=5"></script>
+    <table>
+        <thead>
+            <tr>
+                <th>Tanggal</th>
+                <th>Pemesan</th>
+                <th>Detail Cetak</th>
+                <th>Catatan</th>
+                <th>Ambil</th>
+                <th>Total</th>
+                <th>File Customer</th>
+                <th>Status Pesanan</th>
+            </tr>
+        </thead>
+        <tbody id="adminTableBody">
+            <tr>
+                <td colspan="8" style="text-align: center;">⏳ Memuat pesanan...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    const SUPABASE_URL = "https://gputfcshhgppygipxzfh.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwdXRmY3NoaGdwcHlnaXB4emZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxMjQxNDMsImV4cCI6MjEwNDcwMDE0M30.vhd6pH6jkNsbnnZsjgonc8xGc7yk-rQIZSgegiXbmBs";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function loadOrders() {
+        const tbody = document.getElementById('adminTableBody');
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">⏳ Memuat pesanan...</td></tr>';
+
+        const { data: orders, error } = await supabaseClient
+            .from('orders')
+            .select('*')
+            .order('id', { ascending: false });
+
+        if (error) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color:#ef4444;">❌ Gagal memuat data</td></tr>';
+            return;
+        }
+
+        if (orders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Belum ada pesanan masuk.</td></tr>';
+            return;
+        }
+
+        let html = '';
+        orders.forEach(o => {
+            const dateStr = new Date(o.created_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' });
+            
+            html += `
+                <tr>
+                    <td style="color:#94a3b8; font-size:12px;">${dateStr}</td>
+                    <td>
+                        <b>${o.nama}</b><br>
+                        <span style="font-size:12px; color:#94a3b8;">${o.phone}</span><br>
+                        <a class="btn-wa" href="https://wa.me/${o.phone}" target="_blank">📱 Chat WA</a>
+                    </td>
+                    <td>${o.detail_cetak}</td>
+                    <td style="color:#cbd5e1; font-style:italic;">${o.catatan || '-'}</td>
+                    <td style="color:#38bdf8; font-weight:bold;">${o.waktu_ambil}</td>
+                    <td style="color:#4ade80; font-weight:bold;">Rp ${Number(o.total_harga).toLocaleString('id-ID')}</td>
+                    <td>
+                        ${o.file_url ? `<a href="${o.file_url}" target="_blank" class="btn-download" download>📥 Download File</a>` : 'Tidak Ada File'}
+                    </td>
+                    <td>
+                        <select class="status-select" onchange="updateStatus(${o.id}, this.value)">
+                            <option value="Menunggu Pembayaran (UNPAID)" ${o.status.includes('UNPAID') ? 'selected' : ''}>⏳ UNPAID</option>
+                            <option value="🖨️ DIPROSES" ${o.status.includes('DIPROSES') ? 'selected' : ''}>🖨️ DIPROSES</option>
+                            <option value="✅ SIAP DIAMBIL" ${o.status.includes('SIAP') ? 'selected' : ''}>✅ SIAP DIAMBIL</option>
+                            <option value="🎉 SELESAI" ${o.status.includes('SELESAI') ? 'selected' : ''}>🎉 SELESAI</option>
+                        </select>
+                    </td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    }
+
+    async function updateStatus(id, newStatus) {
+        const { error } = await supabaseClient
+            .from('orders')
+            .update({ status: newStatus })
+            .eq('id', id);
+
+        if (error) {
+            alert('❌ Gagal mengubah status');
+        } else {
+            alert('✅ Status berhasil diperbarui!');
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', loadOrders);
+</script>
+
 </body>
 </html>

@@ -373,7 +373,7 @@
         </div>
     </div>
 
-    <!-- HALAMAN INVOICE (TAMPILAN BARU: SPLIT TICKET & QRIS) -->
+    <!-- HALAMAN INVOICE (SPLIT TICKET & QRIS ZOOM) -->
     <div id="page-invoice" class="page-section">
         <div class="invoice-container-split">
             
@@ -401,7 +401,7 @@
                 <div id="invoiceTimer" class="timer-badge">⏱️ 10:00</div>
                 
                 <div class="qris-box">
-                    <img src="qris.jpeg" alt="QRIS KohanCopier" style="width: 100%; height: auto; border-radius: 6px;">
+                    <img src="qris.jpeg" alt="QRIS KohanCopier" style="width: 100%; height: auto; border-radius: 6px; cursor: zoom-in;" onclick="openQrisModal()" title="Klik untuk perbesar">
                 </div>
                 
                 <div class="payment-desc">Scan menggunakan M-Banking / E-Wallet<br>(Gopay, Dana, ShopeePay, dll)</div>
@@ -448,6 +448,14 @@
             <button type="button" onclick="closeConfirmModal()" style="flex: 1; background: #94a3b8; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s;">Batalkan</button>
             <button type="button" id="btnProceedInvoice" style="flex: 1; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s;">Lanjutkan 🚀</button>
         </div>
+    </div>
+</div>
+
+<!-- MODAL ZOOM QRIS -->
+<div id="qrisModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(5px); cursor: zoom-out;" onclick="closeQrisModal()">
+    <div style="position: relative; text-align: center; animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;">
+        <img src="qris.jpeg" alt="QRIS Diperbesar" style="max-width: 90vw; max-height: 80vh; border-radius: 16px; border: 4px solid var(--primary); box-shadow: 0 0 30px rgba(37, 99, 235, 0.5);">
+        <p style="color: white; margin-top: 16px; font-weight: 600; background: rgba(0,0,0,0.5); display: inline-block; padding: 8px 20px; border-radius: 20px; font-size: 14px;">Ketuk di mana saja untuk menutup</p>
     </div>
 </div>
 
@@ -498,6 +506,14 @@
         if (targetPage) targetPage.classList.add('active');
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function openQrisModal() {
+        document.getElementById('qrisModal').style.display = 'flex';
+    }
+
+    function closeQrisModal() {
+        document.getElementById('qrisModal').style.display = 'none';
     }
 </script>
 

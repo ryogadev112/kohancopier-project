@@ -89,6 +89,7 @@ window.addEventListener('DOMContentLoaded', () => {
     checkLiveStoreStatus();
     generateJadwalAmbil();
     updatePrice();
+    loadFeedbackList();
 });
 
 // --- FORM HANDLER & PRICING ---
@@ -173,7 +174,7 @@ if (fileInput) {
     });
 }
 
-// --- FUNGSI UTAMA KALKULASI HARGA (FIXED AUTO-ESTIMATION) ---
+// --- FUNGSI UTAMA KALKULASI HARGA ---
 function updatePrice() {
     const kategori = kategoriLayanan ? kategoriLayanan.value : 'dokumen';
     let total = 0;
@@ -183,11 +184,8 @@ function updatePrice() {
         const jumlah = parseInt(jumlahLembarStikerInput ? jumlahLembarStikerInput.value : 1) || 1;
         let hargaSatuan = 25000;
         
-        if (jenisStiker === 'Kromo') {
-            hargaSatuan = 15000;
-        } else if (jenisStiker === 'Roll') {
-            hargaSatuan = 50000;
-        }
+        if (jenisStiker === 'Kromo') { hargaSatuan = 15000; } 
+        else if (jenisStiker === 'Roll') { hargaSatuan = 50000; }
         
         total = jumlah * hargaSatuan;
     } else {
@@ -199,17 +197,12 @@ function updatePrice() {
         const ukuranKertas = ukuranKertasSelect ? ukuranKertasSelect.value : 'A4';
         
         let hargaPerHal = (jenis === 'Warna') ? 2000 : 1000;
-        
-        if (ukuranKertas === 'A3+') {
-            hargaPerHal *= 2;
-        }
+        if (ukuranKertas === 'A3+') { hargaPerHal *= 2; }
         
         total = hal * copy * hargaPerHal;
     }
     
-    if (pricePreview) {
-        pricePreview.innerText = "Rp " + total.toLocaleString('id-ID');
-    }
+    if (pricePreview) { pricePreview.innerText = "Rp " + total.toLocaleString('id-ID'); }
 }
 
 if (jumlahHalamanInput) jumlahHalamanInput.addEventListener('input', updatePrice);
@@ -217,9 +210,7 @@ if (jumlahCopyInput) jumlahCopyInput.addEventListener('input', updatePrice);
 if (jumlahLembarStikerInput) jumlahLembarStikerInput.addEventListener('input', updatePrice);
 
 document.addEventListener('change', (e) => {
-    if (e.target && e.target.name === 'jenisCetak') {
-        updatePrice();
-    }
+    if (e.target && e.target.name === 'jenisCetak') { updatePrice(); }
 });
 
 // --- TIMER INVOICE ---
@@ -235,14 +226,8 @@ function startInvoiceTimer(durationInSeconds) {
         minutes = minutes < 10 ? "0" + minutes : minutes;
         seconds = seconds < 10 ? "0" + seconds : seconds;
 
-        if (timerDisplay) {
-            timerDisplay.innerText = "⏱️ " + minutes + ":" + seconds;
-        }
-
-        if (--timer < 0) {
-            clearInterval(countdownInterval);
-            if (timerDisplay) timerDisplay.innerText = "⏱️ Waktu Habis!";
-        }
+        if (timerDisplay) { timerDisplay.innerText = "⏱️ " + minutes + ":" + seconds; }
+        if (--timer < 0) { clearInterval(countdownInterval); if (timerDisplay) timerDisplay.innerText = "⏱️ Waktu Habis!"; }
     }, 1000);
 }
 
@@ -253,12 +238,8 @@ const orderForm = document.getElementById('orderForm');
 if (orderForm) {
     orderForm.addEventListener('submit', function(e) {
         e.preventDefault();
-
         const file = fileInput.files[0];
-        if (!file) {
-            alert('❌ Harap upload file terlebih dahulu!');
-            return;
-        }
+        if (!file) { alert('❌ Harap upload file terlebih dahulu!'); return; }
 
         const nama = document.getElementById('nama').value;
         const phone = document.getElementById('phone').value.trim();
@@ -290,9 +271,7 @@ if (orderForm) {
             detailText = `${jumlahHalaman} Hal x ${jumlahCopy} Rangkap (${jenisCetak} - ${ukuranKertas})`;
         }
 
-        tempOrderData = {
-            nama, phone, waktuAmbil, kategori, detailText, catatan, file, totalHarga
-        };
+        tempOrderData = { nama, phone, waktuAmbil, kategori, detailText, catatan, file, totalHarga };
 
         document.getElementById('mNama').innerText = nama;
         document.getElementById('mPhone').innerText = phone;
@@ -304,62 +283,35 @@ if (orderForm) {
     });
 }
 
-function closeConfirmModal() {
-    document.getElementById('confirmModal').style.display = 'none';
-}
+function closeConfirmModal() { document.getElementById('confirmModal').style.display = 'none'; }
 
 const btnProceedInvoice = document.getElementById('btnProceedInvoice');
 if (btnProceedInvoice) {
     btnProceedInvoice.onclick = async function() {
         if (!tempOrderData) return;
-
         btnProceedInvoice.disabled = true;
         btnProceedInvoice.innerText = "⏳ Mengunggah...";
 
         try {
-            const { count, error: countError } = await supabaseClient
-                .from('orders')
-                .select('*', { count: 'exact', head: true });
-
+            const { count, error: countError } = await supabaseClient.from('orders').select('*', { count: 'exact', head: true });
             let nextNumber = (count || 0) + 1;
-            const formattedNumber = String(nextNumber).padStart(3, '0');
-            const noAntrian = `KHN-${formattedNumber}`;
+            const noAntrian = `KHN-${String(nextNumber).padStart(3, '0')}`;
 
             const file = tempOrderData.file;
-            const fileExt = file.name.split('.').pop();
-            const fileNameCloud = `${Date.now()}_${tempOrderData.phone}.${fileExt}`;
+            const fileNameCloud = `${Date.now()}_${tempOrderData.phone}.${file.name.split('.').pop()}`;
 
-            const { data: uploadData, error: uploadError } = await supabaseClient
-                .storage
-                .from('kohan-files')
-                .upload(fileNameCloud, file);
-
+            const { error: uploadError } = await supabaseClient.storage.from('kohan-files').upload(fileNameCloud, file);
             if (uploadError) throw uploadError;
 
-            const { data: urlData } = supabaseClient
-                .storage
-                .from('kohan-files')
-                .getPublicUrl(fileNameCloud);
+            const { data: urlData } = supabaseClient.storage.from('kohan-files').getPublicUrl(fileNameCloud);
 
-            const filePublicUrl = urlData.publicUrl;
-
-            const { error: dbError } = await supabaseClient
-                .from('orders')
-                .insert([
-                    {
-                        no_antrian: noAntrian,
-                        nama: tempOrderData.nama,
-                        phone: tempOrderData.phone,
-                        kategori: tempOrderData.kategori,
-                        detail_cetak: tempOrderData.detailText,
-                        catatan: tempOrderData.catatan,
-                        waktu_ambil: tempOrderData.waktuAmbil,
-                        total_harga: tempOrderData.totalHarga,
-                        status: 'Menunggu Pembayaran (UNPAID)',
-                        file_url: filePublicUrl,
-                        file_name: file.name
-                    }
-                ]);
+            const { error: dbError } = await supabaseClient.from('orders').insert([{
+                no_antrian: noAntrian, nama: tempOrderData.nama, phone: tempOrderData.phone,
+                kategori: tempOrderData.kategori, detail_cetak: tempOrderData.detailText,
+                catatan: tempOrderData.catatan, waktu_ambil: tempOrderData.waktuAmbil,
+                total_harga: tempOrderData.totalHarga, status: 'Menunggu Pembayaran (UNPAID)',
+                file_url: urlData.publicUrl, file_name: file.name
+            }]);
 
             if (dbError) throw dbError;
 
@@ -376,13 +328,11 @@ if (btnProceedInvoice) {
             if (navInvoice) navInvoice.style.display = 'block';
 
             if(typeof window.switchPage === 'function') window.switchPage('invoice');
-            
             startInvoiceTimer(600);
             orderForm.reset();
             handleKategoriChange();
             updatePrice();
             generateJadwalAmbil();
-
         } catch (err) {
             alert('❌ Gagal menyimpan pesanan: ' + err.message);
         } finally {
@@ -392,11 +342,10 @@ if (btnProceedInvoice) {
     };
 }
 
-// --- LACAK PESANAN REALTIME DARI SUPABASE ---
+// --- LACAK PESANAN ---
 async function lacakStatusPesanan() {
     const keyword = document.getElementById('trackInput').value.trim();
     const resultDiv = document.getElementById('trackResult');
-    
     resultDiv.style.display = 'block';
 
     if (!keyword) {
@@ -406,11 +355,7 @@ async function lacakStatusPesanan() {
 
     resultDiv.innerHTML = '<p style="color: #64748b; font-size: 13px; margin:0;">⏳ Mencari pesanan...</p>';
 
-    const { data: found, error } = await supabaseClient
-        .from('orders')
-        .select('*')
-        .ilike('phone', `%${keyword}%`)
-        .order('id', { ascending: false });
+    const { data: found, error } = await supabaseClient.from('orders').select('*').ilike('phone', `%${keyword}%`).order('id', { ascending: false });
 
     if (error) {
         resultDiv.innerHTML = '<p style="color: #dc2626; font-size: 13px; margin:0;">❌ Gagal memuat data dari database.</p>';
@@ -439,5 +384,103 @@ async function lacakStatusPesanan() {
         resultDiv.innerHTML = html;
     } else {
         resultDiv.innerHTML = '<p style="color: #dc2626; font-size: 13px; margin:0; background: #fee2e2; padding: 10px; border-radius: 6px;">❌ Tidak ada riwayat pesanan dengan Nomor WhatsApp tersebut.</p>';
+    }
+}
+
+// --- FITUR FEEDBACK & RATING DENGAN FOTO PROFIL ---
+const feedbackForm = document.getElementById('feedbackForm');
+if (feedbackForm) {
+    feedbackForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const nama = document.getElementById('fbNama').value.trim();
+        const rating = parseInt(document.getElementById('fbRating').value) || 5;
+        const komentar = document.getElementById('fbKomentar').value.trim();
+        const fotoInput = document.getElementById('fbFoto');
+        const btn = document.getElementById('btnSubmitFeedback');
+
+        btn.disabled = true;
+        btn.innerText = "Mengirim Ulasan...";
+
+        try {
+            let fotoUrl = null;
+
+            if (fotoInput.files && fotoInput.files[0]) {
+                const fotoFile = fotoInput.files[0];
+                if (fotoFile.size > 2 * 1024 * 1024) {
+                    throw new Error("Ukuran foto profil maksimal 2MB!");
+                }
+
+                const fileNameFoto = `avatar_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fotoFile.name.split('.').pop()}`;
+                
+                const { error: uploadError } = await supabaseClient.storage.from('kohan-files').upload(fileNameFoto, fotoFile);
+                if (uploadError) throw uploadError;
+
+                const { data: urlData } = supabaseClient.storage.from('kohan-files').getPublicUrl(fileNameFoto);
+                fotoUrl = urlData.publicUrl;
+            }
+
+            const { error: dbError } = await supabaseClient.from('feedbacks').insert([{
+                nama,
+                rating,
+                komentar,
+                foto_url: fotoUrl
+            }]);
+
+            if (dbError) throw dbError;
+
+            alert('✨ Terima kasih! Ulasan dan foto profil kamu berhasil dikirim.');
+            feedbackForm.reset();
+            loadFeedbackList();
+        } catch (err) {
+            alert('❌ Gagal mengirim ulasan: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Kirim Ulasan 🚀";
+        }
+    });
+}
+
+async function loadFeedbackList() {
+    const container = document.getElementById('listFeedbackContainer');
+    if (!container) return;
+
+    container.innerHTML = '<p style="color: var(--text-muted); font-size: 13px; text-align: center;">Memuat ulasan...</p>';
+
+    const { data, error } = await supabaseClient.from('feedbacks').select('*').order('id', { ascending: false }).limit(10);
+
+    if (error) {
+        container.innerHTML = '<p style="color: #dc2626; font-size: 13px; text-align: center;">Gagal memuat ulasan.</p>';
+        return;
+    }
+
+    if (data && data.length > 0) {
+        let html = '';
+        data.forEach(item => {
+            let starsHtml = '⭐'.repeat(item.rating);
+            
+            let avatarHtml = '';
+            if (item.foto_url) {
+                avatarHtml = `<img src="${item.foto_url}" alt="${item.nama}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary);">`;
+            } else {
+                let initial = item.nama ? item.nama.charAt(0).toUpperCase() : 'U';
+                avatarHtml = `<div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px;">${initial}</div>`;
+            }
+
+            html += `
+                <div style="background: var(--box-bg); border: 1px solid var(--border-color); padding: 14px; border-radius: 12px; font-size: 13px; display: flex; gap: 12px; align-items: flex-start;">
+                    <div>${avatarHtml}</div>
+                    <div style="flex: 1;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <b style="font-size: 14px; color: var(--text-main);">${item.nama}</b>
+                            <span style="color: #f59e0b; font-size: 12px;">${starsHtml}</span>
+                        </div>
+                        <p style="margin: 0; color: var(--text-muted); line-height: 1.5;">${item.komentar}</p>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    } else {
+        container.innerHTML = '<p style="color: var(--text-muted); font-size: 13px; text-align: center;">Belum ada ulasan. Jadilah yang pertama memberikan ulasan!</p>';
     }
 }

@@ -50,7 +50,7 @@
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
         body { background-color: var(--bg-body); margin: 0; padding: 0; color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; }
         
-        .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; width: 100%; flex: 1; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; width: 100%; flex: 1; padding-bottom: 120px; }
         .form-container { max-width: 600px; margin: 0 auto; background: var(--bg-surface); padding: 32px; border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border-color); }
 
         .navbar { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); }
@@ -115,9 +115,7 @@
         .btn-submit { width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
         .btn-submit:hover { background: var(--primary-hover); }
 
-        /* =========================================
-           DESAIN INVOICE MONSTER (SPLIT CARD)
-           ========================================= */
+        /* INVOICE SPLIT CARD */
         .invoice-container-split { display: flex; flex-wrap: wrap; gap: 24px; max-width: 900px; margin: 0 auto; animation: slideUp 0.6s ease-out; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -133,11 +131,9 @@
         .ticket-footer .total-price { color: var(--primary); font-size: 26px; font-weight: 800; }
 
         .payment-card { flex: 1; min-width: 300px; background: var(--bg-surface); border-radius: 16px; padding: 32px 24px; text-align: center; border: 1px solid var(--border-color); box-shadow: 0 0 20px rgba(37, 99, 235, 0.08); display: flex; flex-direction: column; align-items: center; position: relative; }
-        
         [data-theme="dark"] .payment-card { box-shadow: 0 0 25px rgba(59, 130, 246, 0.15); background: linear-gradient(145deg, #1e293b, #0f172a); }
 
         .payment-title { font-size: 16px; color: var(--text-main); margin-bottom: 12px; font-weight: 600; }
-        
         .timer-badge { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; font-size: 22px; font-weight: bold; padding: 8px 20px; border-radius: 30px; display: inline-block; margin-bottom: 24px; animation: pulseTimer 1.5s infinite alternate; }
         @keyframes pulseTimer { 0% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); transform: scale(1); } 100% { box-shadow: 0 0 25px rgba(239, 68, 68, 0.6); transform: scale(1.05); } }
 
@@ -148,8 +144,77 @@
         .btn-wa { display: block; background: linear-gradient(90deg, #22c55e, #16a34a); color: white; border: none; padding: 14px 24px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; width: 100%; text-decoration: none; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.2); transition: 0.3s; }
         .btn-wa:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4); }
 
-        /* Modals & Utils */
-        @keyframes scaleUp { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        /* WIDGET SI KOHAN & MENU INTERAKTIF */
+        #liveMascotWidget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 99999;
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            pointer-events: none;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        #liveMascotWidget > * { pointer-events: auto; }
+
+        #kohanMenuOptions {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            background: var(--bg-surface);
+            border: 2px solid var(--primary);
+            padding: 10px;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+            animation: popEffect 0.3s ease forwards;
+            min-width: 210px;
+        }
+
+        .kohan-menu-btn {
+            background: var(--hero-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .kohan-menu-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .kohan-bubble {
+            background: var(--bg-surface);
+            border: 2px solid var(--primary);
+            color: var(--text-main);
+            padding: 12px 18px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 600;
+            max-width: 240px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            position: relative;
+            transform-origin: bottom right;
+        }
+
+        .pop-anim { animation: popEffect 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes popEffect { 0% { transform: scale(0.8); opacity: 0; } 70% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+
+        .kohan-avatar {
+            width: 120px;
+            height: 120px;
+            cursor: pointer;
+            animation: kohanFloat 2.5s infinite ease-in-out;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.35));
+            transition: transform 0.2s;
+        }
+        .kohan-avatar:hover { transform: scale(1.1) rotate(4deg); }
+        @keyframes kohanFloat { 0% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-10px) rotate(-2deg); } 100% { transform: translateY(0px) rotate(0deg); } }
+        .k-eye { transition: transform 0.1s ease-out; }
+
         .footer { background: var(--bg-surface); border-top: 1px solid var(--border-color); color: var(--text-muted); text-align: center; padding: 24px 20px; font-size: 14px; margin-top: auto; }
 
         @media (max-width: 768px) {
@@ -373,11 +438,10 @@
         </div>
     </div>
 
-    <!-- HALAMAN INVOICE (SPLIT TICKET & QRIS ZOOM) -->
+    <!-- HALAMAN INVOICE -->
     <div id="page-invoice" class="page-section">
         <div class="invoice-container-split">
             
-            <!-- KARTU KIRI: TIKET PESANAN -->
             <div class="ticket-card">
                 <div class="ticket-header">
                     <h3>E-Ticket Pesanan</h3>
@@ -395,7 +459,6 @@
                 </div>
             </div>
 
-            <!-- KARTU KANAN: PAYMENT QRIS -->
             <div class="payment-card">
                 <div class="payment-title">Selesaikan Pembayaran</div>
                 <div id="invoiceTimer" class="timer-badge">⏱️ 10:00</div>
@@ -430,12 +493,50 @@
     </div>
 </div>
 
+<!-- WIDGET MASCOT SI KOHAN (INTERAKTIF) -->
+<div id="liveMascotWidget">
+    <div style="display: flex; flex-direction: column; align-items: flex-end;">
+        <div id="kohanMenuOptions">
+            <div style="font-size: 11px; font-weight: bold; color: var(--primary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">🤖 Menu <span id="namaPetLabel">Si Kohan</span>:</div>
+            <button class="kohan-menu-btn" onclick="pilihOpsi('A')">📖 A. Instruksi Penggunaan</button>
+            <button class="kohan-menu-btn" onclick="pilihOpsi('B')">💖 B. Pat-pat <span id="namaPetLabel2">Si Kohan</span></button>
+            <button class="kohan-menu-btn" onclick="pilihOpsi('C')">✏️ C. Ganti Nama Maskot</button>
+            <button class="kohan-menu-btn" style="background: rgba(239,68,68,0.1); color: #ef4444; border-color: rgba(239,68,68,0.3); text-align: center;" onclick="tutupMenu()">✖ Tutup Menu</button>
+        </div>
+        <div id="kohanBubble" class="kohan-bubble pop-anim">
+            Halo! Klik aku kalau butuh bantuan ya! 🚀
+        </div>
+    </div>
+    
+    <svg class="kohan-avatar pop-anim" id="kohanSvg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" onclick="toggleMenu()">
+        <rect x="95" y="15" width="10" height="20" rx="5" fill="#64748b"/>
+        <circle cx="100" cy="12" r="8" fill="#ef4444"/>
+        <rect x="40" y="35" width="120" height="100" rx="24" fill="#2563eb" stroke="#3b82f6" stroke-width="4"/>
+        <rect x="52" y="47" width="96" height="60" rx="16" fill="#0f172a"/>
+        <g id="mascotEyebrows" stroke="#38bdf8" stroke-width="3" stroke-linecap="round">
+            <line x1="70" y1="67" x2="86" y2="67" />
+            <line x1="114" y1="67" x2="130" y2="67" />
+        </g>
+        <g id="mascotEyes">
+            <circle id="leftEye" class="k-eye" cx="78" cy="78" r="9" fill="#38bdf8"/>
+            <circle id="rightEye" class="k-eye" cx="122" cy="78" r="9" fill="#38bdf8"/>
+        </g>
+        <circle cx="67" cy="91" r="5" fill="#f43f5e" opacity="0.8"/>
+        <circle cx="133" cy="91" r="5" fill="#f43f5e" opacity="0.8"/>
+        <path id="mascotMouth" d="M92 88 Q100 96 108 88" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+        <rect x="60" y="118" width="80" height="8" rx="4" fill="#1e293b"/>
+        <path d="M70 122 H130 V155 Q130 160 125 160 H75 Q70 160 70 155 Z" fill="#ffffff"/>
+        <line x1="78" y1="132" x2="122" y2="132" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+        <rect x="22" y="65" width="16" height="35" rx="8" fill="#1d4ed8" transform="rotate(15 22 65)"/>
+        <rect x="162" y="65" width="16" height="35" rx="8" fill="#1d4ed8" transform="rotate(-15 162 65)"/>
+    </svg>
+</div>
+
 <!-- MODAL KONFIRMASI -->
 <div id="confirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); justify-content: center; align-items: center; padding: 20px; z-index: 9999; backdrop-filter: blur(4px);">
-    <div style="background: var(--bg-surface); padding: 32px; border-radius: 20px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); position: relative; animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; border: 1px solid var(--border-color);">
+    <div style="background: var(--bg-surface); padding: 32px; border-radius: 20px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); position: relative; border: 1px solid var(--border-color);">
         <h3 style="margin-top: 0; font-size: 22px;">📋 Konfirmasi Pesanan</h3>
         <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Pastikan data pesanan kamu sudah sesuai.</p>
-        
         <div style="text-align: left; font-size: 13px; line-height: 1.6; background: var(--box-bg); padding: 14px 18px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 20px;">
             <p style="margin: 3px 0;"><b>Nama:</b> <span id="mNama">-</span></p>
             <p style="margin: 3px 0;"><b>No WhatsApp:</b> <span id="mPhone">-</span></p>
@@ -443,19 +544,34 @@
             <p style="margin: 3px 0;"><b>Detail:</b> <span id="mDetail">-</span></p>
             <p style="margin: 3px 0; font-size: 15px;"><b>Total Pembayaran:</b> <span id="mTotal" style="color:var(--primary); font-weight:bold;">-</span></p>
         </div>
-
         <div style="display: flex; gap: 10px;">
-            <button type="button" onclick="closeConfirmModal()" style="flex: 1; background: #94a3b8; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s;">Batalkan</button>
-            <button type="button" id="btnProceedInvoice" style="flex: 1; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s;">Lanjutkan 🚀</button>
+            <button type="button" onclick="closeConfirmModal()" style="flex: 1; background: #94a3b8; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">Batalkan</button>
+            <button type="button" id="btnProceedInvoice" style="flex: 1; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">Lanjutkan 🚀</button>
         </div>
     </div>
 </div>
 
 <!-- MODAL ZOOM QRIS -->
 <div id="qrisModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(5px); cursor: zoom-out;" onclick="closeQrisModal()">
-    <div style="position: relative; text-align: center; animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;">
+    <div style="position: relative; text-align: center;">
         <img src="qris.jpeg" alt="QRIS Diperbesar" style="max-width: 90vw; max-height: 80vh; border-radius: 16px; border: 4px solid var(--primary); box-shadow: 0 0 30px rgba(37, 99, 235, 0.5);">
         <p style="color: white; margin-top: 16px; font-weight: 600; background: rgba(0,0,0,0.5); display: inline-block; padding: 8px 20px; border-radius: 20px; font-size: 14px;">Ketuk di mana saja untuk menutup</p>
+    </div>
+</div>
+
+<!-- MODAL GANTI NAMA MASKOT (UI CANTIK) -->
+<div id="renameModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); justify-content: center; align-items: center; padding: 20px; z-index: 100000; backdrop-filter: blur(4px);">
+    <div style="background: var(--bg-surface); padding: 32px; border-radius: 20px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); position: relative; border: 1px solid var(--border-color);">
+        <h3 style="margin-top: 0; font-size: 20px; color: var(--primary);">✏️ Ganti Nama Maskot</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Beri nama panggilan baru untuk asisten setiamu!</p>
+        <div style="margin-bottom: 20px; text-align: left;">
+            <label for="inputNamaBaru" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">Nama Baru:</label>
+            <input type="text" id="inputNamaBaru" placeholder="Contoh: Miko, BotCetak, dll" style="width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 15px; background: var(--input-bg); color: var(--text-main);">
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button type="button" onclick="tutupModalRename()" style="flex: 1; background: #94a3b8; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">Batal</button>
+            <button type="button" onclick="simpanNamaBaru()" style="flex: 1; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">Simpan ✨</button>
+        </div>
     </div>
 </div>
 
@@ -465,11 +581,123 @@
 
 <script src="main.js"></script>
 <script>
+    let namaMaskot = localStorage.getItem('kohan_pet_name') || "Si Kohan";
+    updateNamaLabels();
+
+    function updateNamaLabels() {
+        const lbl1 = document.getElementById('namaPetLabel');
+        const lbl2 = document.getElementById('namaPetLabel2');
+        if(lbl1) lbl1.innerText = namaMaskot;
+        if(lbl2) lbl2.innerText = namaMaskot;
+    }
+
+    function toggleMenu() {
+        const menu = document.getElementById('kohanMenuOptions');
+        if (menu.style.display === 'flex') {
+            menu.style.display = 'none';
+        } else {
+            menu.style.display = 'flex';
+            setExpression('excited');
+            document.getElementById('kohanBubble').innerHTML = `Halo! Mau pilih menu apa nih sama ${namaMaskot}? 😊`;
+        }
+    }
+
+    function tutupMenu() {
+        const menu = document.getElementById('kohanMenuOptions');
+        if(menu) menu.style.display = 'none';
+    }
+
+    function pilihOpsi(opsi) {
+        const bubble = document.getElementById('kohanBubble');
+        tutupMenu();
+        triggerPopAnimation();
+
+        if (opsi === 'A') {
+            setExpression('happy');
+            bubble.innerHTML = `<b>📖 Cara Pakai KohanCopier:</b><br>1. Pilih menu 'Pesan'<br>2. Upload file & atur jumlah<br>3. Dapatkan nomor antrean & scan QRIS! 🚀`;
+        } 
+        else if (opsi === 'B') {
+            setExpression('laughing');
+            bubble.innerHTML = `Yay! Senangnya dielus-elus sama kamu! ${namaMaskot} bakal semangat terus cetak dokumennya! 💖✨`;
+            const svg = document.getElementById('kohanSvg');
+            if(svg) {
+                svg.style.transform = "scale(1.25) translateY(-20px)";
+                setTimeout(() => { svg.style.transform = "scale(1) translateY(0)"; }, 400);
+            }
+        } 
+        else if (opsi === 'C') {
+            setExpression('thinking');
+            document.getElementById('inputNamaBaru').value = namaMaskot;
+            document.getElementById('renameModal').style.display = 'flex';
+        }
+    }
+
+    function tutupModalRename() {
+        document.getElementById('renameModal').style.display = 'none';
+    }
+
+    function simpanNamaBaru() {
+        const inputVal = document.getElementById('inputNamaBaru').value.trim();
+        const bubble = document.getElementById('kohanBubble');
+        if (inputVal !== "") {
+            namaMaskot = inputVal;
+            localStorage.setItem('kohan_pet_name', namaMaskot);
+            updateNamaLabels();
+            setExpression('excited');
+            bubble.innerHTML = `Hore! Mulai sekarang panggil aku <b>${namaMaskot}</b> ya! Siap melayani! 🎉`;
+        }
+        tutupModalRename();
+        triggerPopAnimation();
+    }
+
+    function setExpression(type) {
+        const mouth = document.getElementById('mascotMouth');
+        const eyes = document.getElementById('mascotEyes');
+        const eyebrows = document.getElementById('mascotEyebrows');
+        if(!mouth || !eyes || !eyebrows) return;
+
+        if (type === 'happy') {
+            eyebrows.innerHTML = '<line x1="70" y1="67" x2="86" y2="67"/><line x1="114" y1="67" x2="130" y2="67"/>';
+            mouth.setAttribute('d', 'M92 88 Q100 96 108 88');
+            mouth.removeAttribute('fill');
+            eyes.innerHTML = '<circle id="leftEye" class="k-eye" cx="78" cy="78" r="9" fill="#38bdf8"/><circle id="rightEye" class="k-eye" cx="122" cy="78" r="9" fill="#38bdf8"/>';
+        } 
+        else if (type === 'excited') {
+            eyebrows.innerHTML = '<path d="M70 70 L86 64" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/><path d="M114 64 L130 70" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>';
+            mouth.setAttribute('d', 'M88 84 Q100 106 112 84 Z');
+            mouth.setAttribute('fill', '#38bdf8');
+            eyes.innerHTML = '<circle cx="78" cy="78" r="9" fill="#f59e0b"/><circle cx="122" cy="78" r="9" fill="#f59e0b"/>';
+        } 
+        else if (type === 'laughing') {
+            eyebrows.innerHTML = '<path d="M70 66 Q78 60 86 66"/><path d="M114 66 Q122 60 130 66"/>';
+            mouth.setAttribute('d', 'M86 86 Q100 104 114 86');
+            mouth.removeAttribute('fill');
+            eyes.innerHTML = '<path d="M70 80 Q78 68 86 80" stroke="#38bdf8" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M114 80 Q122 68 130 80" stroke="#38bdf8" stroke-width="3.5" fill="none" stroke-linecap="round"/>';
+        }
+        else if (type === 'thinking') {
+            eyebrows.innerHTML = '<line x1="70" y1="64" x2="86" y2="70"/><line x1="114" y1="67" x2="130" y2="67"/>';
+            mouth.setAttribute('d', 'M92 90 Q100 84 108 90');
+            mouth.removeAttribute('fill');
+            eyes.innerHTML = '<circle cx="78" cy="78" r="8" fill="#38bdf8"/><circle cx="122" cy="78" r="9" fill="#38bdf8"/>';
+        }
+    }
+
+    function triggerPopAnimation() {
+        const bubble = document.getElementById('kohanBubble');
+        const svg = document.getElementById('kohanSvg');
+        if(!bubble || !svg) return;
+        bubble.classList.remove('pop-anim');
+        svg.classList.remove('pop-anim');
+        void bubble.offsetWidth;
+        void svg.offsetWidth;
+        bubble.classList.add('pop-anim');
+        svg.classList.add('pop-anim');
+    }
+
     function toggleTheme() {
         const html = document.documentElement;
         const currentTheme = html.getAttribute('data-theme');
         const themeBtn = document.getElementById('themeToggleBtn');
-        
         if (currentTheme === 'dark') {
             html.removeAttribute('data-theme');
             localStorage.setItem('kohancopier_theme', 'light');
@@ -505,6 +733,24 @@
         if (targetNav) targetNav.classList.add('active');
         if (targetPage) targetPage.classList.add('active');
 
+        tutupMenu();
+        triggerPopAnimation();
+
+        const bubble = document.getElementById('kohanBubble');
+        if (pageId === 'home') {
+            bubble.innerHTML = `Halo! Mau cetak apa hari ini? Klik aku ya buat buka menu! 🚀`;
+            setExpression('excited');
+        } else if (pageId === 'order') {
+            bubble.innerHTML = `Jangan lupa upload file PDF atau stiker resolusi tinggi ya! 📄✨`;
+            setExpression('thinking');
+        } else if (pageId === 'invoice') {
+            bubble.innerHTML = `Yey! Silakan scan QRIS dan konfirmasi via WA ya. 🎉`;
+            setExpression('laughing');
+        } else if (pageId === 'track') {
+            bubble.innerHTML = `Masukkan nomor WhatsApp kamu untuk melacak status pesanan! 🔍`;
+            setExpression('happy');
+        }
+
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -515,6 +761,19 @@
     function closeQrisModal() {
         document.getElementById('qrisModal').style.display = 'none';
     }
+
+    document.addEventListener('mousemove', (e) => {
+        const leftEye = document.getElementById('leftEye');
+        const rightEye = document.getElementById('rightEye');
+        if (leftEye && rightEye) {
+            const x = (e.clientX / window.innerWidth - 0.5) * 4;
+            const y = (e.clientY / window.innerHeight - 0.5) * 4;
+            leftEye.setAttribute('cx', 78 + x);
+            leftEye.setAttribute('cy', 78 + y);
+            rightEye.setAttribute('cx', 122 + x);
+            rightEye.setAttribute('cy', 78 + y);
+        }
+    });
 </script>
 
 </body>

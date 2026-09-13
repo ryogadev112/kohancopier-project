@@ -230,7 +230,6 @@
             <div class="feature-card">
                 <div class="feature-icon">3</div>
                 <h3>Ambil / Kirim</h3>
-                <!-- Kata "fisik" sudah dihapus sesuai catatan -->
                 <p>Datang ke toko untuk mengambil pesanan yang sudah siap.</p>
             </div>
         </div>
@@ -500,14 +499,14 @@
     </div>
 </div>
 
-<!-- TOMBOL-TOMBOL MELAYANG DI KIRI BAWAH -->
-<div style="position: fixed; bottom: 20px; left: 20px; z-index: 99998; display: flex; flex-direction: column; gap: 10px;">
+<!-- TOMBOL-TOMBOL MELAYANG DI KIRI BAWAH (BERDAMPINGAN / HORIZONTAL) -->
+<div style="position: fixed; bottom: 20px; left: 20px; z-index: 99998; display: flex; flex-direction: row; align-items: center; gap: 10px;">
     <!-- Tombol Info Pembayaran -->
     <button id="floatingInfoBtn" onclick="toggleInfoModal()">
         <span>💡</span> Info Pembayaran
     </button>
 
-    <!-- Tombol Bulat Kecil Ulasan (Pojok Kiri Bawah) -->
+    <!-- Tombol Bulat Kecil Ulasan di Sampingnya -->
     <button onclick="switchPage('feedback')" title="Beri Ulasan & Rating" style="width: 44px; height: 44px; background: var(--bg-surface); border: 2px solid #f59e0b; color: #f59e0b; border-radius: 50%; font-size: 20px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; transition: 0.2s;">
         ⭐
     </button>

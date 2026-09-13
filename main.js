@@ -324,8 +324,12 @@ if (btnProceedInvoice) {
             document.getElementById('btnInvWA').href = `https://wa.me/${ADMIN_WA}?text=` + encodeURIComponent(pesanWA);
 
             closeConfirmModal();
+            
+            // Munculkan tab invoice di navbar atas & bottom nav mobile
             const navInvoice = document.getElementById('nav-invoice');
-            if (navInvoice) navInvoice.style.display = 'block';
+            const bnavInvoice = document.getElementById('bnav-invoice');
+            if (navInvoice) navInvoice.style.display = 'inline-block';
+            if (bnavInvoice) bnavInvoice.style.display = 'flex';
 
             if(typeof window.switchPage === 'function') window.switchPage('invoice');
             startInvoiceTimer(600);

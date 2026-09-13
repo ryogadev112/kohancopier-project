@@ -484,34 +484,26 @@
         </div>
     </div>
 
-    <!-- HALAMAN LACAK (REDESAIN BARU YANG ELEGAN) -->
+    <!-- HALAMAN LACAK -->
     <div id="page-track" class="page-section">
         <div style="max-width: 650px; margin: 0 auto; background: var(--bg-surface); padding: 40px 32px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), var(--shadow); border: 1px solid var(--border-color); position: relative; overflow: hidden;">
-            
-            <!-- Aksen Garis Gradasi di Atas Kartu -->
             <div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #2563eb, #38bdf8, #2563eb);"></div>
-
             <div style="text-align: center; margin-bottom: 30px;">
                 <div style="font-size: 36px; margin-bottom: 12px;">🔍</div>
                 <h2 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 800; color: var(--text-main);">Lacak & Riwayat Pesanan</h2>
                 <p style="color: var(--text-muted); font-size: 14px; margin: 0; line-height: 1.5;">Masukkan nomor WhatsApp yang terdaftar untuk memantau progres cetakan dokumen atau stiker kamu secara real-time.</p>
             </div>
-
             <div style="background: var(--box-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px;">
                 <label for="trackInput" style="display: block; font-weight: 600; font-size: 13px; color: var(--text-main); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">📱 Nomor WhatsApp Pemesan</label>
-                
                 <div class="input-group" style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <input type="tel" id="trackInput" placeholder="Contoh: 088123456789" style="flex: 1; min-width: 200px; padding: 14px 18px; border: 2px solid var(--border-color); border-radius: 12px; font-size: 15px; background: var(--input-bg); color: var(--text-main); outline: none; transition: 0.2s;">
                     <button type="button" onclick="lacakStatusPesanan()" style="background: var(--primary); color: white; border: none; padding: 0 24px; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">Cari Data 🚀</button>
                 </div>
             </div>
-
-            <!-- Kotak Tips Kecil di Bawah -->
             <div style="margin-top: 20px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); background: rgba(59, 130, 246, 0.05); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.1);">
                 <span>💡</span>
                 <span><b>Tips:</b> Gunakan nomor WhatsApp yang sama persis seperti saat kamu menekan tombol konfirmasi pesanan.</span>
             </div>
-
             <div id="trackResult" style="margin-top: 20px; display: none;"></div>
         </div>
     </div>
@@ -554,6 +546,30 @@
         <rect x="22" y="65" width="16" height="35" rx="8" fill="#1d4ed8" transform="rotate(15 22 65)"/>
         <rect x="162" y="65" width="16" height="35" rx="8" fill="#1d4ed8" transform="rotate(-15 162 65)"/>
     </svg>
+</div>
+
+<!-- MODAL JENDELA INFORMASI (WELCOME POPUP) -->
+<div id="infoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); justify-content: center; align-items: center; padding: 20px; z-index: 100000; backdrop-filter: blur(5px);">
+    <div style="background: var(--bg-surface); padding: 36px 28px; border-radius: 24px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); position: relative; border: 1px solid var(--border-color);">
+        
+        <div style="width: 64px; height: 64px; background: var(--hero-bg); border: 2px solid var(--hero-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 20px auto;">
+            👋
+        </div>
+
+        <h3 style="margin: 0 0 10px 0; font-size: 22px; color: var(--text-main); font-weight: 800;">Halo, Selamat Datang!</h3>
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6;">
+            Terima kasih sudah mengunjungi <b>KohanCopier</b>! Kami informasikan bahwa sistem pembayaran saat ini masih menggunakan verifikasi manual (Admin akan mengecek transferan masuk dan mengubah status pembayaran secara manual setelah konfirmasi WhatsApp).
+        </p>
+
+        <div style="background: var(--box-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; margin-bottom: 24px; text-align: left; font-size: 13px; color: var(--text-muted); display: flex; gap: 10px; align-items: center;">
+            <span style="font-size: 20px;">💡</span>
+            <span>Pastikan kamu menekan tombol konfirmasi via WhatsApp setelah melakukan pembayaran QRIS ya!</span>
+        </div>
+
+        <button type="button" onclick="tutupInfoModal()" style="width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); transition: 0.2s;">
+            Mengerti, Lanjutkan! 🔥
+        </button>
+    </div>
 </div>
 
 <!-- MODAL KONFIRMASI -->
@@ -615,6 +631,35 @@
         if(lbl2) lbl2.innerText = namaMaskot;
     }
 
+    // Munculkan Welcome Popup saat pertama kali buka web
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('kohancopier_theme');
+        const themeBtn = document.getElementById('themeToggleBtn');
+        if (savedTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            if(themeBtn) themeBtn.innerText = '☀️';
+        } else {
+            if(themeBtn) themeBtn.innerText = '🌙';
+        }
+
+        // Cek apakah info modal sudah pernah ditutup sebelumnya
+        const sudahDibaca = localStorage.getItem('kohan_info_manual_pay_2026');
+        if (!sudahDibaca) {
+            setTimeout(() => {
+                document.getElementById('infoModal').style.display = 'flex';
+                setExpression('excited');
+            }, 800);
+        }
+    });
+
+    function tutupInfoModal() {
+        document.getElementById('infoModal').style.display = 'none';
+        localStorage.setItem('kohan_info_manual_pay_2026', 'true');
+        const bubble = document.getElementById('kohanBubble');
+        if(bubble) bubble.innerHTML = `Halo! Selamat datang di KohanCopier ya! 🎉`;
+        triggerPopAnimation();
+    }
+
     function toggleMenu() {
         const menu = document.getElementById('kohanMenuOptions');
         if (menu.style.display === 'flex') {
@@ -638,7 +683,7 @@
 
         if (opsi === 'A') {
             setExpression('happy');
-            bubble.innerHTML = `<b>📖 Cara Pakai KohanCopier:</b><br>1. Pilih menu 'Pesan'<br>2. Upload file & atur jumlah<br>3. Dapatkan nomor antrean & scan QRIS! 🚀`;
+            bubble.innerHTML = `<b>📖 Cara Pakai KohanCopier:</b><br>1. Pilih menu 'Pesan'<br>2. Upload file & atur jumlah<br>3. Bayar QRIS & konfirmasi via WA! 🚀`;
         } 
         else if (opsi === 'B') {
             setExpression('laughing');
@@ -732,17 +777,6 @@
             if(themeBtn) themeBtn.innerText = '☀️';
         }
     }
-
-    window.addEventListener('DOMContentLoaded', () => {
-        const savedTheme = localStorage.getItem('kohancopier_theme');
-        const themeBtn = document.getElementById('themeToggleBtn');
-        if (savedTheme === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            if(themeBtn) themeBtn.innerText = '☀️';
-        } else {
-            if(themeBtn) themeBtn.innerText = '🌙';
-        }
-    });
 
     function switchPage(pageId) {
         ['home', 'order', 'invoice', 'track'].forEach(id => {

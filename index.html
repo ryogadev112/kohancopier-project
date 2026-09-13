@@ -53,7 +53,7 @@
         .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; width: 100%; flex: 1; padding-bottom: 120px; }
         .form-container { max-width: 600px; margin: 0 auto; background: var(--bg-surface); padding: 32px; border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border-color); }
 
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; gap: 12px; }
         .nav-logo { font-size: 24px; font-weight: 800; color: var(--primary); cursor: pointer; display: flex; align-items: center; gap: 10px; }
         
         .store-badge { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; }
@@ -61,10 +61,10 @@
         .store-badge.closed { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
 
         .nav-right { display: flex; align-items: center; gap: 12px; }
-        .nav-links { display: flex; gap: 8px; }
-        .nav-links button { background: transparent; color: var(--text-muted); border: none; padding: 10px 16px; font-weight: 600; font-size: 15px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
+        .nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+        .nav-links button { background: transparent; color: var(--text-muted); border: none; padding: 8px 12px; font-weight: 600; font-size: 14px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
         .nav-links button:hover { color: var(--text-main); background: var(--border-color); }
-        .nav-links button.active { color: var(--primary); font-weight: 700; }
+        .nav-links button.active { color: var(--primary); font-weight: 700; background: var(--hero-bg); }
 
         .btn-theme { background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
         .btn-theme:hover { background: var(--border-color); }
@@ -95,9 +95,6 @@
         .btn-maps:hover { background: #15803d; }
 
         .box-section { background: var(--box-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 24px; }
-        .box-section h3 { margin-top: 0; font-size: 16px; display: flex; align-items: center; gap: 8px; color: var(--text-main); }
-        .box-section p { font-size: 14px; color: var(--text-muted); margin-bottom: 16px; }
-        
         .input-group { display: flex; gap: 8px; }
         .input-group input { flex: 1; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 15px; background: var(--input-bg); color: var(--text-main); }
         .input-group button { color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; }
@@ -114,6 +111,11 @@
 
         .btn-submit { width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
         .btn-submit:hover { background: var(--primary-hover); }
+
+        /* RATING BINTANG CSS */
+        .star-rating { display: flex; gap: 8px; font-size: 32px; cursor: pointer; justify-content: center; margin-bottom: 16px; }
+        .star { color: #cbd5e1; transition: 0.2s; }
+        .star.active { color: #f59e0b; }
 
         /* INVOICE SPLIT CARD */
         .invoice-container-split { display: flex; flex-wrap: wrap; gap: 24px; max-width: 900px; margin: 0 auto; animation: slideUp 0.6s ease-out; }
@@ -145,96 +147,24 @@
         .btn-wa:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4); }
 
         /* WIDGET SI KOHAN & MENU INTERAKTIF */
-        #liveMascotWidget {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 99999;
-            display: flex;
-            align-items: flex-end;
-            gap: 12px;
-            pointer-events: none;
-            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
+        #liveMascotWidget { position: fixed; bottom: 20px; right: 20px; z-index: 99999; display: flex; align-items: flex-end; gap: 12px; pointer-events: none; transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
         #liveMascotWidget > * { pointer-events: auto; }
 
-        #kohanMenuOptions {
-            display: none;
-            flex-direction: column;
-            gap: 6px;
-            background: var(--bg-surface);
-            border: 2px solid var(--primary);
-            padding: 10px;
-            border-radius: 14px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            margin-bottom: 10px;
-            animation: popEffect 0.3s ease forwards;
-            min-width: 210px;
-        }
-
-        .kohan-menu-btn {
-            background: var(--hero-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            text-align: left;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+        #kohanMenuOptions { display: none; flex-direction: column; gap: 6px; background: var(--bg-surface); border: 2px solid var(--primary); padding: 10px; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); margin-bottom: 10px; animation: popEffect 0.3s ease forwards; min-width: 210px; }
+        .kohan-menu-btn { background: var(--hero-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; text-align: left; cursor: pointer; transition: 0.2s; }
         .kohan-menu-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
 
-        .kohan-bubble {
-            background: var(--bg-surface);
-            border: 2px solid var(--primary);
-            color: var(--text-main);
-            padding: 12px 18px;
-            border-radius: 16px;
-            font-size: 13px;
-            font-weight: 600;
-            max-width: 240px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            position: relative;
-            transform-origin: bottom right;
-        }
-
+        .kohan-bubble { background: var(--bg-surface); border: 2px solid var(--primary); color: var(--text-main); padding: 12px 18px; border-radius: 16px; font-size: 13px; font-weight: 600; max-width: 240px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); position: relative; transform-origin: bottom right; }
         .pop-anim { animation: popEffect 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes popEffect { 0% { transform: scale(0.8); opacity: 0; } 70% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
 
-        .kohan-avatar {
-            width: 120px;
-            height: 120px;
-            cursor: pointer;
-            animation: kohanFloat 2.5s infinite ease-in-out;
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.35));
-            transition: transform 0.2s;
-        }
+        .kohan-avatar { width: 120px; height: 120px; cursor: pointer; animation: kohanFloat 2.5s infinite ease-in-out; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.35)); transition: transform 0.2s; }
         .kohan-avatar:hover { transform: scale(1.1) rotate(4deg); }
         @keyframes kohanFloat { 0% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-10px) rotate(-2deg); } 100% { transform: translateY(0px) rotate(0deg); } }
         .k-eye { transition: transform 0.1s ease-out; }
 
-        /* TOMBOL INFO MELAYANG DI KIRI BAWAH */
-        #floatingInfoBtn {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            z-index: 99998;
-            background: var(--bg-surface);
-            border: 2px solid var(--primary);
-            color: var(--text-main);
-            padding: 10px 16px;
-            border-radius: 30px;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: 0.2s;
-        }
+        /* TOMBOL MELAYANG DI KIRI BAWAH */
+        #floatingInfoBtn { background: var(--bg-surface); border: 2px solid var(--primary); color: var(--text-main); padding: 10px 16px; border-radius: 30px; font-size: 13px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 8px; transition: 0.2s; }
         #floatingInfoBtn:hover { background: var(--primary); color: white; transform: translateY(-2px); }
 
         .footer { background: var(--bg-surface); border-top: 1px solid var(--border-color); color: var(--text-muted); text-align: center; padding: 24px 20px; font-size: 14px; margin-top: auto; }
@@ -271,7 +201,7 @@
                 <button id="nav-home" class="active" onclick="switchPage('home')">Beranda</button>
                 <button id="nav-order" onclick="switchPage('order')">Pesan</button>
                 <button id="nav-invoice" onclick="switchPage('invoice')" style="display:none;">Invoice</button>
-                <button id="nav-track" onclick="switchPage('track')">Lacak & Riwayat</button>
+                <button id="nav-track" onclick="switchPage('track')">Lacak</button>
             </div>
             <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()" title="Ubah Tema">🌙</button>
         </div>
@@ -300,11 +230,12 @@
             <div class="feature-card">
                 <div class="feature-icon">3</div>
                 <h3>Ambil / Kirim</h3>
-                <p>Datang ke toko fisik untuk mengambil pesanan yang sudah siap.</p>
+                <!-- Kata "fisik" sudah dihapus sesuai catatan -->
+                <p>Datang ke toko untuk mengambil pesanan yang sudah siap.</p>
             </div>
         </div>
 
-        <!-- INFORMASI TOKO FISIK -->
+        <!-- INFORMASI TOKO -->
         <h2 class="section-title">📍 Kunjungi langsung toko kami sekarang!!!</h2>
         <div class="store-info-card">
             <div class="store-info-details">
@@ -429,7 +360,6 @@
                     <textarea id="catatan" placeholder="Contoh: Jilid lakban hitam, atau instruksi potong stiker bulat..."></textarea>
                 </div>
 
-                <!-- STRUKTUR INPUT VOUCHER -->
                 <div class="form-group" style="margin-top: 16px;">
                     <label for="kodeVoucher">Punya Kode Voucher / Promo? ✨</label>
                     <div style="display: flex; gap: 8px;">
@@ -472,7 +402,6 @@
     <!-- HALAMAN INVOICE -->
     <div id="page-invoice" class="page-section">
         <div class="invoice-container-split">
-            
             <div class="ticket-card">
                 <div class="ticket-header">
                     <h3>E-Ticket Pesanan</h3>
@@ -493,16 +422,12 @@
             <div class="payment-card">
                 <div class="payment-title">Selesaikan Pembayaran</div>
                 <div id="invoiceTimer" class="timer-badge">⏱️ 10:00</div>
-                
                 <div class="qris-box">
                     <img src="qris.jpeg" alt="QRIS KohanCopier" style="width: 100%; height: auto; border-radius: 6px; cursor: zoom-in;" onclick="openQrisModal()" title="Klik untuk perbesar">
                 </div>
-                
                 <div class="payment-desc">Scan menggunakan M-Banking / E-Wallet<br>(Gopay, Dana, ShopeePay, dll)</div>
-                
                 <a id="btnInvWA" href="#" target="_blank" class="btn-wa">📱 Konfirmasi via WhatsApp</a>
             </div>
-
         </div>
     </div>
 
@@ -529,14 +454,66 @@
             <div id="trackResult" style="margin-top: 20px; display: none;"></div>
         </div>
     </div>
+
+    <!-- HALAMAN ULASAN & RATING (EVALUASI) -->
+    <div id="page-feedback" class="page-section">
+        <div style="max-width: 600px; margin: 0 auto; background: var(--bg-surface); padding: 40px 32px; border-radius: 24px; box-shadow: var(--shadow); border: 1px solid var(--border-color);">
+            <div style="text-align: center; margin-bottom: 24px;">
+                <div style="font-size: 36px; margin-bottom: 8px;">⭐</div>
+                <h2 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 800;">Beri Ulasan & Rating</h2>
+                <p style="color: var(--text-muted); font-size: 14px; margin: 0;">Masukan kamu sangat berarti untuk evaluasi dan peningkatan layanan KohanCopier.</p>
+            </div>
+
+            <form id="feedbackForm">
+                <div class="form-group">
+                    <label for="fbNama">Nama Lengkap *</label>
+                    <input type="text" id="fbNama" placeholder="Nama kamu" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Rating Pelayanan *</label>
+                    <div class="star-rating" id="starContainer">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                    <input type="hidden" id="fbRating" value="5" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="fbKomentar">Komentar / Saran Evaluasi *</label>
+                    <textarea id="fbKomentar" placeholder="Tuliskan pengalaman cetak kamu di sini..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit" id="btnSubmitFeedback">Kirim Ulasan 🚀</button>
+            </form>
+
+            <div style="margin-top: 30px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <h3 style="font-size: 16px; margin-bottom: 16px;">💬 Ulasan Pelanggan Lain</h3>
+                <div id="listFeedbackContainer" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+                    <p style="color: var(--text-muted); font-size: 13px; text-align: center;">Memuat ulasan...</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- TOMBOL MELAYANG INFO & BANTUAN DI KIRI BAWAH -->
-<button id="floatingInfoBtn" onclick="toggleInfoModal()">
-    <span>💡</span> Info Pembayaran
-</button>
+<!-- TOMBOL-TOMBOL MELAYANG DI KIRI BAWAH -->
+<div style="position: fixed; bottom: 20px; left: 20px; z-index: 99998; display: flex; flex-direction: column; gap: 10px;">
+    <!-- Tombol Info Pembayaran -->
+    <button id="floatingInfoBtn" onclick="toggleInfoModal()">
+        <span>💡</span> Info Pembayaran
+    </button>
 
-<!-- WIDGET MASCOT SI KOHAN (INTERAKTIF DI KANAN BAWAH) -->
+    <!-- Tombol Bulat Kecil Ulasan (Pojok Kiri Bawah) -->
+    <button onclick="switchPage('feedback')" title="Beri Ulasan & Rating" style="width: 44px; height: 44px; background: var(--bg-surface); border: 2px solid #f59e0b; color: #f59e0b; border-radius: 50%; font-size: 20px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; transition: 0.2s;">
+        ⭐
+    </button>
+</div>
+
+<!-- WIDGET MASCOT SI KOHAN -->
 <div id="liveMascotWidget">
     <div style="display: flex; flex-direction: column; align-items: flex-end;">
         <div id="kohanMenuOptions">
@@ -575,30 +552,14 @@
     </svg>
 </div>
 
-<!-- MODAL JENDELA INFORMASI (BISA DIBUKA TUTUP) -->
+<!-- MODAL INFO -->
 <div id="infoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); justify-content: center; align-items: center; padding: 20px; z-index: 100000; backdrop-filter: blur(5px);">
     <div style="background: var(--bg-surface); padding: 36px 28px; border-radius: 24px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); position: relative; border: 1px solid var(--border-color);">
-        
-        <!-- Tombol Tutup (X) -->
         <button onclick="toggleInfoModal()" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer;">✕</button>
-
-        <div style="width: 64px; height: 64px; background: var(--hero-bg); border: 2px solid var(--hero-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 20px auto;">
-            👋
-        </div>
-
+        <div style="width: 64px; height: 64px; background: var(--hero-bg); border: 2px solid var(--hero-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 20px auto;">👋</div>
         <h3 style="margin: 0 0 10px 0; font-size: 22px; color: var(--text-main); font-weight: 800;">Informasi KohanCopier</h3>
-        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6;">
-            Terima kasih sudah mengunjungi <b>KohanCopier</b>! Kami informasikan bahwa sistem pembayaran saat ini masih menggunakan verifikasi manual (Admin akan mengecek transferan masuk dan mengubah status pembayaran secara manual setelah konfirmasi WhatsApp).
-        </p>
-
-        <div style="background: var(--box-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; margin-bottom: 24px; text-align: left; font-size: 13px; color: var(--text-muted); display: flex; gap: 10px; align-items: center;">
-            <span style="font-size: 20px;">💡</span>
-            <span>Pastikan kamu menekan tombol konfirmasi via WhatsApp setelah melakukan pembayaran QRIS ya!</span>
-        </div>
-
-        <button type="button" onclick="toggleInfoModal()" style="width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); transition: 0.2s;">
-            Tutup Jendela Ini 👍
-        </button>
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6;">Terima kasih sudah mengunjungi <b>KohanCopier</b>! Sistem pembayaran saat ini menggunakan verifikasi manual melalui konfirmasi WhatsApp.</p>
+        <button type="button" onclick="toggleInfoModal()" style="width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer;">Tutup Jendela Ini 👍</button>
     </div>
 </div>
 
@@ -679,27 +640,33 @@
                 localStorage.setItem('kohan_info_manual_pay_2026', 'true');
             }, 800);
         }
+
+        // Setup Rating Bintang Interaktif
+        const stars = document.querySelectorAll('.star');
+        const ratingInput = document.getElementById('fbRating');
+        stars.forEach((star, index) => {
+            star.addEventListener('click', () => {
+                const val = star.getAttribute('data-value');
+                ratingInput.value = val;
+                stars.forEach((s, i) => {
+                    if (i < val) { s.classList.add('active'); } 
+                    else { s.classList.remove('active'); }
+                });
+            });
+        });
+        stars.forEach(s => s.classList.add('active'));
     });
 
     function toggleInfoModal() {
         const modal = document.getElementById('infoModal');
-        if (modal.style.display === 'flex') {
-            modal.style.display = 'none';
-        } else {
-            modal.style.display = 'flex';
-            setExpression('happy');
-        }
+        if (modal.style.display === 'flex') { modal.style.display = 'none'; } 
+        else { modal.style.display = 'flex'; setExpression('happy'); }
     }
 
     function toggleMenu() {
         const menu = document.getElementById('kohanMenuOptions');
-        if (menu.style.display === 'flex') {
-            menu.style.display = 'none';
-        } else {
-            menu.style.display = 'flex';
-            setExpression('excited');
-            document.getElementById('kohanBubble').innerHTML = `Halo! Mau pilih menu apa nih sama ${namaMaskot}? 😊`;
-        }
+        if (menu.style.display === 'flex') { menu.style.display = 'none'; } 
+        else { menu.style.display = 'flex'; setExpression('excited'); document.getElementById('kohanBubble').innerHTML = `Halo! Mau pilih menu apa nih sama ${namaMaskot}? 😊`; }
     }
 
     function tutupMenu() {
@@ -715,26 +682,22 @@
         if (opsi === 'A') {
             setExpression('happy');
             bubble.innerHTML = `<b>📖 Cara Pakai KohanCopier:</b><br>1. Pilih menu 'Pesan'<br>2. Upload file & atur jumlah<br>3. Bayar QRIS & konfirmasi via WA! 🚀`;
-        } 
-        else if (opsi === 'B') {
+        } else if (opsi === 'B') {
             setExpression('laughing');
-            bubble.innerHTML = `Yay! Senangnya dielus-elus sama kamu! ${namaMaskot} bakal semangat terus cetak dokumennya! 💖✨`;
+            bubble.innerHTML = `Yay! Senangnya dielus-elus sama kamu! ${namaMaskot} bakal semangat terus! 💖✨`;
             const svg = document.getElementById('kohanSvg');
             if(svg) {
                 svg.style.transform = "scale(1.25) translateY(-20px)";
                 setTimeout(() => { svg.style.transform = "scale(1) translateY(0)"; }, 400);
             }
-        } 
-        else if (opsi === 'C') {
+        } else if (opsi === 'C') {
             setExpression('thinking');
             document.getElementById('inputNamaBaru').value = namaMaskot;
             document.getElementById('renameModal').style.display = 'flex';
         }
     }
 
-    function tutupModalRename() {
-        document.getElementById('renameModal').style.display = 'none';
-    }
+    function tutupModalRename() { document.getElementById('renameModal').style.display = 'none'; }
 
     function simpanNamaBaru() {
         const inputVal = document.getElementById('inputNamaBaru').value.trim();
@@ -758,26 +721,19 @@
 
         if (type === 'happy') {
             eyebrows.innerHTML = '<line x1="70" y1="67" x2="86" y2="67"/><line x1="114" y1="67" x2="130" y2="67"/>';
-            mouth.setAttribute('d', 'M92 88 Q100 96 108 88');
-            mouth.removeAttribute('fill');
-            eyes.innerHTML = '<circle id="leftEye" class="k-eye" cx="78" cy="78" r="9" fill="#38bdf8"/><circle id="rightEye" class="k-eye" cx="122" cy="78" r="9" fill="#38bdf8"/>';
-        } 
-        else if (type === 'excited') {
+            mouth.setAttribute('d', 'M92 88 Q100 96 108 88'); mouth.removeAttribute('fill');
+            eyes.innerHTML = '<circle cx="78" cy="78" r="9" fill="#38bdf8"/><circle cx="122" cy="78" r="9" fill="#38bdf8"/>';
+        } else if (type === 'excited') {
             eyebrows.innerHTML = '<path d="M70 70 L86 64" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/><path d="M114 64 L130 70" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>';
-            mouth.setAttribute('d', 'M88 84 Q100 106 112 84 Z');
-            mouth.setAttribute('fill', '#38bdf8');
+            mouth.setAttribute('d', 'M88 84 Q100 106 112 84 Z'); mouth.setAttribute('fill', '#38bdf8');
             eyes.innerHTML = '<circle cx="78" cy="78" r="9" fill="#f59e0b"/><circle cx="122" cy="78" r="9" fill="#f59e0b"/>';
-        } 
-        else if (type === 'laughing') {
+        } else if (type === 'laughing') {
             eyebrows.innerHTML = '<path d="M70 66 Q78 60 86 66"/><path d="M114 66 Q122 60 130 66"/>';
-            mouth.setAttribute('d', 'M86 86 Q100 104 114 86');
-            mouth.removeAttribute('fill');
+            mouth.setAttribute('d', 'M86 86 Q100 104 114 86'); mouth.removeAttribute('fill');
             eyes.innerHTML = '<path d="M70 80 Q78 68 86 80" stroke="#38bdf8" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M114 80 Q122 68 130 80" stroke="#38bdf8" stroke-width="3.5" fill="none" stroke-linecap="round"/>';
-        }
-        else if (type === 'thinking') {
+        } else if (type === 'thinking') {
             eyebrows.innerHTML = '<line x1="70" y1="64" x2="86" y2="70"/><line x1="114" y1="67" x2="130" y2="67"/>';
-            mouth.setAttribute('d', 'M92 90 Q100 84 108 90');
-            mouth.removeAttribute('fill');
+            mouth.setAttribute('d', 'M92 90 Q100 84 108 90'); mouth.removeAttribute('fill');
             eyes.innerHTML = '<circle cx="78" cy="78" r="8" fill="#38bdf8"/><circle cx="122" cy="78" r="9" fill="#38bdf8"/>';
         }
     }
@@ -786,12 +742,9 @@
         const bubble = document.getElementById('kohanBubble');
         const svg = document.getElementById('kohanSvg');
         if(!bubble || !svg) return;
-        bubble.classList.remove('pop-anim');
-        svg.classList.remove('pop-anim');
-        void bubble.offsetWidth;
-        void svg.offsetWidth;
-        bubble.classList.add('pop-anim');
-        svg.classList.add('pop-anim');
+        bubble.classList.remove('pop-anim'); svg.classList.remove('pop-anim');
+        void bubble.offsetWidth; void svg.offsetWidth;
+        bubble.classList.add('pop-anim'); svg.classList.add('pop-anim');
     }
 
     function toggleTheme() {
@@ -799,18 +752,16 @@
         const currentTheme = html.getAttribute('data-theme');
         const themeBtn = document.getElementById('themeToggleBtn');
         if (currentTheme === 'dark') {
-            html.removeAttribute('data-theme');
-            localStorage.setItem('kohancopier_theme', 'light');
+            html.removeAttribute('data-theme'); localStorage.setItem('kohancopier_theme', 'light');
             if(themeBtn) themeBtn.innerText = '🌙';
         } else {
-            html.setAttribute('data-theme', 'dark');
-            localStorage.setItem('kohancopier_theme', 'dark');
+            html.setAttribute('data-theme', 'dark'); localStorage.setItem('kohancopier_theme', 'dark');
             if(themeBtn) themeBtn.innerText = '☀️';
         }
     }
 
     function switchPage(pageId) {
-        ['home', 'order', 'invoice', 'track'].forEach(id => {
+        ['home', 'order', 'invoice', 'track', 'feedback'].forEach(id => {
             const nav = document.getElementById('nav-' + id);
             const page = document.getElementById('page-' + id);
             if (nav) nav.classList.remove('active');
@@ -827,29 +778,23 @@
 
         const bubble = document.getElementById('kohanBubble');
         if (pageId === 'home') {
-            bubble.innerHTML = `Halo! Mau cetak apa hari ini? Klik aku ya buat buka menu! 🚀`;
-            setExpression('excited');
+            bubble.innerHTML = `Halo! Mau cetak apa hari ini? Klik aku ya buat buka menu! 🚀`; setExpression('excited');
         } else if (pageId === 'order') {
-            bubble.innerHTML = `Jangan lupa upload file PDF atau stiker resolusi tinggi ya! 📄✨`;
-            setExpression('thinking');
+            bubble.innerHTML = `Jangan lupa upload file PDF atau stiker resolusi tinggi ya! 📄✨`; setExpression('thinking');
         } else if (pageId === 'invoice') {
-            bubble.innerHTML = `Yey! Silakan scan QRIS dan konfirmasi via WA ya. 🎉`;
-            setExpression('laughing');
+            bubble.innerHTML = `Yey! Silakan scan QRIS dan konfirmasi via WA ya. 🎉`; setExpression('laughing');
         } else if (pageId === 'track') {
-            bubble.innerHTML = `Masukkan nomor WhatsApp kamu untuk melacak status pesanan! 🔍`;
-            setExpression('happy');
+            bubble.innerHTML = `Masukkan nomor WhatsApp kamu untuk melacak status pesanan! 🔍`; setExpression('happy');
+        } else if (pageId === 'feedback') {
+            bubble.innerHTML = `Bagikan ulasan dan rating untuk membantu kami berkembang ya! ⭐`; setExpression('happy');
+            if(typeof loadFeedbackList === 'function') loadFeedbackList();
         }
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function openQrisModal() {
-        document.getElementById('qrisModal').style.display = 'flex';
-    }
-
-    function closeQrisModal() {
-        document.getElementById('qrisModal').style.display = 'none';
-    }
+    function openQrisModal() { document.getElementById('qrisModal').style.display = 'flex'; }
+    function closeQrisModal() { document.getElementById('qrisModal').style.display = 'none'; }
 
     document.addEventListener('mousemove', (e) => {
         const leftEye = document.getElementById('leftEye');
@@ -857,10 +802,8 @@
         if (leftEye && rightEye) {
             const x = (e.clientX / window.innerWidth - 0.5) * 4;
             const y = (e.clientY / window.innerHeight - 0.5) * 4;
-            leftEye.setAttribute('cx', 78 + x);
-            leftEye.setAttribute('cy', 78 + y);
-            rightEye.setAttribute('cx', 122 + x);
-            rightEye.setAttribute('cy', 77 + y);
+            leftEye.setAttribute('cx', 78 + x); leftEye.setAttribute('cy', 78 + y);
+            rightEye.setAttribute('cx', 122 + x); rightEye.setAttribute('cy', 77 + y);
         }
     });
 </script>

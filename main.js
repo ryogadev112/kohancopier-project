@@ -88,6 +88,7 @@ function generateJadwalAmbil() {
 window.addEventListener('DOMContentLoaded', () => {
     checkLiveStoreStatus();
     generateJadwalAmbil();
+    updatePrice();
 });
 
 // --- FORM HANDLER & PRICING ---
@@ -102,17 +103,19 @@ const jumlahLembarStikerInput = document.getElementById('jumlahLembarStiker');
 const ukuranKertasSelect = document.getElementById('ukuranKertas');
 const groupCustomUkuran = document.getElementById('groupCustomUkuran');
 const jumlahHalamanInput = document.getElementById('jumlahHalaman');
+const jumlahCopyInput = document.getElementById('jumlahCopy');
+const pricePreview = document.getElementById('pricePreview');
 
 function handleKategoriChange() {
     if (!kategoriLayanan) return;
     if (kategoriLayanan.value === 'stiker') {
-        sectionDokumen.style.display = 'none';
-        sectionStiker.style.display = 'block';
+        if(sectionDokumen) sectionDokumen.style.display = 'none';
+        if(sectionStiker) sectionStiker.style.display = 'block';
         if (fileLabel) fileLabel.innerText = "Upload File Desain Stiker (PNG/JPG/CDR/PDF) *";
         if (fileHelper) fileHelper.innerHTML = "💡 <b>Tips Stiker:</b> Gunakan file resolusi tinggi (PNG transparan/CDR/PDF). Maksimal 10MB.";
     } else {
-        sectionDokumen.style.display = 'block';
-        sectionStiker.style.display = 'none';
+        if(sectionDokumen) sectionDokumen.style.display = 'block';
+        if(sectionStiker) sectionStiker.style.display = 'none';
         if (fileLabel) fileLabel.innerText = "Upload File Dokumen (PDF/DOCX) *";
         if (fileHelper) fileHelper.innerHTML = "Format: PDF (Auto-deteksi halaman), DOCX. Maksimal 10MB.";
     }
@@ -123,7 +126,9 @@ if (kategoriLayanan) kategoriLayanan.addEventListener('change', handleKategoriCh
 
 if (ukuranKertasSelect) {
     ukuranKertasSelect.addEventListener('change', () => {
-        groupCustomUkuran.style.display = ukuranKertasSelect.value === 'Custom' ? 'block' : 'none';
+        if(groupCustomUkuran) {
+            groupCustomUkuran.style.display = ukuranKertasSelect.value === 'Custom' ? 'block' : 'none';
+        }
         updatePrice();
     });
 }
@@ -168,9 +173,7 @@ if (fileInput) {
     });
 }
 
-const jumlahCopyInput = document.getElementById('jumlahCopy');
-const pricePreview = document.getElementById('pricePreview');
-
+// --- FUNGSI UTAMA KALKULASI HARGA (FIXED AUTO-ESTIMATION) ---
 function updatePrice() {
     const kategori = kategoriLayanan ? kategoriLayanan.value : 'dokumen';
     let total = 0;
@@ -178,26 +181,46 @@ function updatePrice() {
     if (kategori === 'stiker') {
         const jenisStiker = jenisStikerSelect ? jenisStikerSelect.value : 'Vinyl';
         const jumlah = parseInt(jumlahLembarStikerInput ? jumlahLembarStikerInput.value : 1) || 1;
-        let hargaSatuan = jenisStiker === 'Kromo' ? 15000 : (jenisStiker === 'Roll' ? 50000 : 25000);
+        let hargaSatuan = 25000;
+        
+        if (jenisStiker === 'Kromo') {
+            hargaSatuan = 15000;
+        } else if (jenisStiker === 'Roll') {
+            hargaSatuan = 50000;
+        }
+        
         total = jumlah * hargaSatuan;
     } else {
         const hal = parseInt(jumlahHalamanInput ? jumlahHalamanInput.value : 1) || 1;
         const copy = parseInt(jumlahCopyInput ? jumlahCopyInput.value : 1) || 1;
+        
         const checkedRadio = document.querySelector('input[name="jenisCetak"]:checked');
         const jenis = checkedRadio ? checkedRadio.value : 'Hitam Putih';
         const ukuranKertas = ukuranKertasSelect ? ukuranKertasSelect.value : 'A4';
         
-        let hargaPerHal = jenis === 'Warna' ? 2000 : 1000;
-        if (ukuranKertas === 'A3+') hargaPerHal *= 2;
+        let hargaPerHal = (jenis === 'Warna') ? 2000 : 1000;
+        
+        if (ukuranKertas === 'A3+') {
+            hargaPerHal *= 2;
+        }
+        
         total = hal * copy * hargaPerHal;
     }
     
-    if(pricePreview) pricePreview.innerText = "Rp " + total.toLocaleString('id-ID');
+    if (pricePreview) {
+        pricePreview.innerText = "Rp " + total.toLocaleString('id-ID');
+    }
 }
 
 if (jumlahHalamanInput) jumlahHalamanInput.addEventListener('input', updatePrice);
 if (jumlahCopyInput) jumlahCopyInput.addEventListener('input', updatePrice);
 if (jumlahLembarStikerInput) jumlahLembarStikerInput.addEventListener('input', updatePrice);
+
+document.addEventListener('change', (e) => {
+    if (e.target && e.target.name === 'jenisCetak') {
+        updatePrice();
+    }
+});
 
 // --- TIMER INVOICE ---
 let countdownInterval;
@@ -294,7 +317,6 @@ if (btnProceedInvoice) {
         btnProceedInvoice.innerText = "⏳ Mengunggah...";
 
         try {
-            // 1. CEK JUMLAH PESANAN SAAT INI UNTUK ANTREAN (KHN-001, KHN-002, dst)
             const { count, error: countError } = await supabaseClient
                 .from('orders')
                 .select('*', { count: 'exact', head: true });
@@ -303,7 +325,6 @@ if (btnProceedInvoice) {
             const formattedNumber = String(nextNumber).padStart(3, '0');
             const noAntrian = `KHN-${formattedNumber}`;
 
-            // 2. Upload file ke Supabase Storage
             const file = tempOrderData.file;
             const fileExt = file.name.split('.').pop();
             const fileNameCloud = `${Date.now()}_${tempOrderData.phone}.${fileExt}`;
@@ -315,7 +336,6 @@ if (btnProceedInvoice) {
 
             if (uploadError) throw uploadError;
 
-            // 3. Dapatkan Public URL File
             const { data: urlData } = supabaseClient
                 .storage
                 .from('kohan-files')
@@ -323,7 +343,6 @@ if (btnProceedInvoice) {
 
             const filePublicUrl = urlData.publicUrl;
 
-            // 4. Simpan data ke Database Supabase
             const { error: dbError } = await supabaseClient
                 .from('orders')
                 .insert([
@@ -344,7 +363,6 @@ if (btnProceedInvoice) {
 
             if (dbError) throw dbError;
 
-            // Render ke invoice
             document.getElementById('invPhone').innerText = tempOrderData.phone;
             document.getElementById('invNama').innerText = tempOrderData.nama;
             document.getElementById('invDetail').innerText = `[NO ANTREAN: ${noAntrian}]\n${tempOrderData.detailText}\nFile: ${file.name}\nAmbil: ${tempOrderData.waktuAmbil}`;

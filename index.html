@@ -661,7 +661,6 @@
         if(lbl2) lbl2.innerText = namaMaskot;
     }
 
-    // Munculkan Welcome Popup otomatis sekali saja saat pertama kali buka web
     window.addEventListener('DOMContentLoaded', () => {
         const savedTheme = localStorage.getItem('kohancopier_theme');
         const themeBtn = document.getElementById('themeToggleBtn');
@@ -682,7 +681,6 @@
         }
     });
 
-    // Fungsi Buka-Tutup Jendela Informasi via Tombol Kiri Bawah
     function toggleInfoModal() {
         const modal = document.getElementById('infoModal');
         if (modal.style.display === 'flex') {

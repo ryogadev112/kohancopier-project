@@ -154,7 +154,18 @@
         .kohan-menu-btn { background: var(--hero-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; text-align: left; cursor: pointer; transition: 0.2s; }
         .kohan-menu-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
 
-        .kohan-bubble { background: var(--bg-surface); border: 2px solid var(--primary); color: var(--text-main); padding: 12px 18px; border-radius: 16px; font-size: 13px; font-weight: 600; max-width: 240px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); position: relative; transform-origin: bottom right; }
+        .kohan-bubble { background: var(--bg-surface); border: 2px solid var(--primary); color: var(--text-main); padding: 12px 18px; border-radius: 16px; font-size: 13px; font-weight: 600; max-width: 240px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); position: relative; transform-origin: bottom right; display: none; }
+        
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(10px) scale(0.95); }
+            15% { opacity: 1; transform: translateY(0) scale(1); }
+            85% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(10px) scale(0.95); pointer-events: none; }
+        }
+        .bubble-anim {
+            animation: fadeInOut 4s ease forwards;
+        }
+
         .pop-anim { animation: popEffect 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes popEffect { 0% { transform: scale(0.8); opacity: 0; } 70% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
 
@@ -528,7 +539,7 @@
             <button class="kohan-menu-btn" onclick="pilihOpsi('C')">✏️ C. Ganti Nama Maskot</button>
             <button class="kohan-menu-btn" style="background: rgba(239,68,68,0.1); color: #ef4444; border-color: rgba(239,68,68,0.3); text-align: center;" onclick="tutupMenu()">✖ Tutup Menu</button>
         </div>
-        <div id="kohanBubble" class="kohan-bubble pop-anim">
+        <div id="kohanBubble" class="kohan-bubble">
             Halo! Klik aku kalau butuh bantuan ya! 🚀
         </div>
     </div>
@@ -563,7 +574,7 @@
         <button onclick="toggleInfoModal()" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer;">✕</button>
         <div style="width: 64px; height: 64px; background: var(--hero-bg); border: 2px solid var(--hero-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 20px auto;">👋</div>
         <h3 style="margin: 0 0 10px 0; font-size: 22px; color: var(--text-main); font-weight: 800;">Informasi KohanCopier</h3>
-        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6;">"Halo, terima kasih sudah mampir ke KohanCopier! Info penting: pembayaran saat ini diverifikasi manual ya (admin cek transferan masuk lalu update status pesanan). Terima kasih banyak!"</p>
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6;">Terima kasih sudah mengunjungi <b>KohanCopier</b>! Kami informasikan bahwa sistem pembayaran saat ini menggunakan verifikasi manual (admin cek transferan masuk, lalu update status pesanan.) terima kasih.</p>
         <button type="button" onclick="toggleInfoModal()" style="width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer;">Tutup Jendela Ini 👍</button>
     </div>
 </div>
@@ -619,12 +630,30 @@
 <script>
     let namaMaskot = localStorage.getItem('kohan_pet_name') || "Si Kohan";
     updateNamaLabels();
+    let bubbleTimeout = null;
 
     function updateNamaLabels() {
         const lbl1 = document.getElementById('namaPetLabel');
         const lbl2 = document.getElementById('namaPetLabel2');
         if(lbl1) lbl1.innerText = namaMaskot;
         if(lbl2) lbl2.innerText = namaMaskot;
+    }
+
+    function tampilkanPesanMascot(pesan, durasi = 4000) {
+        const bubble = document.getElementById('kohanBubble');
+        if (!bubble) return;
+
+        bubble.innerHTML = pesan;
+        bubble.style.display = 'block';
+        bubble.classList.remove('bubble-anim');
+        void bubble.offsetWidth; 
+        bubble.classList.add('bubble-anim');
+
+        if (bubbleTimeout) clearTimeout(bubbleTimeout);
+
+        bubbleTimeout = setTimeout(() => {
+            bubble.style.display = 'none';
+        }, durasi);
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -645,6 +674,9 @@
                 localStorage.setItem('kohan_info_manual_pay_2026', 'true');
             }, 800);
         }
+
+        // Tampilkan pesan awal saat halaman pertama dimuat
+        tampilkanPesanMascot(`Halo! Mau cetak apa hari ini? Klik aku ya buat buka menu! 🚀`, 4000);
 
         // Setup Rating Bintang Interaktif
         const stars = document.querySelectorAll('.star');
@@ -670,8 +702,14 @@
 
     function toggleMenu() {
         const menu = document.getElementById('kohanMenuOptions');
-        if (menu.style.display === 'flex') { menu.style.display = 'none'; } 
-        else { menu.style.display = 'flex'; setExpression('excited'); document.getElementById('kohanBubble').innerHTML = `Halo! Mau pilih menu apa nih sama ${namaMaskot}? 😊`; }
+        
+        if (menu.style.display === 'flex') { 
+            menu.style.display = 'none'; 
+        } else { 
+            menu.style.display = 'flex'; 
+            setExpression('excited'); 
+            tampilkanPesanMascot(`Halo! Mau pilih menu apa nih sama ${namaMaskot}? 😊`, 6000);
+        }
     }
 
     function tutupMenu() {
@@ -680,16 +718,15 @@
     }
 
     function pilihOpsi(opsi) {
-        const bubble = document.getElementById('kohanBubble');
         tutupMenu();
         triggerPopAnimation();
 
         if (opsi === 'A') {
             setExpression('happy');
-            bubble.innerHTML = `<b>📖 Cara Pakai KohanCopier:</b><br>1. Pilih menu 'Pesan'<br>2. Upload file & atur jumlah<br>3. Bayar QRIS & konfirmasi via WA! 🚀`;
+            tampilkanPesanMascot(`<b>📖 Cara Pakai KohanCopier:</b><br>1. Pilih menu 'Pesan'<br>2. Upload file & atur jumlah<br>3. Bayar QRIS & konfirmasi via WA! 🚀`, 6000);
         } else if (opsi === 'B') {
             setExpression('laughing');
-            bubble.innerHTML = `Yay! Senangnya dielus-elus sama kamu! ${namaMaskot} bakal semangat terus! 💖✨`;
+            tampilkanPesanMascot(`Yay! Senangnya dielus-elus sama kamu! ${namaMaskot} bakal semangat terus! 💖✨`, 5000);
             const svg = document.getElementById('kohanSvg');
             if(svg) {
                 svg.style.transform = "scale(1.25) translateY(-20px)";
@@ -706,13 +743,12 @@
 
     function simpanNamaBaru() {
         const inputVal = document.getElementById('inputNamaBaru').value.trim();
-        const bubble = document.getElementById('kohanBubble');
         if (inputVal !== "") {
             namaMaskot = inputVal;
             localStorage.setItem('kohan_pet_name', namaMaskot);
             updateNamaLabels();
             setExpression('excited');
-            bubble.innerHTML = `Hore! Mulai sekarang panggil aku <b>${namaMaskot}</b> ya! Siap melayani! 🎉`;
+            tampilkanPesanMascot(`Hore! Mulai sekarang panggil aku <b>${namaMaskot}</b> ya! Siap melayani! 🎉`, 5000);
         }
         tutupModalRename();
         triggerPopAnimation();
@@ -747,9 +783,9 @@
         const bubble = document.getElementById('kohanBubble');
         const svg = document.getElementById('kohanSvg');
         if(!bubble || !svg) return;
-        bubble.classList.remove('pop-anim'); svg.classList.remove('pop-anim');
-        void bubble.offsetWidth; void svg.offsetWidth;
-        bubble.classList.add('pop-anim'); svg.classList.add('pop-anim');
+        svg.classList.remove('pop-anim');
+        void svg.offsetWidth;
+        svg.classList.add('pop-anim');
     }
 
     function toggleTheme() {
@@ -781,17 +817,21 @@
         tutupMenu();
         triggerPopAnimation();
 
-        const bubble = document.getElementById('kohanBubble');
         if (pageId === 'home') {
-            bubble.innerHTML = `Halo! Mau cetak apa hari ini? Klik aku ya buat buka menu! 🚀`; setExpression('excited');
+            tampilkanPesanMascot(`Halo! Mau cetak apa hari ini? Klik aku ya buat buka menu! 🚀`, 4000);
+            setExpression('excited');
         } else if (pageId === 'order') {
-            bubble.innerHTML = `Jangan lupa upload file PDF atau stiker resolusi tinggi ya! 📄✨`; setExpression('thinking');
+            tampilkanPesanMascot(`Jangan lupa upload file PDF atau stiker resolusi tinggi ya! 📄✨`, 4000);
+            setExpression('thinking');
         } else if (pageId === 'invoice') {
-            bubble.innerHTML = `Yey! Silakan scan QRIS dan konfirmasi via WA ya. 🎉`; setExpression('laughing');
+            tampilkanPesanMascot(`Yey! Silakan scan QRIS dan konfirmasi via WA ya. 🎉`, 4000);
+            setExpression('laughing');
         } else if (pageId === 'track') {
-            bubble.innerHTML = `Masukkan nomor WhatsApp kamu untuk melacak status pesanan! 🔍`; setExpression('happy');
+            tampilkanPesanMascot(`Masukkan nomor WhatsApp kamu untuk melacak status pesanan! 🔍`, 4000);
+            setExpression('happy');
         } else if (pageId === 'feedback') {
-            bubble.innerHTML = `Bagikan ulasan dan rating untuk membantu kami berkembang ya! ⭐`; setExpression('happy');
+            tampilkanPesanMascot(`Bagikan ulasan dan rating untuk membantu kami berkembang ya! ⭐`, 4000);
+            setExpression('happy');
             if(typeof loadFeedbackList === 'function') loadFeedbackList();
         }
 

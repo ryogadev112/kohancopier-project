@@ -215,6 +215,28 @@
         @keyframes kohanFloat { 0% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-10px) rotate(-2deg); } 100% { transform: translateY(0px) rotate(0deg); } }
         .k-eye { transition: transform 0.1s ease-out; }
 
+        /* TOMBOL INFO MELAYANG DI KIRI BAWAH */
+        #floatingInfoBtn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 99998;
+            background: var(--bg-surface);
+            border: 2px solid var(--primary);
+            color: var(--text-main);
+            padding: 10px 16px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+        #floatingInfoBtn:hover { background: var(--primary); color: white; transform: translateY(-2px); }
+
         .footer { background: var(--bg-surface); border-top: 1px solid var(--border-color); color: var(--text-muted); text-align: center; padding: 24px 20px; font-size: 14px; margin-top: auto; }
 
         @media (max-width: 768px) {
@@ -509,7 +531,12 @@
     </div>
 </div>
 
-<!-- WIDGET MASCOT SI KOHAN (INTERAKTIF) -->
+<!-- TOMBOL MELAYANG INFO & BANTUAN DI KIRI BAWAH -->
+<button id="floatingInfoBtn" onclick="toggleInfoModal()">
+    <span>💡</span> Info Pembayaran
+</button>
+
+<!-- WIDGET MASCOT SI KOHAN (INTERAKTIF DI KANAN BAWAH) -->
 <div id="liveMascotWidget">
     <div style="display: flex; flex-direction: column; align-items: flex-end;">
         <div id="kohanMenuOptions">
@@ -548,15 +575,18 @@
     </svg>
 </div>
 
-<!-- MODAL JENDELA INFORMASI (WELCOME POPUP) -->
+<!-- MODAL JENDELA INFORMASI (BISA DIBUKA TUTUP) -->
 <div id="infoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); justify-content: center; align-items: center; padding: 20px; z-index: 100000; backdrop-filter: blur(5px);">
     <div style="background: var(--bg-surface); padding: 36px 28px; border-radius: 24px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); position: relative; border: 1px solid var(--border-color);">
         
+        <!-- Tombol Tutup (X) -->
+        <button onclick="toggleInfoModal()" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer;">✕</button>
+
         <div style="width: 64px; height: 64px; background: var(--hero-bg); border: 2px solid var(--hero-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 20px auto;">
             👋
         </div>
 
-        <h3 style="margin: 0 0 10px 0; font-size: 22px; color: var(--text-main); font-weight: 800;">Halo, Selamat Datang!</h3>
+        <h3 style="margin: 0 0 10px 0; font-size: 22px; color: var(--text-main); font-weight: 800;">Informasi KohanCopier</h3>
         <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6;">
             Terima kasih sudah mengunjungi <b>KohanCopier</b>! Kami informasikan bahwa sistem pembayaran saat ini masih menggunakan verifikasi manual (Admin akan mengecek transferan masuk dan mengubah status pembayaran secara manual setelah konfirmasi WhatsApp).
         </p>
@@ -566,8 +596,8 @@
             <span>Pastikan kamu menekan tombol konfirmasi via WhatsApp setelah melakukan pembayaran QRIS ya!</span>
         </div>
 
-        <button type="button" onclick="tutupInfoModal()" style="width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); transition: 0.2s;">
-            Mengerti, Lanjutkan! 🔥
+        <button type="button" onclick="toggleInfoModal()" style="width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); transition: 0.2s;">
+            Tutup Jendela Ini 👍
         </button>
     </div>
 </div>
@@ -631,7 +661,7 @@
         if(lbl2) lbl2.innerText = namaMaskot;
     }
 
-    // Munculkan Welcome Popup saat pertama kali buka web
+    // Munculkan Welcome Popup otomatis sekali saja saat pertama kali buka web
     window.addEventListener('DOMContentLoaded', () => {
         const savedTheme = localStorage.getItem('kohancopier_theme');
         const themeBtn = document.getElementById('themeToggleBtn');
@@ -642,22 +672,25 @@
             if(themeBtn) themeBtn.innerText = '🌙';
         }
 
-        // Cek apakah info modal sudah pernah ditutup sebelumnya
         const sudahDibaca = localStorage.getItem('kohan_info_manual_pay_2026');
         if (!sudahDibaca) {
             setTimeout(() => {
                 document.getElementById('infoModal').style.display = 'flex';
                 setExpression('excited');
+                localStorage.setItem('kohan_info_manual_pay_2026', 'true');
             }, 800);
         }
     });
 
-    function tutupInfoModal() {
-        document.getElementById('infoModal').style.display = 'none';
-        localStorage.setItem('kohan_info_manual_pay_2026', 'true');
-        const bubble = document.getElementById('kohanBubble');
-        if(bubble) bubble.innerHTML = `Halo! Selamat datang di KohanCopier ya! 🎉`;
-        triggerPopAnimation();
+    // Fungsi Buka-Tutup Jendela Informasi via Tombol Kiri Bawah
+    function toggleInfoModal() {
+        const modal = document.getElementById('infoModal');
+        if (modal.style.display === 'flex') {
+            modal.style.display = 'none';
+        } else {
+            modal.style.display = 'flex';
+            setExpression('happy');
+        }
     }
 
     function toggleMenu() {

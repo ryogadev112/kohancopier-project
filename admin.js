@@ -2,7 +2,10 @@
 const SUPABASE_URL = "https://gputfcshhgppygipxzfh.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwdXRmY3NoaGdwcHlnaXB4emZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxMjQxNDMsImV4cCI6MjEwNDcwMDE0M30.vhd6pH6jkNsbnnZsjgonc8xGc7yk-rQIZSgegiXbmBs";
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
 
 const loginSection = document.getElementById('loginSection');
 const dashboardSection = document.getElementById('dashboardSection');
@@ -11,26 +14,33 @@ const loginError = document.getElementById('loginError');
 const btnLoginSubmit = document.getElementById('btnLoginSubmit');
 const adminUserLabel = document.getElementById('adminUserLabel');
 
+
 // --- CEK HAK AKSES ADMIN ---
 async function checkAdminAccess() {
-    const { data: { session }, error: sessionError } =
-        await supabaseClient.auth.getSession();
+    const {
+        data: { session },
+        error: sessionError
+    } = await supabaseClient.auth.getSession();
 
     if (sessionError || !session?.user) {
         showLoginForm();
         return false;
     }
 
-    const { data: isAdmin, error: adminError } =
-        await supabaseClient.rpc('is_admin');
+    const {
+        data: isAdmin,
+        error: adminError
+    } = await supabaseClient.rpc('is_admin');
 
     if (adminError) {
         console.error('Gagal mengecek admin:', adminError);
+
         await supabaseClient.auth.signOut();
         showLoginForm();
 
         if (loginError) {
-            loginError.innerText = "❌ Gagal memverifikasi akses admin.";
+            loginError.innerText =
+                "❌ Gagal memverifikasi akses admin.";
             loginError.style.display = 'block';
         }
 
@@ -42,7 +52,8 @@ async function checkAdminAccess() {
         showLoginForm();
 
         if (loginError) {
-            loginError.innerText = "❌ Akses ditolak. Akun ini bukan admin.";
+            loginError.innerText =
+                "❌ Akses ditolak. Akun ini bukan admin.";
             loginError.style.display = 'block';
         }
 
@@ -52,13 +63,15 @@ async function checkAdminAccess() {
     return true;
 }
 
+
 // --- CEK SESI LOGIN SAAT HALAMAN DIBUKA ---
 window.addEventListener('DOMContentLoaded', async () => {
     const isAdmin = await checkAdminAccess();
 
     if (isAdmin) {
-        const { data: { session } } =
-            await supabaseClient.auth.getSession();
+        const {
+            data: { session }
+        } = await supabaseClient.auth.getSession();
 
         if (session) {
             showDashboard(session.user);
@@ -66,17 +79,35 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+
 function showLoginForm() {
-    if (loginSection) loginSection.style.display = 'flex';
-    if (dashboardSection) dashboardSection.style.display = 'none';
+    if (loginSection) {
+        loginSection.style.display = 'flex';
+    }
+
+    if (dashboardSection) {
+        dashboardSection.style.display = 'none';
+    }
 }
 
+
 function showDashboard(user) {
-    if (loginSection) loginSection.style.display = 'none';
-    if (dashboardSection) dashboardSection.style.display = 'block';
-    if (adminUserLabel) adminUserLabel.innerText = `Login sebagai: ${user.email}`;
+    if (loginSection) {
+        loginSection.style.display = 'none';
+    }
+
+    if (dashboardSection) {
+        dashboardSection.style.display = 'block';
+    }
+
+    if (adminUserLabel) {
+        adminUserLabel.innerText =
+            `Login sebagai: ${user.email}`;
+    }
+
     loadOrders();
 }
+
 
 // --- FUNGSI LOGIN SUPABASE AUTH ---
 if (loginForm) {
@@ -84,22 +115,34 @@ if (loginForm) {
         e.preventDefault();
 
         loginError.style.display = 'none';
+
         btnLoginSubmit.disabled = true;
         btnLoginSubmit.innerText = "⏳ Memverifikasi...";
 
-        const email = document.getElementById('adminEmail').value.trim();
-        const password = document.getElementById('adminPassword').value;
+        const email =
+            document.getElementById('adminEmail').value.trim();
 
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password,
+        const password =
+            document.getElementById('adminPassword').value;
+
+        const {
+            data,
+            error
+        } = await supabaseClient.auth.signInWithPassword({
+            email,
+            password
         });
 
         if (error) {
-            loginError.innerText = "❌ Email atau Password salah!";
+            loginError.innerText =
+                "❌ Email atau Password salah!";
+
             loginError.style.display = 'block';
+
             btnLoginSubmit.disabled = false;
-            btnLoginSubmit.innerText = "Masuk ke Dasbor 🚀";
+            btnLoginSubmit.innerText =
+                "Masuk ke Dasbor 🚀";
+
             return;
         }
 
@@ -108,54 +151,203 @@ if (loginForm) {
 
         if (!isAdmin) {
             btnLoginSubmit.disabled = false;
-            btnLoginSubmit.innerText = "Masuk ke Dasbor 🚀";
+            btnLoginSubmit.innerText =
+                "Masuk ke Dasbor 🚀";
+
             return;
         }
 
         btnLoginSubmit.disabled = false;
-        btnLoginSubmit.innerText = "Masuk ke Dasbor 🚀";
+        btnLoginSubmit.innerText =
+            "Masuk ke Dasbor 🚀";
 
         showDashboard(data.user);
     });
 }
 
+
 // --- FUNGSI LOGOUT ---
 async function logoutAdmin() {
-    if (confirm("Apakah Anda yakin ingin keluar dari Dashboard Admin?")) {
+    if (
+        confirm(
+            "Apakah Anda yakin ingin keluar dari Dashboard Admin?"
+        )
+    ) {
         await supabaseClient.auth.signOut();
         showLoginForm();
     }
 }
 
+
+// --- BUAT SIGNED URL FILE ---
+async function getSignedFileUrl(fileUrl) {
+    if (!fileUrl) {
+        return null;
+    }
+
+    try {
+        // Format URL lama:
+        // /storage/v1/object/public/kohan-files/NAMA_FILE
+        const marker =
+            '/storage/v1/object/public/kohan-files/';
+
+        let filePath = null;
+
+        if (fileUrl.includes(marker)) {
+            filePath =
+                decodeURIComponent(
+                    fileUrl.split(marker)[1]
+                );
+        } else {
+            // Jika suatu saat file_url langsung berisi
+            // storage path, tetap bisa digunakan.
+            filePath = fileUrl;
+        }
+
+        if (!filePath) {
+            return null;
+        }
+
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .storage
+            .from('kohan-files')
+            .createSignedUrl(
+                filePath,
+                300
+            );
+
+        if (error) {
+            console.error(
+                'Gagal membuat signed URL:',
+                error
+            );
+
+            return null;
+        }
+
+        return data?.signedUrl || null;
+
+    } catch (err) {
+        console.error(
+            'Error membuat signed URL:',
+            err
+        );
+
+        return null;
+    }
+}
+
+
+// --- BUKA / DOWNLOAD FILE PESANAN ---
+async function downloadOrderFile(fileUrl) {
+    if (!fileUrl) {
+        alert('❌ File tidak tersedia.');
+        return;
+    }
+
+    const button =
+        event?.currentTarget;
+
+    if (button) {
+        button.disabled = true;
+        button.innerText = "⏳ Menyiapkan...";
+    }
+
+    try {
+        const signedUrl =
+            await getSignedFileUrl(fileUrl);
+
+        if (!signedUrl) {
+            alert(
+                '❌ Gagal membuat akses aman ke file.'
+            );
+
+            return;
+        }
+
+        window.open(
+            signedUrl,
+            '_blank',
+            'noopener,noreferrer'
+        );
+
+    } catch (err) {
+        console.error(err);
+
+        alert(
+            '❌ Gagal membuka file: ' +
+            err.message
+        );
+
+    } finally {
+        if (button) {
+            button.disabled = false;
+            button.innerText =
+                "📥 Download File";
+        }
+    }
+}
+
+
 // --- MEMUAT DATA PESANAN DARI SUPABASE ---
 async function loadOrders() {
-    const tbody = document.getElementById('adminTableBody');
-    if (!tbody) return;
+    const tbody =
+        document.getElementById(
+            'adminTableBody'
+        );
 
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 20px;">⏳ Memuat data pesanan...</td></tr>';
+    if (!tbody) {
+        return;
+    }
 
-    const { data: orders, error } = await supabaseClient
+    tbody.innerHTML =
+        '<tr><td colspan="10" style="text-align: center; padding: 20px;">⏳ Memuat data pesanan...</td></tr>';
+
+    const {
+        data: orders,
+        error
+    } = await supabaseClient
         .from('orders')
         .select('*')
-        .order('id', { ascending: false });
+        .order('id', {
+            ascending: false
+        });
 
     if (error) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color:#ef4444; padding: 20px;">❌ Gagal memuat data dari database.</td></tr>';
+        console.error(
+            'Gagal memuat orders:',
+            error
+        );
+
+        tbody.innerHTML =
+            '<tr><td colspan="10" style="text-align: center; color:#ef4444; padding: 20px;">❌ Gagal memuat data dari database.</td></tr>';
+
         return;
     }
 
     if (!orders || orders.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 20px;">Belum ada pesanan masuk.</td></tr>';
+        tbody.innerHTML =
+            '<tr><td colspan="10" style="text-align: center; padding: 20px;">Belum ada pesanan masuk.</td></tr>';
+
         return;
     }
 
     let html = '';
 
     orders.forEach(o => {
-        const dateStr = new Date(o.created_at).toLocaleString('id-ID', {
-            dateStyle: 'short',
-            timeStyle: 'short'
-        });
+        const dateStr =
+            new Date(
+                o.created_at
+            ).toLocaleString(
+                'id-ID',
+                {
+                    dateStyle: 'short',
+                    timeStyle: 'short'
+                }
+            );
 
         // Proteksi: Cek apakah status aman untuk dihapus
         const isSafeToDelete =
@@ -164,24 +356,36 @@ async function loadOrders() {
 
         html += `
             <tr>
-                <td style="font-weight: bold; color: var(--primary); font-size: 15px;">
+
+                <td style="
+                    font-weight: bold;
+                    color: var(--primary);
+                    font-size: 15px;
+                ">
                     ${o.no_antrian || '-'}
                 </td>
 
-                <td style="font-size: 12px; color: var(--text-muted);">
+                <td style="
+                    font-size: 12px;
+                    color: var(--text-muted);
+                ">
                     ${dateStr}
                 </td>
 
                 <td>
                     <b>${o.nama}</b><br>
 
-                    <span style="font-size: 12px; color: var(--text-muted);">
+                    <span style="
+                        font-size: 12px;
+                        color: var(--text-muted);
+                    ">
                         ${o.phone}
                     </span><br>
 
                     <a
                         href="https://wa.me/${o.phone}"
                         target="_blank"
+                        rel="noopener noreferrer"
                         style="
                             display:inline-block;
                             margin-top:4px;
@@ -198,43 +402,59 @@ async function loadOrders() {
                     </a>
                 </td>
 
-                <td>${o.detail_cetak}</td>
+                <td>
+                    ${o.detail_cetak}
+                </td>
 
-                <td style="font-style: italic; color: var(--text-muted);">
+                <td style="
+                    font-style: italic;
+                    color: var(--text-muted);
+                ">
                     ${o.catatan || '-'}
                 </td>
 
-                <td style="color: var(--primary); font-weight: bold;">
+                <td style="
+                    color: var(--primary);
+                    font-weight: bold;
+                ">
                     ${o.waktu_ambil}
                 </td>
 
-                <td style="color: #16a34a; font-weight: bold;">
-                    Rp ${Number(o.total_harga).toLocaleString('id-ID')}
+                <td style="
+                    color: #16a34a;
+                    font-weight: bold;
+                ">
+                    Rp ${Number(
+                        o.total_harga
+                    ).toLocaleString('id-ID')}
                 </td>
 
                 <td>
                     ${
                         o.file_url
                             ? `
-                                <a
-                                    href="${o.file_url}"
-                                    target="_blank"
+                                <button
+                                    type="button"
+                                    onclick="downloadOrderFile('${String(o.file_url).replace(/'/g, "\\'")}')"
                                     style="
                                         padding:6px 12px;
                                         background:#16a34a;
                                         color:white;
+                                        border:none;
                                         border-radius:6px;
                                         text-decoration:none;
                                         font-weight:bold;
                                         font-size:12px;
+                                        cursor:pointer;
                                     "
-                                    download
                                 >
                                     📥 Download File
-                                </a>
+                                </button>
                               `
                             : `
-                                <span style="color:var(--text-muted);">
+                                <span style="
+                                    color:var(--text-muted);
+                                ">
                                     Tanpa File
                                 </span>
                               `
@@ -254,47 +474,87 @@ async function loadOrders() {
                             cursor:pointer;
                         "
                     >
+
                         <option
                             value="Menunggu Pembayaran (UNPAID)"
-                            ${o.status.includes('UNPAID') ? 'selected' : ''}
+                            ${
+                                o.status.includes(
+                                    'UNPAID'
+                                )
+                                    ? 'selected'
+                                    : ''
+                            }
                         >
                             ⏳ UNPAID
                         </option>
 
                         <option
                             value="🖨️ DIPROSES"
-                            ${o.status.includes('DIPROSES') ? 'selected' : ''}
+                            ${
+                                o.status.includes(
+                                    'DIPROSES'
+                                )
+                                    ? 'selected'
+                                    : ''
+                            }
                         >
                             🖨️ DIPROSES
                         </option>
 
                         <option
                             value="✅ SIAP DIAMBIL"
-                            ${o.status.includes('SIAP') ? 'selected' : ''}
+                            ${
+                                o.status.includes(
+                                    'SIAP'
+                                )
+                                    ? 'selected'
+                                    : ''
+                            }
                         >
                             ✅ SIAP DIAMBIL
                         </option>
 
                         <option
                             value="🎉 SELESAI"
-                            ${o.status.includes('SELESAI') ? 'selected' : ''}
+                            ${
+                                o.status.includes(
+                                    'SELESAI'
+                                )
+                                    ? 'selected'
+                                    : ''
+                            }
                         >
                             🎉 SELESAI
                         </option>
+
                     </select>
                 </td>
 
                 <td>
                     <button
-                        onclick="deleteOrder(${o.id}, '${o.status.replace(/'/g, "\\'")}')"
+                        onclick="deleteOrder(
+                            ${o.id},
+                            '${o.status.replace(
+                                /'/g,
+                                "\\'"
+                            )}'
+                        )"
                         style="
                             padding:6px 12px;
                             border-radius:6px;
                             border:none;
                             font-weight:bold;
                             font-size:12px;
-                            cursor:${isSafeToDelete ? 'pointer' : 'not-allowed'};
-                            background:${isSafeToDelete ? '#dc2626' : '#94a3b8'};
+                            cursor:${
+                                isSafeToDelete
+                                    ? 'pointer'
+                                    : 'not-allowed'
+                            };
+                            background:${
+                                isSafeToDelete
+                                    ? '#dc2626'
+                                    : '#94a3b8'
+                            };
                             color:white;
                         "
                         title="${
@@ -306,6 +566,7 @@ async function loadOrders() {
                         🗑️ Hapus
                     </button>
                 </td>
+
             </tr>
         `;
     });
@@ -313,19 +574,33 @@ async function loadOrders() {
     tbody.innerHTML = html;
 }
 
+
 // --- FUNGSI UPDATE STATUS PESANAN ---
 async function updateStatus(id, newStatus) {
-    const { error } = await supabaseClient
+    const {
+        error
+    } = await supabaseClient
         .from('orders')
-        .update({ status: newStatus })
+        .update({
+            status: newStatus
+        })
         .eq('id', id);
 
     if (error) {
-        alert('❌ Gagal mengubah status pesanan.');
+        console.error(
+            'Gagal update status:',
+            error
+        );
+
+        alert(
+            '❌ Gagal mengubah status pesanan.'
+        );
+
     } else {
         loadOrders();
     }
 }
+
 
 // --- FUNGSI HAPUS PESANAN ---
 async function deleteOrder(id, status) {
@@ -340,6 +615,7 @@ async function deleteOrder(id, status) {
             '"✅ SIAP DIAMBIL" atau "🎉 SELESAI" terlebih dahulu ' +
             'sebelum menghapus.'
         );
+
         return;
     }
 
@@ -349,15 +625,24 @@ async function deleteOrder(id, status) {
             'Data yang dihapus tidak bisa dikembalikan.'
         )
     ) {
-        const { error } = await supabaseClient
+        const {
+            error
+        } = await supabaseClient
             .from('orders')
             .delete()
             .eq('id', id);
 
         if (error) {
-            alert('❌ Gagal menghapus pesanan: ' + error.message);
+            alert(
+                '❌ Gagal menghapus pesanan: ' +
+                error.message
+            );
+
         } else {
-            alert('✅ Pesanan berhasil dihapus.');
+            alert(
+                '✅ Pesanan berhasil dihapus.'
+            );
+
             loadOrders();
         }
     }

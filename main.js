@@ -70,15 +70,17 @@ function generateJadwalAmbil() {
         optionsHtml += `<option value="Besok (Hari Buka) - Jam Operasional">Besok (Sesuai Jam Buka Toko)</option>`;
     } else {
         if (infoJamBuka) infoJamBuka.innerText = `ℹ️ Jam Operasional Hari Ini (${hariIni.nama}): ${String(hariIni.buka).padStart(2,'0')}.00 – ${String(hariIni.tutup).padStart(2,'0')}.00 WIB`;
-        
+
         optionsHtml += `<option value="Hari ini - Secepatnya (Sesuai Antrean)">Hari ini - Secepatnya (Sesuai Antrean)</option>`;
-        
+
         if (hariIni.tutup > 12 && currentHour < 12) {
             optionsHtml += `<option value="Hari ini - Siang (12:00 - 15:00)">Hari ini - Siang (12:00 - 15:00)</option>`;
         }
+
         if (hariIni.tutup > 15 && currentHour < 15) {
             optionsHtml += `<option value="Hari ini - Sore (15:00 - ${String(hariIni.tutup).padStart(2,'0')}:00)">Hari ini - Sore (15:00 - ${String(hariIni.tutup).padStart(2,'0')}:00)</option>`;
         }
+
         optionsHtml += `<option value="Besok Pagi">Besok Pagi</option>`;
     }
 
@@ -109,27 +111,35 @@ const pricePreview = document.getElementById('pricePreview');
 
 function handleKategoriChange() {
     if (!kategoriLayanan) return;
+
     if (kategoriLayanan.value === 'stiker') {
         if(sectionDokumen) sectionDokumen.style.display = 'none';
         if(sectionStiker) sectionStiker.style.display = 'block';
+
         if (fileLabel) fileLabel.innerText = "Upload File Desain Stiker (PNG/JPG/CDR/PDF) *";
         if (fileHelper) fileHelper.innerHTML = "💡 <b>Tips Stiker:</b> Gunakan file resolusi tinggi (PNG transparan/CDR/PDF). Maksimal 10MB.";
     } else {
         if(sectionDokumen) sectionDokumen.style.display = 'block';
         if(sectionStiker) sectionStiker.style.display = 'none';
+
         if (fileLabel) fileLabel.innerText = "Upload File Dokumen (PDF/DOCX) *";
         if (fileHelper) fileHelper.innerHTML = "Format: PDF (Auto-deteksi halaman), DOCX. Maksimal 10MB.";
     }
+
     updatePrice();
 }
 
-if (kategoriLayanan) kategoriLayanan.addEventListener('change', handleKategoriChange);
+if (kategoriLayanan) {
+    kategoriLayanan.addEventListener('change', handleKategoriChange);
+}
 
 if (ukuranKertasSelect) {
     ukuranKertasSelect.addEventListener('change', () => {
         if(groupCustomUkuran) {
-            groupCustomUkuran.style.display = ukuranKertasSelect.value === 'Custom' ? 'block' : 'none';
+            groupCustomUkuran.style.display =
+                ukuranKertasSelect.value === 'Custom' ? 'block' : 'none';
         }
+
         updatePrice();
     });
 }
@@ -137,9 +147,14 @@ if (ukuranKertasSelect) {
 if (jenisStikerSelect) {
     jenisStikerSelect.addEventListener('change', () => {
         const labelJumlah = document.getElementById('labelJumlahStiker');
+
         if (labelJumlah) {
-            labelJumlah.innerText = jenisStikerSelect.value === 'Roll' ? "Panjang Stiker (dalam Meter) *" : "Jumlah Lembar A3+ *";
+            labelJumlah.innerText =
+                jenisStikerSelect.value === 'Roll'
+                    ? "Panjang Stiker (dalam Meter) *"
+                    : "Jumlah Lembar A3+ *";
         }
+
         updatePrice();
     });
 }
@@ -151,7 +166,9 @@ if (fileInput) {
         if (!file) return;
 
         if (file.size > 10 * 1024 * 1024) {
-            fileHelper.innerHTML = `❌ <span style="color: #dc2626;">File terlalu besar! Maksimal 10MB.</span>`;
+            fileHelper.innerHTML =
+                `❌ <span style="color: #dc2626;">File terlalu besar! Maksimal 10MB.</span>`;
+
             this.value = '';
             return;
         }
@@ -159,17 +176,24 @@ if (fileInput) {
         if (file.type === 'application/pdf' || file.name.match(/\.pdf$/i)) {
             try {
                 const arrayBuffer = await file.arrayBuffer();
-                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                const pdf = await pdfjsLib.getDocument({
+                    data: arrayBuffer
+                }).promise;
+
                 if (jumlahHalamanInput) {
                     jumlahHalamanInput.value = pdf.numPages;
                     updatePrice();
                 }
-                fileHelper.innerHTML = `✅ <span style="color: #16a34a; font-weight: bold;">PDF Valid (${pdf.numPages} Halaman)</span>`;
+
+                fileHelper.innerHTML =
+                    `✅ <span style="color: #16a34a; font-weight: bold;">PDF Valid (${pdf.numPages} Halaman)</span>`;
             } catch (err) {
-                fileHelper.innerHTML = `✅ <span style="color: #16a34a; font-weight: bold;">File Siap Diupload</span>`;
+                fileHelper.innerHTML =
+                    `✅ <span style="color: #16a34a; font-weight: bold;">File Siap Diupload</span>`;
             }
         } else {
-            fileHelper.innerHTML = `✅ <span style="color: #16a34a; font-weight: bold;">File Siap Diupload</span>`;
+            fileHelper.innerHTML =
+                `✅ <span style="color: #16a34a; font-weight: bold;">File Siap Diupload</span>`;
         }
     });
 }
@@ -180,54 +204,113 @@ function updatePrice() {
     let total = 0;
 
     if (kategori === 'stiker') {
-        const jenisStiker = jenisStikerSelect ? jenisStikerSelect.value : 'Vinyl';
-        const jumlah = parseInt(jumlahLembarStikerInput ? jumlahLembarStikerInput.value : 1) || 1;
+        const jenisStiker =
+            jenisStikerSelect ? jenisStikerSelect.value : 'Vinyl';
+
+        const jumlah =
+            parseInt(
+                jumlahLembarStikerInput
+                    ? jumlahLembarStikerInput.value
+                    : 1
+            ) || 1;
+
         let hargaSatuan = 25000;
-        
-        if (jenisStiker === 'Kromo') { hargaSatuan = 15000; } 
-        else if (jenisStiker === 'Roll') { hargaSatuan = 50000; }
-        
+
+        if (jenisStiker === 'Kromo') {
+            hargaSatuan = 15000;
+        } else if (jenisStiker === 'Roll') {
+            hargaSatuan = 50000;
+        }
+
         total = jumlah * hargaSatuan;
     } else {
-        const hal = parseInt(jumlahHalamanInput ? jumlahHalamanInput.value : 1) || 1;
-        const copy = parseInt(jumlahCopyInput ? jumlahCopyInput.value : 1) || 1;
-        
-        const checkedRadio = document.querySelector('input[name="jenisCetak"]:checked');
-        const jenis = checkedRadio ? checkedRadio.value : 'Hitam Putih';
-        const ukuranKertas = ukuranKertasSelect ? ukuranKertasSelect.value : 'A4';
-        
-        let hargaPerHal = (jenis === 'Warna') ? 2000 : 1000;
-        if (ukuranKertas === 'A3+') { hargaPerHal *= 2; }
-        
+        const hal =
+            parseInt(
+                jumlahHalamanInput
+                    ? jumlahHalamanInput.value
+                    : 1
+            ) || 1;
+
+        const copy =
+            parseInt(
+                jumlahCopyInput
+                    ? jumlahCopyInput.value
+                    : 1
+            ) || 1;
+
+        const checkedRadio =
+            document.querySelector('input[name="jenisCetak"]:checked');
+
+        const jenis =
+            checkedRadio ? checkedRadio.value : 'Hitam Putih';
+
+        const ukuranKertas =
+            ukuranKertasSelect
+                ? ukuranKertasSelect.value
+                : 'A4';
+
+        let hargaPerHal =
+            jenis === 'Warna' ? 2000 : 1000;
+
+        if (ukuranKertas === 'A3+') {
+            hargaPerHal *= 2;
+        }
+
         total = hal * copy * hargaPerHal;
     }
-    
-    if (pricePreview) { pricePreview.innerText = "Rp " + total.toLocaleString('id-ID'); }
+
+    if (pricePreview) {
+        pricePreview.innerText =
+            "Rp " + total.toLocaleString('id-ID');
+    }
 }
 
-if (jumlahHalamanInput) jumlahHalamanInput.addEventListener('input', updatePrice);
-if (jumlahCopyInput) jumlahCopyInput.addEventListener('input', updatePrice);
-if (jumlahLembarStikerInput) jumlahLembarStikerInput.addEventListener('input', updatePrice);
+if (jumlahHalamanInput) {
+    jumlahHalamanInput.addEventListener('input', updatePrice);
+}
+
+if (jumlahCopyInput) {
+    jumlahCopyInput.addEventListener('input', updatePrice);
+}
+
+if (jumlahLembarStikerInput) {
+    jumlahLembarStikerInput.addEventListener('input', updatePrice);
+}
 
 document.addEventListener('change', (e) => {
-    if (e.target && e.target.name === 'jenisCetak') { updatePrice(); }
+    if (e.target && e.target.name === 'jenisCetak') {
+        updatePrice();
+    }
 });
 
 // --- TIMER INVOICE ---
 let countdownInterval;
+
 function startInvoiceTimer(durationInSeconds) {
     clearInterval(countdownInterval);
+
     let timer = durationInSeconds;
     const timerDisplay = document.getElementById('invoiceTimer');
-    
+
     countdownInterval = setInterval(() => {
         let minutes = parseInt(timer / 60, 10);
         let seconds = parseInt(timer % 60, 10);
+
         minutes = minutes < 10 ? "0" + minutes : minutes;
         seconds = seconds < 10 ? "0" + seconds : seconds;
 
-        if (timerDisplay) { timerDisplay.innerText = "⏱️ " + minutes + ":" + seconds; }
-        if (--timer < 0) { clearInterval(countdownInterval); if (timerDisplay) timerDisplay.innerText = "⏱️ Waktu Habis!"; }
+        if (timerDisplay) {
+            timerDisplay.innerText =
+                "⏱️ " + minutes + ":" + seconds;
+        }
+
+        if (--timer < 0) {
+            clearInterval(countdownInterval);
+
+            if (timerDisplay) {
+                timerDisplay.innerText = "⏱️ Waktu Habis!";
+            }
+        }
     }, 1000);
 }
 
@@ -238,107 +321,246 @@ const orderForm = document.getElementById('orderForm');
 if (orderForm) {
     orderForm.addEventListener('submit', function(e) {
         e.preventDefault();
+
         const file = fileInput.files[0];
-        if (!file) { alert('❌ Harap upload file terlebih dahulu!'); return; }
+
+        if (!file) {
+            alert('❌ Harap upload file terlebih dahulu!');
+            return;
+        }
 
         const nama = document.getElementById('nama').value;
         const phone = document.getElementById('phone').value.trim();
         const waktuAmbil = document.getElementById('waktuAmbil').value;
         const kategori = kategoriLayanan.value;
-        const catatan = document.getElementById('catatan').value || '-';
+        const catatan =
+            document.getElementById('catatan').value || '-';
 
         let detailText = '';
         let totalHarga = 0;
 
         if (kategori === 'stiker') {
             const jenisStiker = jenisStikerSelect.value;
-            const jumlah = document.getElementById('jumlahLembarStiker').value;
-            const finishing = document.getElementById('finishingStiker').value;
-            let hargaSatuan = jenisStiker === 'Kromo' ? 15000 : (jenisStiker === 'Roll' ? 50000 : 25000);
+            const jumlah =
+                document.getElementById('jumlahLembarStiker').value;
+
+            const finishing =
+                document.getElementById('finishingStiker').value;
+
+            let hargaSatuan =
+                jenisStiker === 'Kromo'
+                    ? 15000
+                    : (jenisStiker === 'Roll' ? 50000 : 25000);
+
             totalHarga = jumlah * hargaSatuan;
-            detailText = `Stiker ${jenisStiker} - ${jumlah} ${jenisStiker === 'Roll' ? 'Meter' : 'Lembar A3+'} (${finishing})`;
+
+            detailText =
+                `Stiker ${jenisStiker} - ${jumlah} ${
+                    jenisStiker === 'Roll'
+                        ? 'Meter'
+                        : 'Lembar A3+'
+                } (${finishing})`;
         } else {
-            const jumlahHalaman = document.getElementById('jumlahHalaman').value;
-            const jumlahCopy = document.getElementById('jumlahCopy').value;
-            const jenisCetak = document.querySelector('input[name="jenisCetak"]:checked').value;
-            const ukuranKertasBase = ukuranKertasSelect.value;
-            const customUkuranText = document.getElementById('detailCustomUkuran').value || 'Custom';
-            const ukuranKertas = ukuranKertasBase === 'Custom' ? `Custom (${customUkuranText})` : ukuranKertasBase;
-            
-            let hargaPerHal = jenisCetak === 'Warna' ? 2000 : 1000;
-            if (ukuranKertasBase === 'A3+') hargaPerHal *= 2;
-            totalHarga = jumlahHalaman * jumlahCopy * hargaPerHal;
-            detailText = `${jumlahHalaman} Hal x ${jumlahCopy} Rangkap (${jenisCetak} - ${ukuranKertas})`;
+            const jumlahHalaman =
+                document.getElementById('jumlahHalaman').value;
+
+            const jumlahCopy =
+                document.getElementById('jumlahCopy').value;
+
+            const jenisCetak =
+                document.querySelector(
+                    'input[name="jenisCetak"]:checked'
+                ).value;
+
+            const ukuranKertasBase =
+                ukuranKertasSelect.value;
+
+            const customUkuranText =
+                document.getElementById('detailCustomUkuran').value ||
+                'Custom';
+
+            const ukuranKertas =
+                ukuranKertasBase === 'Custom'
+                    ? `Custom (${customUkuranText})`
+                    : ukuranKertasBase;
+
+            let hargaPerHal =
+                jenisCetak === 'Warna' ? 2000 : 1000;
+
+            if (ukuranKertasBase === 'A3+') {
+                hargaPerHal *= 2;
+            }
+
+            totalHarga =
+                jumlahHalaman *
+                jumlahCopy *
+                hargaPerHal;
+
+            detailText =
+                `${jumlahHalaman} Hal x ${jumlahCopy} Rangkap (${jenisCetak} - ${ukuranKertas})`;
         }
 
-        tempOrderData = { nama, phone, waktuAmbil, kategori, detailText, catatan, file, totalHarga };
+        tempOrderData = {
+            nama,
+            phone,
+            waktuAmbil,
+            kategori,
+            detailText,
+            catatan,
+            file,
+            totalHarga
+        };
 
         document.getElementById('mNama').innerText = nama;
         document.getElementById('mPhone').innerText = phone;
         document.getElementById('mAmbil').innerText = waktuAmbil;
         document.getElementById('mDetail').innerText = detailText;
-        document.getElementById('mTotal').innerText = 'Rp ' + totalHarga.toLocaleString('id-ID');
+        document.getElementById('mTotal').innerText =
+            'Rp ' + totalHarga.toLocaleString('id-ID');
 
         document.getElementById('confirmModal').style.display = 'flex';
     });
 }
 
-function closeConfirmModal() { document.getElementById('confirmModal').style.display = 'none'; }
+function closeConfirmModal() {
+    document.getElementById('confirmModal').style.display = 'none';
+}
 
-const btnProceedInvoice = document.getElementById('btnProceedInvoice');
+const btnProceedInvoice =
+    document.getElementById('btnProceedInvoice');
+
 if (btnProceedInvoice) {
     btnProceedInvoice.onclick = async function() {
         if (!tempOrderData) return;
+
         btnProceedInvoice.disabled = true;
         btnProceedInvoice.innerText = "⏳ Mengunggah...";
 
         try {
-            const { count, error: countError } = await supabaseClient.from('orders').select('*', { count: 'exact', head: true });
+            const {
+                count,
+                error: countError
+            } = await supabaseClient
+                .from('orders')
+                .select('*', {
+                    count: 'exact',
+                    head: true
+                });
+
             let nextNumber = (count || 0) + 1;
-            const noAntrian = `KHN-${String(nextNumber).padStart(3, '0')}`;
+            const noAntrian =
+                `KHN-${String(nextNumber).padStart(3, '0')}`;
 
             const file = tempOrderData.file;
-            const fileNameCloud = `${Date.now()}_${tempOrderData.phone}.${file.name.split('.').pop()}`;
 
-            const { error: uploadError } = await supabaseClient.storage.from('kohan-files').upload(fileNameCloud, file);
+            const fileNameCloud =
+                `${Date.now()}_${tempOrderData.phone}.${file.name.split('.').pop()}`;
+
+            const {
+                error: uploadError
+            } = await supabaseClient
+                .storage
+                .from('kohan-files')
+                .upload(fileNameCloud, file);
+
             if (uploadError) throw uploadError;
 
-            const { data: urlData } = supabaseClient.storage.from('kohan-files').getPublicUrl(fileNameCloud);
+            const {
+                data: urlData
+            } = supabaseClient
+                .storage
+                .from('kohan-files')
+                .getPublicUrl(fileNameCloud);
 
-            const { error: dbError } = await supabaseClient.from('orders').insert([{
-                no_antrian: noAntrian, nama: tempOrderData.nama, phone: tempOrderData.phone,
-                kategori: tempOrderData.kategori, detail_cetak: tempOrderData.detailText,
-                catatan: tempOrderData.catatan, waktu_ambil: tempOrderData.waktuAmbil,
-                total_harga: tempOrderData.totalHarga, status: 'Menunggu Pembayaran (UNPAID)',
-                file_url: urlData.publicUrl, file_name: file.name
-            }]);
+            // Generate kode tracking unik
+            const trackingToken = crypto.randomUUID();
+
+            const {
+                error: dbError
+            } = await supabaseClient
+                .from('orders')
+                .insert([{
+                    no_antrian: noAntrian,
+                    nama: tempOrderData.nama,
+                    phone: tempOrderData.phone,
+                    kategori: tempOrderData.kategori,
+                    detail_cetak: tempOrderData.detailText,
+                    catatan: tempOrderData.catatan,
+                    waktu_ambil: tempOrderData.waktuAmbil,
+                    total_harga: tempOrderData.totalHarga,
+                    status: 'Menunggu Pembayaran (UNPAID)',
+                    file_url: urlData.publicUrl,
+                    file_name: file.name,
+                    tracking_token: trackingToken
+                }]);
 
             if (dbError) throw dbError;
 
-            document.getElementById('invPhone').innerText = tempOrderData.phone;
-            document.getElementById('invNama').innerText = tempOrderData.nama;
-            document.getElementById('invDetail').innerText = `[NO ANTREAN: ${noAntrian}]\n${tempOrderData.detailText}\nFile: ${file.name}\nAmbil: ${tempOrderData.waktuAmbil}`;
-            document.getElementById('invTotal').innerText = 'Rp ' + tempOrderData.totalHarga.toLocaleString('id-ID');
+            document.getElementById('invPhone').innerText =
+                tempOrderData.phone;
 
-            const pesanWA = `Halo Admin KohanCopier, saya ingin konfirmasi pembayaran QRIS.\n\n*No Antrean:* ${noAntrian}\n*No WA:* ${tempOrderData.phone}\n*Nama:* ${tempOrderData.nama}\n*Waktu Ambil:* ${tempOrderData.waktuAmbil}\n*Detail:* ${tempOrderData.detailText}\n*Catatan:* ${tempOrderData.catatan}\n*Total:* Rp ${tempOrderData.totalHarga.toLocaleString('id-ID')}\n\nBerikut bukti pembayarannya:`;
-            document.getElementById('btnInvWA').href = `https://wa.me/${ADMIN_WA}?text=` + encodeURIComponent(pesanWA);
+            document.getElementById('invNama').innerText =
+                tempOrderData.nama;
+
+            document.getElementById('invDetail').innerText =
+                `[NO ANTREAN: ${noAntrian}]
+[KODE TRACKING: ${trackingToken}]
+${tempOrderData.detailText}
+File: ${file.name}
+Ambil: ${tempOrderData.waktuAmbil}`;
+
+            document.getElementById('invTotal').innerText =
+                'Rp ' +
+                tempOrderData.totalHarga.toLocaleString('id-ID');
+
+            const pesanWA =
+                `Halo Admin KohanCopier, saya ingin konfirmasi pembayaran QRIS.\n\n` +
+                `*No Antrean:* ${noAntrian}\n` +
+                `*No WA:* ${tempOrderData.phone}\n` +
+                `*Nama:* ${tempOrderData.nama}\n` +
+                `*Waktu Ambil:* ${tempOrderData.waktuAmbil}\n` +
+                `*Detail:* ${tempOrderData.detailText}\n` +
+                `*Catatan:* ${tempOrderData.catatan}\n` +
+                `*Total:* Rp ${tempOrderData.totalHarga.toLocaleString('id-ID')}\n\n` +
+                `Berikut bukti pembayarannya:`;
+
+            document.getElementById('btnInvWA').href =
+                `https://wa.me/${ADMIN_WA}?text=` +
+                encodeURIComponent(pesanWA);
 
             closeConfirmModal();
-            
-            // Munculkan tab invoice di navbar atas & bottom nav mobile
-            const navInvoice = document.getElementById('nav-invoice');
-            const bnavInvoice = document.getElementById('bnav-invoice');
-            if (navInvoice) navInvoice.style.display = 'inline-block';
-            if (bnavInvoice) bnavInvoice.style.display = 'flex';
 
-            if(typeof window.switchPage === 'function') window.switchPage('invoice');
+            // Munculkan tab invoice di navbar atas & bottom nav mobile
+            const navInvoice =
+                document.getElementById('nav-invoice');
+
+            const bnavInvoice =
+                document.getElementById('bnav-invoice');
+
+            if (navInvoice) {
+                navInvoice.style.display = 'inline-block';
+            }
+
+            if (bnavInvoice) {
+                bnavInvoice.style.display = 'flex';
+            }
+
+            if (typeof window.switchPage === 'function') {
+                window.switchPage('invoice');
+            }
+
             startInvoiceTimer(600);
+
             orderForm.reset();
             handleKategoriChange();
             updatePrice();
             generateJadwalAmbil();
+
         } catch (err) {
-            alert('❌ Gagal menyimpan pesanan: ' + err.message);
+            alert(
+                '❌ Gagal menyimpan pesanan: ' +
+                err.message
+            );
         } finally {
             btnProceedInvoice.disabled = false;
             btnProceedInvoice.innerText = "Lanjutkan 🚀";
@@ -348,143 +570,315 @@ if (btnProceedInvoice) {
 
 // --- LACAK PESANAN ---
 async function lacakStatusPesanan() {
-    const keyword = document.getElementById('trackInput').value.trim();
-    const resultDiv = document.getElementById('trackResult');
+    const keyword =
+        document.getElementById('trackInput').value.trim();
+
+    const resultDiv =
+        document.getElementById('trackResult');
+
     resultDiv.style.display = 'block';
 
     if (!keyword) {
-        resultDiv.innerHTML = '<p style="color: #d97706; font-size: 13px; margin:0; background: #fef3c7; padding: 10px; border-radius: 6px;">⚠️ Masukkan Nomor WhatsApp Anda.</p>';
+        resultDiv.innerHTML =
+            '<p style="color: #d97706; font-size: 13px; margin:0; background: #fef3c7; padding: 10px; border-radius: 6px;">⚠️ Masukkan Kode Tracking pesanan Anda.</p>';
+
         return;
     }
 
-    resultDiv.innerHTML = '<p style="color: #64748b; font-size: 13px; margin:0;">⏳ Mencari pesanan...</p>';
+    resultDiv.innerHTML =
+        '<p style="color: #64748b; font-size: 13px; margin:0;">⏳ Mencari pesanan...</p>';
 
-    const { data: found, error } = await supabaseClient.from('orders').select('*').ilike('phone', `%${keyword}%`).order('id', { ascending: false });
+    const {
+        data: order,
+        error
+    } = await supabaseClient.rpc(
+        'get_order_by_tracking_token',
+        {
+            p_tracking_token: keyword
+        }
+    );
 
     if (error) {
-        resultDiv.innerHTML = '<p style="color: #dc2626; font-size: 13px; margin:0;">❌ Gagal memuat data dari database.</p>';
+        resultDiv.innerHTML =
+            '<p style="color: #dc2626; font-size: 13px; margin:0;">❌ Gagal memuat data pesanan.</p>';
+
         return;
     }
 
-    if (found && found.length > 0) {
-        let html = '<div style="background:white; padding:12px; border-radius:8px; border:1px solid #cbd5e1; font-size:13px; color:#1e293b;">';
-        found.forEach(o => {
-            let maskedPhone = o.phone.length > 4 ? o.phone.slice(0, -4) + 'XXXX' : 'XXXX';
-            let badgeBg = o.status.includes('UNPAID') ? '#fef3c7' : (o.status.includes('SIAP') ? '#dcfce7' : '#e0f2fe');
-            let badgeColor = o.status.includes('UNPAID') ? '#d97706' : (o.status.includes('SIAP') ? '#16a34a' : '#0284c7');
+    if (order) {
+        const maskedPhone =
+            order.phone && order.phone.length > 4
+                ? order.phone.slice(0, -4) + 'XXXX'
+                : 'XXXX';
 
-            html += `
+        const status =
+            order.status || '-';
+
+        const badgeBg =
+            status.includes('UNPAID')
+                ? '#fef3c7'
+                : (
+                    status.includes('SIAP')
+                        ? '#dcfce7'
+                        : '#e0f2fe'
+                );
+
+        const badgeColor =
+            status.includes('UNPAID')
+                ? '#d97706'
+                : (
+                    status.includes('SIAP')
+                        ? '#16a34a'
+                        : '#0284c7'
+                );
+
+        resultDiv.innerHTML = `
+            <div style="background:white; padding:12px; border-radius:8px; border:1px solid #cbd5e1; font-size:13px; color:#1e293b;">
                 <div style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #eee;">
-                    <p style="margin: 2px 0;"><b>No Antrean:</b> <span style="color:#2563eb; font-weight:bold;">${o.no_antrian || '-'}</span></p>
-                    <p style="margin: 2px 0;"><b>Pemesan:</b> ${o.nama} (${maskedPhone})</p>
-                    <p style="margin: 2px 0;"><b>Status:</b> <span style="color:${badgeColor}; font-weight:bold; background:${badgeBg}; padding: 2px 8px; border-radius: 4px; display:inline-block;">${o.status}</span></p>
-                    <p style="margin: 2px 0; color:#64748b;"><b>Detail:</b> ${o.detail_cetak}</p>
-                    <p style="margin: 2px 0; color:#64748b;"><b>Ambil:</b> ${o.waktu_ambil}</p>
-                    <p style="margin: 2px 0; font-size: 14px;"><b>Total:</b> <span style="color: #2563eb; font-weight: bold;">Rp ${Number(o.total_harga).toLocaleString('id-ID')}</span></p>
+
+                    <p style="margin: 2px 0;">
+                        <b>No Antrean:</b>
+                        <span style="color:#2563eb; font-weight:bold;">
+                            ${order.no_antrian || '-'}
+                        </span>
+                    </p>
+
+                    <p style="margin: 2px 0;">
+                        <b>Pemesan:</b>
+                        ${order.nama || '-'} (${maskedPhone})
+                    </p>
+
+                    <p style="margin: 2px 0;">
+                        <b>Status:</b>
+                        <span style="
+                            color:${badgeColor};
+                            font-weight:bold;
+                            background:${badgeBg};
+                            padding:2px 8px;
+                            border-radius:4px;
+                            display:inline-block;
+                        ">
+                            ${status}
+                        </span>
+                    </p>
+
+                    <p style="margin: 2px 0; color:#64748b;">
+                        <b>Detail:</b>
+                        ${order.detail_cetak || '-'}
+                    </p>
+
+                    <p style="margin: 2px 0; color:#64748b;">
+                        <b>Ambil:</b>
+                        ${order.waktu_ambil || '-'}
+                    </p>
+
+                    <p style="margin: 2px 0; font-size:14px;">
+                        <b>Total:</b>
+                        <span style="color:#2563eb; font-weight:bold;">
+                            Rp ${Number(order.total_harga || 0).toLocaleString('id-ID')}
+                        </span>
+                    </p>
+
                 </div>
-            `;
-        });
-        html += '</div>';
-        resultDiv.innerHTML = html;
+            </div>
+        `;
     } else {
-        resultDiv.innerHTML = '<p style="color: #dc2626; font-size: 13px; margin:0; background: #fee2e2; padding: 10px; border-radius: 6px;">❌ Tidak ada riwayat pesanan dengan Nomor WhatsApp tersebut.</p>';
+        resultDiv.innerHTML =
+            '<p style="color: #dc2626; font-size: 13px; margin:0; background: #fee2e2; padding: 10px; border-radius: 6px;">❌ Kode Tracking tidak ditemukan.</p>';
     }
 }
 
 // --- FITUR FEEDBACK & RATING DENGAN FOTO PROFIL ---
-const feedbackForm = document.getElementById('feedbackForm');
+const feedbackForm =
+    document.getElementById('feedbackForm');
+
 if (feedbackForm) {
-    feedbackForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const nama = document.getElementById('fbNama').value.trim();
-        const rating = parseInt(document.getElementById('fbRating').value) || 5;
-        const komentar = document.getElementById('fbKomentar').value.trim();
-        const fotoInput = document.getElementById('fbFoto');
-        const btn = document.getElementById('btnSubmitFeedback');
+    feedbackForm.addEventListener(
+        'submit',
+        async function(e) {
+            e.preventDefault();
 
-        btn.disabled = true;
-        btn.innerText = "Mengirim Ulasan...";
+            const nama =
+                document.getElementById('fbNama').value.trim();
 
-        try {
-            let fotoUrl = null;
+            const rating =
+                parseInt(
+                    document.getElementById('fbRating').value
+                ) || 5;
 
-            if (fotoInput.files && fotoInput.files[0]) {
-                const fotoFile = fotoInput.files[0];
-                if (fotoFile.size > 2 * 1024 * 1024) {
-                    throw new Error("Ukuran foto profil maksimal 2MB!");
+            const komentar =
+                document.getElementById('fbKomentar').value.trim();
+
+            const fotoInput =
+                document.getElementById('fbFoto');
+
+            const btn =
+                document.getElementById('btnSubmitFeedback');
+
+            btn.disabled = true;
+            btn.innerText = "Mengirim Ulasan...";
+
+            try {
+                let fotoUrl = null;
+
+                if (
+                    fotoInput.files &&
+                    fotoInput.files[0]
+                ) {
+                    const fotoFile =
+                        fotoInput.files[0];
+
+                    if (
+                        fotoFile.size >
+                        2 * 1024 * 1024
+                    ) {
+                        throw new Error(
+                            "Ukuran foto profil maksimal 2MB!"
+                        );
+                    }
+
+                    const fileNameFoto =
+                        `avatar_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fotoFile.name.split('.').pop()}`;
+
+                    const {
+                        error: uploadError
+                    } = await supabaseClient
+                        .storage
+                        .from('kohan-files')
+                        .upload(
+                            fileNameFoto,
+                            fotoFile
+                        );
+
+                    if (uploadError) {
+                        throw uploadError;
+                    }
+
+                    const {
+                        data: urlData
+                    } = supabaseClient
+                        .storage
+                        .from('kohan-files')
+                        .getPublicUrl(fileNameFoto);
+
+                    fotoUrl =
+                        urlData.publicUrl;
                 }
 
-                const fileNameFoto = `avatar_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fotoFile.name.split('.').pop()}`;
-                
-                const { error: uploadError } = await supabaseClient.storage.from('kohan-files').upload(fileNameFoto, fotoFile);
-                if (uploadError) throw uploadError;
+                const {
+                    error: dbError
+                } = await supabaseClient
+                    .from('feedbacks')
+                    .insert([{
+                        nama,
+                        rating,
+                        komentar,
+                        foto_url: fotoUrl
+                    }]);
 
-                const { data: urlData } = supabaseClient.storage.from('kohan-files').getPublicUrl(fileNameFoto);
-                fotoUrl = urlData.publicUrl;
+                if (dbError) {
+                    throw dbError;
+                }
+
+                alert(
+                    '✨ Terima kasih! Ulasan dan foto profil kamu berhasil dikirim.'
+                );
+
+                feedbackForm.reset();
+                loadFeedbackList();
+
+            } catch (err) {
+                alert(
+                    '❌ Gagal mengirim ulasan: ' +
+                    err.message
+                );
+
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Kirim Ulasan 🚀";
             }
-
-            const { error: dbError } = await supabaseClient.from('feedbacks').insert([{
-                nama,
-                rating,
-                komentar,
-                foto_url: fotoUrl
-            }]);
-
-            if (dbError) throw dbError;
-
-            alert('✨ Terima kasih! Ulasan dan foto profil kamu berhasil dikirim.');
-            feedbackForm.reset();
-            loadFeedbackList();
-        } catch (err) {
-            alert('❌ Gagal mengirim ulasan: ' + err.message);
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "Kirim Ulasan 🚀";
         }
-    });
+    );
 }
 
 async function loadFeedbackList() {
-    const container = document.getElementById('listFeedbackContainer');
+    const container =
+        document.getElementById(
+            'listFeedbackContainer'
+        );
+
     if (!container) return;
 
-    container.innerHTML = '<p style="color: var(--text-muted); font-size: 13px; text-align: center;">Memuat ulasan...</p>';
+    container.innerHTML =
+        '<p style="color: var(--text-muted); font-size: 13px; text-align: center;">Memuat ulasan...</p>';
 
-    const { data, error } = await supabaseClient.from('feedbacks').select('*').order('id', { ascending: false }).limit(10);
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from('feedbacks')
+        .select('*')
+        .order('id', {
+            ascending: false
+        })
+        .limit(10);
 
     if (error) {
-        container.innerHTML = '<p style="color: #dc2626; font-size: 13px; text-align: center;">Gagal memuat ulasan.</p>';
+        container.innerHTML =
+            '<p style="color: #dc2626; font-size: 13px; text-align: center;">Gagal memuat ulasan.</p>';
+
         return;
     }
 
     if (data && data.length > 0) {
         let html = '';
+
         data.forEach(item => {
-            let starsHtml = '⭐'.repeat(item.rating);
-            
+            let starsHtml =
+                '⭐'.repeat(item.rating);
+
             let avatarHtml = '';
+
             if (item.foto_url) {
-                avatarHtml = `<img src="${item.foto_url}" alt="${item.nama}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary);">`;
+                avatarHtml =
+                    `<img src="${item.foto_url}" alt="${item.nama}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary);">`;
             } else {
-                let initial = item.nama ? item.nama.charAt(0).toUpperCase() : 'U';
-                avatarHtml = `<div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px;">${initial}</div>`;
+                let initial =
+                    item.nama
+                        ? item.nama.charAt(0).toUpperCase()
+                        : 'U';
+
+                avatarHtml =
+                    `<div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px;">${initial}</div>`;
             }
 
             html += `
                 <div style="background: var(--box-bg); border: 1px solid var(--border-color); padding: 14px; border-radius: 12px; font-size: 13px; display: flex; gap: 12px; align-items: flex-start;">
                     <div>${avatarHtml}</div>
+
                     <div style="flex: 1;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                            <b style="font-size: 14px; color: var(--text-main);">${item.nama}</b>
-                            <span style="color: #f59e0b; font-size: 12px;">${starsHtml}</span>
+                            <b style="font-size: 14px; color: var(--text-main);">
+                                ${item.nama}
+                            </b>
+
+                            <span style="color: #f59e0b; font-size: 12px;">
+                                ${starsHtml}
+                            </span>
                         </div>
-                        <p style="margin: 0; color: var(--text-muted); line-height: 1.5;">${item.komentar}</p>
+
+                        <p style="margin: 0; color: var(--text-muted); line-height: 1.5;">
+                            ${item.komentar}
+                        </p>
                     </div>
                 </div>
             `;
         });
+
         container.innerHTML = html;
+
     } else {
-        container.innerHTML = '<p style="color: var(--text-muted); font-size: 13px; text-align: center;">Belum ada ulasan. Jadilah yang pertama memberikan ulasan!</p>';
+        container.innerHTML =
+            '<p style="color: var(--text-muted); font-size: 13px; text-align: center;">Belum ada ulasan. Jadilah yang pertama memberikan ulasan!</p>';
     }
 }

@@ -11,14 +11,58 @@ const loginError = document.getElementById('loginError');
 const btnLoginSubmit = document.getElementById('btnLoginSubmit');
 const adminUserLabel = document.getElementById('adminUserLabel');
 
+// --- CEK HAK AKSES ADMIN ---
+async function checkAdminAccess() {
+    const { data: { session }, error: sessionError } =
+        await supabaseClient.auth.getSession();
+
+    if (sessionError || !session?.user) {
+        showLoginForm();
+        return false;
+    }
+
+    const { data: isAdmin, error: adminError } =
+        await supabaseClient.rpc('is_admin');
+
+    if (adminError) {
+        console.error('Gagal mengecek admin:', adminError);
+        await supabaseClient.auth.signOut();
+        showLoginForm();
+
+        if (loginError) {
+            loginError.innerText = "❌ Gagal memverifikasi akses admin.";
+            loginError.style.display = 'block';
+        }
+
+        return false;
+    }
+
+    if (!isAdmin) {
+        await supabaseClient.auth.signOut();
+        showLoginForm();
+
+        if (loginError) {
+            loginError.innerText = "❌ Akses ditolak. Akun ini bukan admin.";
+            loginError.style.display = 'block';
+        }
+
+        return false;
+    }
+
+    return true;
+}
+
 // --- CEK SESI LOGIN SAAT HALAMAN DIBUKA ---
 window.addEventListener('DOMContentLoaded', async () => {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    
-    if (session) {
-        showDashboard(session.user);
-    } else {
-        showLoginForm();
+    const isAdmin = await checkAdminAccess();
+
+    if (isAdmin) {
+        const { data: { session } } =
+            await supabaseClient.auth.getSession();
+
+        if (session) {
+            showDashboard(session.user);
+        }
     }
 });
 
@@ -38,6 +82,7 @@ function showDashboard(user) {
 if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+
         loginError.style.display = 'none';
         btnLoginSubmit.disabled = true;
         btnLoginSubmit.innerText = "⏳ Memverifikasi...";
@@ -55,11 +100,22 @@ if (loginForm) {
             loginError.style.display = 'block';
             btnLoginSubmit.disabled = false;
             btnLoginSubmit.innerText = "Masuk ke Dasbor 🚀";
-        } else {
+            return;
+        }
+
+        // Login berhasil, sekarang cek apakah benar-benar admin
+        const isAdmin = await checkAdminAccess();
+
+        if (!isAdmin) {
             btnLoginSubmit.disabled = false;
             btnLoginSubmit.innerText = "Masuk ke Dasbor 🚀";
-            showDashboard(data.user);
+            return;
         }
+
+        btnLoginSubmit.disabled = false;
+        btnLoginSubmit.innerText = "Masuk ke Dasbor 🚀";
+
+        showDashboard(data.user);
     });
 }
 
@@ -94,40 +150,159 @@ async function loadOrders() {
     }
 
     let html = '';
+
     orders.forEach(o => {
-        const dateStr = new Date(o.created_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' });
-        
-        // Proteksi: Cek apakah status aman untuk dihapus (SELESAI atau SIAP DIAMBIL)
-        const isSafeToDelete = o.status.includes('SELESAI') || o.status.includes('SIAP');
+        const dateStr = new Date(o.created_at).toLocaleString('id-ID', {
+            dateStyle: 'short',
+            timeStyle: 'short'
+        });
+
+        // Proteksi: Cek apakah status aman untuk dihapus
+        const isSafeToDelete =
+            o.status.includes('SELESAI') ||
+            o.status.includes('SIAP');
 
         html += `
             <tr>
-                <td style="font-weight: bold; color: var(--primary); font-size: 15px;">${o.no_antrian || '-'}</td>
-                <td style="font-size: 12px; color: var(--text-muted);">${dateStr}</td>
+                <td style="font-weight: bold; color: var(--primary); font-size: 15px;">
+                    ${o.no_antrian || '-'}
+                </td>
+
+                <td style="font-size: 12px; color: var(--text-muted);">
+                    ${dateStr}
+                </td>
+
                 <td>
                     <b>${o.nama}</b><br>
-                    <span style="font-size: 12px; color: var(--text-muted);">${o.phone}</span><br>
-                    <a href="https://wa.me/${o.phone}" target="_blank" style="display:inline-block; margin-top:4px; padding:2px 8px; background:#22c55e; color:white; border-radius:4px; text-decoration:none; font-size:11px; font-weight:bold;">📱 Chat WA</a>
+
+                    <span style="font-size: 12px; color: var(--text-muted);">
+                        ${o.phone}
+                    </span><br>
+
+                    <a
+                        href="https://wa.me/${o.phone}"
+                        target="_blank"
+                        style="
+                            display:inline-block;
+                            margin-top:4px;
+                            padding:2px 8px;
+                            background:#22c55e;
+                            color:white;
+                            border-radius:4px;
+                            text-decoration:none;
+                            font-size:11px;
+                            font-weight:bold;
+                        "
+                    >
+                        📱 Chat WA
+                    </a>
                 </td>
+
                 <td>${o.detail_cetak}</td>
-                <td style="font-style: italic; color: var(--text-muted);">${o.catatan || '-'}</td>
-                <td style="color: var(--primary); font-weight: bold;">${o.waktu_ambil}</td>
-                <td style="color: #16a34a; font-weight: bold;">Rp ${Number(o.total_harga).toLocaleString('id-ID')}</td>
-                <td>
-                    ${o.file_url ? `<a href="${o.file_url}" target="_blank" style="padding:6px 12px; background:#16a34a; color:white; border-radius:6px; text-decoration:none; font-weight:bold; font-size:12px;" download>📥 Download File</a>` : '<span style="color:var(--text-muted);">Tanpa File</span>'}
+
+                <td style="font-style: italic; color: var(--text-muted);">
+                    ${o.catatan || '-'}
                 </td>
+
+                <td style="color: var(--primary); font-weight: bold;">
+                    ${o.waktu_ambil}
+                </td>
+
+                <td style="color: #16a34a; font-weight: bold;">
+                    Rp ${Number(o.total_harga).toLocaleString('id-ID')}
+                </td>
+
                 <td>
-                    <select onchange="updateStatus(${o.id}, this.value)" style="padding:6px; border-radius:6px; background:var(--input-bg); color:var(--text-main); border:1px solid var(--border-color); font-weight:bold; cursor:pointer;">
-                        <option value="Menunggu Pembayaran (UNPAID)" ${o.status.includes('UNPAID') ? 'selected' : ''}>⏳ UNPAID</option>
-                        <option value="🖨️ DIPROSES" ${o.status.includes('DIPROSES') ? 'selected' : ''}>🖨️ DIPROSES</option>
-                        <option value="✅ SIAP DIAMBIL" ${o.status.includes('SIAP') ? 'selected' : ''}>✅ SIAP DIAMBIL</option>
-                        <option value="🎉 SELESAI" ${o.status.includes('SELESAI') ? 'selected' : ''}>🎉 SELESAI</option>
+                    ${
+                        o.file_url
+                            ? `
+                                <a
+                                    href="${o.file_url}"
+                                    target="_blank"
+                                    style="
+                                        padding:6px 12px;
+                                        background:#16a34a;
+                                        color:white;
+                                        border-radius:6px;
+                                        text-decoration:none;
+                                        font-weight:bold;
+                                        font-size:12px;
+                                    "
+                                    download
+                                >
+                                    📥 Download File
+                                </a>
+                              `
+                            : `
+                                <span style="color:var(--text-muted);">
+                                    Tanpa File
+                                </span>
+                              `
+                    }
+                </td>
+
+                <td>
+                    <select
+                        onchange="updateStatus(${o.id}, this.value)"
+                        style="
+                            padding:6px;
+                            border-radius:6px;
+                            background:var(--input-bg);
+                            color:var(--text-main);
+                            border:1px solid var(--border-color);
+                            font-weight:bold;
+                            cursor:pointer;
+                        "
+                    >
+                        <option
+                            value="Menunggu Pembayaran (UNPAID)"
+                            ${o.status.includes('UNPAID') ? 'selected' : ''}
+                        >
+                            ⏳ UNPAID
+                        </option>
+
+                        <option
+                            value="🖨️ DIPROSES"
+                            ${o.status.includes('DIPROSES') ? 'selected' : ''}
+                        >
+                            🖨️ DIPROSES
+                        </option>
+
+                        <option
+                            value="✅ SIAP DIAMBIL"
+                            ${o.status.includes('SIAP') ? 'selected' : ''}
+                        >
+                            ✅ SIAP DIAMBIL
+                        </option>
+
+                        <option
+                            value="🎉 SELESAI"
+                            ${o.status.includes('SELESAI') ? 'selected' : ''}
+                        >
+                            🎉 SELESAI
+                        </option>
                     </select>
                 </td>
+
                 <td>
-                    <button onclick="deleteOrder(${o.id}, '${o.status.replace(/'/g, "\\'")}')" 
-                            style="padding:6px 12px; border-radius:6px; border:none; font-weight:bold; font-size:12px; cursor:${isSafeToDelete ? 'pointer' : 'not-allowed'}; background:${isSafeToDelete ? '#dc2626' : '#94a3b8'}; color:white;"
-                            title="${isSafeToDelete ? 'Hapus Pesanan' : 'Ubah status ke SIAP DIAMBIL / SELESAI untuk menghapus'}">
+                    <button
+                        onclick="deleteOrder(${o.id}, '${o.status.replace(/'/g, "\\'")}')"
+                        style="
+                            padding:6px 12px;
+                            border-radius:6px;
+                            border:none;
+                            font-weight:bold;
+                            font-size:12px;
+                            cursor:${isSafeToDelete ? 'pointer' : 'not-allowed'};
+                            background:${isSafeToDelete ? '#dc2626' : '#94a3b8'};
+                            color:white;
+                        "
+                        title="${
+                            isSafeToDelete
+                                ? 'Hapus Pesanan'
+                                : 'Ubah status ke SIAP DIAMBIL / SELESAI untuk menghapus'
+                        }"
+                    >
                         🗑️ Hapus
                     </button>
                 </td>
@@ -152,16 +327,28 @@ async function updateStatus(id, newStatus) {
     }
 }
 
-// --- FUNGSI HAPUS PESANAN (DENGAN PROTEKSI STATUS) ---
+// --- FUNGSI HAPUS PESANAN ---
 async function deleteOrder(id, status) {
-    const isSafe = status.includes('SELESAI') || status.includes('SIAP');
+    const isSafe =
+        status.includes('SELESAI') ||
+        status.includes('SIAP');
 
     if (!isSafe) {
-        alert('⚠️ Pesanan tidak dapat dihapus!\n\nUntuk alasan keamanan, ubah status pesanan menjadi "✅ SIAP DIAMBIL" atau "🎉 SELESAI" terlebih dahulu sebelum menghapus.');
+        alert(
+            '⚠️ Pesanan tidak dapat dihapus!\n\n' +
+            'Untuk alasan keamanan, ubah status pesanan menjadi ' +
+            '"✅ SIAP DIAMBIL" atau "🎉 SELESAI" terlebih dahulu ' +
+            'sebelum menghapus.'
+        );
         return;
     }
 
-    if (confirm('⚠️ Apakah Anda yakin ingin menghapus pesanan ini secara permanen? Data yang dihapus tidak bisa dikembalikan.')) {
+    if (
+        confirm(
+            '⚠️ Apakah Anda yakin ingin menghapus pesanan ini secara permanen? ' +
+            'Data yang dihapus tidak bisa dikembalikan.'
+        )
+    ) {
         const { error } = await supabaseClient
             .from('orders')
             .delete()

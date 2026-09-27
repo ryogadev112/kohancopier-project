@@ -1,10 +1,10 @@
 // --- KONFIGURASI SUPABASE ---
 const SUPABASE_URL = "https://gputfcshhgppygipxzfh.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwdXRmY3NoaGdwcHln aXB4emZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxMjQxNDMsImV4cCI6MjEwNDcwMDE0M30.vhd6pH6jkNsbnnZsjgonc8xGc7yk-rQIZSgegiXbmBs";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_s_pTEbz1PXq9byGJu14RCw_ppa1gtlH";
 
 const supabaseClient = supabase.createClient(
     SUPABASE_URL,
-    SUPABASE_ANON_KEY
+    SUPABASE_PUBLISHABLE_KEY
 );
 
 const ADMIN_WA = "6285316121981";

@@ -1,6 +1,6 @@
 // --- KONFIGURASI SUPABASE ---
 const SUPABASE_URL = "https://gputfcshhgppygipxzfh.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJndXB0ZmNzaGhncHB5Z2lweHpmaCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzg5MTI0MTQzLCJleHAiOjIxMDQ3MDAxNDN9.vhd6pH6jkNsbnnZsjgonc8xGc7yk-rQIZSgegiXbmBs";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhc2UiLCJyZWYiOiJncHV0ZmNzaGhncHB5Z2lwaHh6ZiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzg5MTI0MTQzLCJleHAiOjIxMDQ3MDAxNDN9.vhd6pH6jkNsbnnZsjgonc8xGc7yk-rQIZSgegiXbmBs";
 
 const supabaseClient = supabase.createClient(
     SUPABASE_URL,
@@ -13,60 +13,29 @@ const MAX_FILES_PER_ORDER = 10;
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 const MAX_TOTAL_UPLOAD_BYTES = 50 * 1024 * 1024;
 
+
 // --- CEK STATUS TOKO LIVE ---
 function checkLiveStoreStatus() {
-    const badge =
-        document.getElementById('liveStoreBadge');
-
+    const badge = document.getElementById('liveStoreBadge');
     if (!badge) return;
 
     const now = new Date();
     const day = now.getDay();
-
     const currentHour =
         now.getHours() +
         now.getMinutes() / 60;
 
     const jamBukaToko = {
-        0: {
-            buka: 0,
-            tutup: 0,
-            libur: true
-        },
-        1: {
-            buka: 6,
-            tutup: 17,
-            libur: false
-        },
-        2: {
-            buka: 9,
-            tutup: 18,
-            libur: false
-        },
-        3: {
-            buka: 9,
-            tutup: 18,
-            libur: false
-        },
-        4: {
-            buka: 6,
-            tutup: 17,
-            libur: false
-        },
-        5: {
-            buka: 6,
-            tutup: 17,
-            libur: false
-        },
-        6: {
-            buka: 7,
-            tutup: 12,
-            libur: false
-        }
+        0: { buka: 0, tutup: 0, libur: true },
+        1: { buka: 6, tutup: 17, libur: false },
+        2: { buka: 9, tutup: 18, libur: false },
+        3: { buka: 9, tutup: 18, libur: false },
+        4: { buka: 6, tutup: 17, libur: false },
+        5: { buka: 6, tutup: 17, libur: false },
+        6: { buka: 7, tutup: 12, libur: false }
     };
 
-    const hariIni =
-        jamBukaToko[day];
+    const hariIni = jamBukaToko[day];
 
     let isOpen = false;
 
@@ -79,37 +48,29 @@ function checkLiveStoreStatus() {
     }
 
     if (isOpen) {
-        badge.className =
-            "store-badge open";
-
-        badge.innerHTML =
-            "🟢 Toko Buka";
+        badge.className = "store-badge open";
+        badge.innerHTML = "🟢 Toko Buka";
     } else {
-        badge.className =
-            "store-badge closed";
-
-        badge.innerHTML =
-            "🔴 Toko Tutup";
+        badge.className = "store-badge closed";
+        badge.innerHTML = "🔴 Toko Tutup";
     }
 }
+
 
 // --- GENERATE SLOT WAKTU AMBIL ---
 function generateJadwalAmbil() {
     const selectAmbil =
-        document.getElementById(
-            'waktuAmbil'
-        );
+        document.getElementById('waktuAmbil');
 
     const infoJamBuka =
-        document.getElementById(
-            'infoJamBuka'
-        );
+        document.getElementById('infoJamBuka');
 
     if (!selectAmbil) return;
 
     selectAmbil.innerHTML = '';
 
     const now = new Date();
+
     const day = now.getDay();
 
     const currentHour =
@@ -167,8 +128,7 @@ function generateJadwalAmbil() {
         }
     };
 
-    const hariIni =
-        jamBukaToko[day];
+    const hariIni = jamBukaToko[day];
 
     let optionsHtml = '';
 
@@ -222,12 +182,12 @@ function generateJadwalAmbil() {
             currentHour < 15
         ) {
             optionsHtml += `
-                <option value="Hari ini - Sore (15:00 - ${String(
-                    hariIni.tutup
-                ).padStart(2, '0')}:00)">
-                    Hari ini - Sore (15:00 - ${String(
-                        hariIni.tutup
-                    ).padStart(2, '0')}:00)
+                <option value="Hari ini - Sore (15:00 - ${
+                    String(hariIni.tutup).padStart(2, '0')
+                }:00)">
+                    Hari ini - Sore (15:00 - ${
+                        String(hariIni.tutup).padStart(2, '0')
+                    }:00)
                 </option>
             `;
         }
@@ -239,101 +199,70 @@ function generateJadwalAmbil() {
         `;
     }
 
-    selectAmbil.innerHTML =
-        optionsHtml;
+    selectAmbil.innerHTML = optionsHtml;
 }
 
-window.addEventListener(
-    'DOMContentLoaded',
-    () => {
-        checkLiveStoreStatus();
-        generateJadwalAmbil();
-        updatePrice();
-        loadFeedbackList();
-    }
-);
+
+window.addEventListener('DOMContentLoaded', () => {
+    checkLiveStoreStatus();
+    generateJadwalAmbil();
+    updatePrice();
+    loadFeedbackList();
+});
+
 
 // --- FORM HANDLER & PRICING ---
+
 const kategoriLayanan =
-    document.getElementById(
-        'kategoriLayanan'
-    );
+    document.getElementById('kategoriLayanan');
 
 const sectionDokumen =
-    document.getElementById(
-        'sectionDokumen'
-    );
+    document.getElementById('sectionDokumen');
 
 const sectionStiker =
-    document.getElementById(
-        'sectionStiker'
-    );
+    document.getElementById('sectionStiker');
 
 const fileLabel =
-    document.getElementById(
-        'fileLabel'
-    );
+    document.getElementById('fileLabel');
 
 const fileHelper =
-    document.getElementById(
-        'fileHelper'
-    );
+    document.getElementById('fileHelper');
 
 const fileInput =
-    document.getElementById(
-        'file'
-    );
+    document.getElementById('file');
 
 const jenisStikerSelect =
-    document.getElementById(
-        'jenisStiker'
-    );
+    document.getElementById('jenisStiker');
 
 const jumlahLembarStikerInput =
-    document.getElementById(
-        'jumlahLembarStiker'
-    );
+    document.getElementById('jumlahLembarStiker');
 
 const ukuranKertasSelect =
-    document.getElementById(
-        'ukuranKertas'
-    );
+    document.getElementById('ukuranKertas');
 
 const groupCustomUkuran =
-    document.getElementById(
-        'groupCustomUkuran'
-    );
+    document.getElementById('groupCustomUkuran');
 
 const jumlahHalamanInput =
-    document.getElementById(
-        'jumlahHalaman'
-    );
+    document.getElementById('jumlahHalaman');
 
 const jumlahCopyInput =
-    document.getElementById(
-        'jumlahCopy'
-    );
+    document.getElementById('jumlahCopy');
 
 const pricePreview =
-    document.getElementById(
-        'pricePreview'
-    );
+    document.getElementById('pricePreview');
+
 
 function handleKategoriChange() {
     if (!kategoriLayanan) return;
 
-    if (
-        kategoriLayanan.value ===
-        'stiker'
-    ) {
+    if (kategoriLayanan.value === 'stiker') {
         if (sectionDokumen) {
-            sectionDokumen.style.display =
-                'none';
+            sectionDokumen.style.display = 'none';
         }
 
         if (sectionStiker) {
-            sectionStiker.style.display =
-                'block';
+            sectionStiker.style.display = 'block';
         }
 
         if (fileLabel) {
@@ -347,13 +276,11 @@ function handleKategoriChange() {
         }
     } else {
         if (sectionDokumen) {
-            sectionDokumen.style.display =
-                'block';
+            sectionDokumen.style.display = 'block';
         }
 
         if (sectionStiker) {
-            sectionStiker.style.display =
-                'none';
+            sectionStiker.style.display = 'none';
         }
 
         if (fileLabel) {
@@ -370,6 +297,7 @@ function handleKategoriChange() {
     updatePrice();
 }
 
+
 if (kategoriLayanan) {
     kategoriLayanan.addEventListener(
         'change',
@@ -377,14 +305,14 @@ if (kategoriLayanan) {
     );
 }
 
+
 if (ukuranKertasSelect) {
     ukuranKertasSelect.addEventListener(
         'change',
         () => {
             if (groupCustomUkuran) {
                 groupCustomUkuran.style.display =
-                    ukuranKertasSelect.value ===
-                    'Custom'
+                    ukuranKertasSelect.value === 'Custom'
                         ? 'block'
                         : 'none';
             }
@@ -393,6 +321,7 @@ if (ukuranKertasSelect) {
         }
     );
 }
+
 
 if (jenisStikerSelect) {
     jenisStikerSelect.addEventListener(
@@ -405,8 +334,7 @@ if (jenisStikerSelect) {
 
             if (labelJumlah) {
                 labelJumlah.innerText =
-                    jenisStikerSelect.value ===
-                    'Roll'
+                    jenisStikerSelect.value === 'Roll'
                         ? "Panjang Stiker (dalam Meter) *"
                         : "Jumlah Lembar A3+ *";
             }
@@ -416,94 +344,86 @@ if (jenisStikerSelect) {
     );
 }
 
+
 // --- VALIDASI & DETEKSI HALAMAN MULTI-FILE ---
+
 function formatBytes(bytes) {
     if (bytes < 1024 * 1024) {
-        return `${
-            Math.max(
-                1,
-                Math.round(bytes / 1024)
-            )
-        } KB`;
+        return `${Math.max(
+            1,
+            Math.round(bytes / 1024)
+        )} KB`;
     }
 
-    return `${
-        (
-            bytes /
-            (1024 * 1024)
-        ).toFixed(1)
-    } MB`;
+    return `${(
+        bytes /
+        (1024 * 1024)
+    ).toFixed(1)} MB`;
 }
+
 
 function renderSelectedFiles(files) {
     const fileList =
-        document.getElementById(
-            'fileList'
-        );
+        document.getElementById('fileList');
 
     if (!fileList) return;
 
     if (!files.length) {
-        fileList.style.display =
-            'none';
-
-        fileList.innerHTML =
-            '';
-
+        fileList.style.display = 'none';
+        fileList.innerHTML = '';
         return;
     }
 
-    fileList.style.display =
-        'block';
+    fileList.style.display = 'block';
 
     fileList.innerHTML =
-        files.map(
-            (file, index) => `
-                <div style="
-                    display:flex;
-                    align-items:center;
-                    gap:8px;
-                    padding:5px 0;
-                    border-bottom:${
-                        index <
-                        files.length - 1
-                            ? '1px solid var(--border-color)'
-                            : 'none'
-                    };
-                ">
-                    <span style="
-                        font-weight:700;
-                        color:var(--primary);
+        files
+            .map(
+                (file, index) => `
+                    <div style="
+                        display:flex;
+                        align-items:center;
+                        gap:8px;
+                        padding:5px 0;
+                        border-bottom:${
+                            index < files.length - 1
+                                ? '1px solid var(--border-color)'
+                                : 'none'
+                        };
                     ">
-                        ${index + 1}.
-                    </span>
+                        <span style="
+                            font-weight:700;
+                            color:var(--primary);
+                        ">
+                            ${index + 1}.
+                        </span>
 
-                    <span style="
-                        flex:1;
-                        word-break:break-word;
-                    ">
-                        ${file.name}
-                    </span>
+                        <span style="
+                            flex:1;
+                            word-break:break-word;
+                        ">
+                            ${file.name}
+                        </span>
 
-                    <span style="
-                        color:var(--text-muted);
-                        white-space:nowrap;
-                    ">
-                        ${formatBytes(file.size)}
-                    </span>
-                </div>
-            `
-        ).join('');
+                        <span style="
+                            color:var(--text-muted);
+                            white-space:nowrap;
+                        ">
+                            ${formatBytes(file.size)}
+                        </span>
+                    </div>
+                `
+            )
+            .join('');
 }
+
 
 if (fileInput) {
     fileInput.addEventListener(
         'change',
         async function () {
             const files =
-                Array.from(
-                    this.files || []
-                );
+                Array.from(this.files || []);
 
             if (!files.length) {
                 renderSelectedFiles([]);
@@ -533,12 +453,8 @@ if (fileInput) {
 
             const totalBytes =
                 files.reduce(
-                    (
-                        sum,
-                        file
-                    ) =>
-                        sum +
-                        file.size,
+                    (sum, file) =>
+                        sum + file.size,
                     0
                 );
 
@@ -576,18 +492,13 @@ if (fileInput) {
                 return;
             }
 
-            renderSelectedFiles(
-                files
-            );
+            renderSelectedFiles(files);
 
             let detectedPages = 0;
             let pdfCount = 0;
             let hasPdfError = false;
 
-            for (
-                const file of
-                files
-            ) {
+            for (const file of files) {
                 const isPdf =
                     file.type ===
                         'application/pdf' ||
@@ -605,8 +516,7 @@ if (fileInput) {
                         const pdf =
                             await pdfjsLib
                                 .getDocument({
-                                    data:
-                                        arrayBuffer
+                                    data: arrayBuffer
                                 })
                                 .promise;
 
@@ -647,7 +557,9 @@ if (fileInput) {
     );
 }
 
+
 // --- FUNGSI UTAMA KALKULASI HARGA ---
+
 function updatePrice() {
     const kategori =
         kategoriLayanan
@@ -656,9 +568,7 @@ function updatePrice() {
 
     let total = 0;
 
-    if (
-        kategori === 'stiker'
-    ) {
+    if (kategori === 'stiker') {
         const jenisStiker =
             jenisStikerSelect
                 ? jenisStikerSelect.value
@@ -671,21 +581,14 @@ function updatePrice() {
                     : 1
             ) || 1;
 
-        let hargaSatuan =
-            25000;
+        let hargaSatuan = 25000;
 
-        if (
-            jenisStiker ===
-            'Kromo'
-        ) {
-            hargaSatuan =
-                15000;
+        if (jenisStiker === 'Kromo') {
+            hargaSatuan = 15000;
         } else if (
-            jenisStiker ===
-            'Roll'
+            jenisStiker === 'Roll'
         ) {
-            hargaSatuan =
-                50000;
+            hargaSatuan = 50000;
         }
 
         const finishing =
@@ -695,12 +598,10 @@ function updatePrice() {
             'Tanpa Potong';
 
         const finishingMultiplier =
-            finishing ===
-            'Tanpa Potong'
+            finishing === 'Tanpa Potong'
                 ? 0.8
                 : (
-                    finishing ===
-                    'Die Cut'
+                    finishing === 'Die Cut'
                         ? 1.2
                         : 1.1
                 );
@@ -709,6 +610,7 @@ function updatePrice() {
             jumlah *
             hargaSatuan *
             finishingMultiplier;
+
     } else {
         const hal =
             parseInt(
@@ -745,8 +647,7 @@ function updatePrice() {
                 : 1000;
 
         if (
-            ukuranKertas ===
-            'A3+'
+            ukuranKertas === 'A3+'
         ) {
             hargaPerHal *= 2;
         }
@@ -766,12 +667,14 @@ function updatePrice() {
     }
 }
 
+
 if (jumlahHalamanInput) {
     jumlahHalamanInput.addEventListener(
         'input',
         updatePrice
     );
 }
+
 
 if (jumlahCopyInput) {
     jumlahCopyInput.addEventListener(
@@ -780,28 +683,28 @@ if (jumlahCopyInput) {
     );
 }
 
-if (
-    jumlahLembarStikerInput
-) {
+
+if (jumlahLembarStikerInput) {
     jumlahLembarStikerInput.addEventListener(
         'input',
         updatePrice
     );
 }
 
+
 const finishingStikerSelect =
     document.getElementById(
         'finishingStiker'
     );
 
-if (
-    finishingStikerSelect
-) {
+
+if (finishingStikerSelect) {
     finishingStikerSelect.addEventListener(
         'change',
         updatePrice
     );
 }
+
 
 document.addEventListener(
     'change',
@@ -816,8 +719,11 @@ document.addEventListener(
     }
 );
 
+
 // --- TIMER INVOICE ---
+
 let countdownInterval;
+
 
 function startInvoiceTimer(
     durationInSeconds
@@ -839,35 +745,27 @@ function startInvoiceTimer(
             () => {
                 let minutes =
                     parseInt(
-                        timer /
-                            60,
+                        timer / 60,
                         10
                     );
 
                 let seconds =
                     parseInt(
-                        timer %
-                            60,
+                        timer % 60,
                         10
                     );
 
                 minutes =
-                    minutes <
-                    10
-                        ? "0" +
-                          minutes
+                    minutes < 10
+                        ? "0" + minutes
                         : minutes;
 
                 seconds =
-                    seconds <
-                    10
-                        ? "0" +
-                          seconds
+                    seconds < 10
+                        ? "0" + seconds
                         : seconds;
 
-                if (
-                    timerDisplay
-                ) {
+                if (timerDisplay) {
                     timerDisplay.innerText =
                         "⏱️ " +
                         minutes +
@@ -875,17 +773,12 @@ function startInvoiceTimer(
                         seconds;
                 }
 
-                if (
-                    --timer <
-                    0
-                ) {
+                if (--timer < 0) {
                     clearInterval(
                         countdownInterval
                     );
 
-                    if (
-                        timerDisplay
-                    ) {
+                    if (timerDisplay) {
                         timerDisplay.innerText =
                             "⏱️ Waktu Habis!";
                     }
@@ -895,7 +788,9 @@ function startInvoiceTimer(
         );
 }
 
+
 // --- VERIFIKASI STATUS SISWA ---
+
 const phoneInput =
     document.getElementById(
         'phone'
@@ -921,6 +816,7 @@ const paymentMethodGroup =
         'paymentMethodGroup'
     );
 
+
 function getSelectedPaymentMethod() {
     const selected =
         document.querySelector(
@@ -932,10 +828,9 @@ function getSelectedPaymentMethod() {
         : 'QRIS';
 }
 
+
 function resetStudentVerificationUI() {
-    if (
-        studentVerificationStatus
-    ) {
+    if (studentVerificationStatus) {
         studentVerificationStatus.innerText =
             '🎓 Status siswa: belum dicek.';
 
@@ -959,10 +854,10 @@ function resetStudentVerificationUI() {
         );
 
     if (qrisRadio) {
-        qrisRadio.checked =
-            true;
+        qrisRadio.checked = true;
     }
 }
+
 
 async function checkStudentStatus() {
     const phone =
@@ -994,8 +889,7 @@ async function checkStudentStatus() {
             await supabaseClient.rpc(
                 'is_verified_student_phone',
                 {
-                    p_phone:
-                        phone
+                    p_phone: phone
                 }
             );
 
@@ -1004,9 +898,7 @@ async function checkStudentStatus() {
         }
 
         if (data === true) {
-            if (
-                studentVerificationStatus
-            ) {
+            if (studentVerificationStatus) {
                 studentVerificationStatus.innerText =
                     '🎓 Status siswa: ✅ Terverifikasi';
 
@@ -1023,10 +915,9 @@ async function checkStudentStatus() {
                 paymentMethodGroup.style.display =
                     'block';
             }
+
         } else {
-            if (
-                studentVerificationStatus
-            ) {
+            if (studentVerificationStatus) {
                 studentVerificationStatus.innerText =
                     '🎓 Status siswa: belum terverifikasi.';
 
@@ -1044,9 +935,8 @@ async function checkStudentStatus() {
                     'none';
             }
         }
-    } catch (
-        err
-    ) {
+
+    } catch (err) {
         console.error(
             'Gagal mengecek status siswa:',
             err
@@ -1055,6 +945,7 @@ async function checkStudentStatus() {
         alert(
             '❌ Gagal mengecek status siswa. Silakan coba lagi.'
         );
+
     } finally {
         if (btnCheckStudent) {
             btnCheckStudent.disabled =
@@ -1065,6 +956,7 @@ async function checkStudentStatus() {
         }
     }
 }
+
 
 async function applyStudentStatus() {
     const phone =
@@ -1096,8 +988,7 @@ async function applyStudentStatus() {
             await supabaseClient.rpc(
                 'submit_student_verification',
                 {
-                    p_phone:
-                        phone
+                    p_phone: phone
                 }
             );
 
@@ -1109,9 +1000,7 @@ async function applyStudentStatus() {
             data?.status ===
             'verified'
         ) {
-            if (
-                studentVerificationStatus
-            ) {
+            if (studentVerificationStatus) {
                 studentVerificationStatus.innerText =
                     '🎓 Status siswa: ✅ Terverifikasi';
 
@@ -1128,13 +1017,12 @@ async function applyStudentStatus() {
                 paymentMethodGroup.style.display =
                     'block';
             }
+
         } else if (
             data?.status ===
             'pending'
         ) {
-            if (
-                studentVerificationStatus
-            ) {
+            if (studentVerificationStatus) {
                 studentVerificationStatus.innerText =
                     '🎓 Status siswa: ⏳ Menunggu verifikasi admin';
 
@@ -1155,15 +1043,15 @@ async function applyStudentStatus() {
             alert(
                 '✅ Pengajuan status siswa berhasil dikirim. Tunggu verifikasi admin.'
             );
+
         } else {
             alert(
                 data?.message ||
-                    '❌ Pengajuan tidak dapat diproses.'
+                '❌ Pengajuan tidak dapat diproses.'
             );
         }
-    } catch (
-        err
-    ) {
+
+    } catch (err) {
         console.error(
             'Gagal mengajukan status siswa:',
             err
@@ -1171,8 +1059,9 @@ async function applyStudentStatus() {
 
         alert(
             '❌ Gagal mengajukan status siswa: ' +
-                err.message
+            err.message
         );
+
     } finally {
         if (btnApplyStudent) {
             btnApplyStudent.disabled =
@@ -1184,6 +1073,7 @@ async function applyStudentStatus() {
     }
 }
 
+
 if (btnCheckStudent) {
     btnCheckStudent.addEventListener(
         'click',
@@ -1191,12 +1081,14 @@ if (btnCheckStudent) {
     );
 }
 
+
 if (btnApplyStudent) {
     btnApplyStudent.addEventListener(
         'click',
         applyStudentStatus
     );
 }
+
 
 if (phoneInput) {
     phoneInput.addEventListener(
@@ -1210,18 +1102,18 @@ if (phoneInput) {
     );
 }
 
+
 // --- SUBMIT FORM & UPLOAD KE SUPABASE ---
-let tempOrderData =
-    null;
+
+let tempOrderData = null;
 
 const orderForm =
     document.getElementById(
         'orderForm'
     );
 
-function sanitizeFileName(
-    name
-) {
+
+function sanitizeFileName(name) {
     return String(
         name || 'file'
     )
@@ -1236,34 +1128,31 @@ function sanitizeFileName(
         );
 }
 
+
 function getStickerPricing(
     jenisStiker,
     finishing
 ) {
-    let hargaSatuan =
-        25000;
+    let hargaSatuan = 25000;
 
     if (
-        jenisStiker ===
-        'Kromo'
+        jenisStiker === 'Kromo'
     ) {
-        hargaSatuan =
-            15000;
+        hargaSatuan = 15000;
+
     } else if (
-        jenisStiker ===
-        'Roll'
+        jenisStiker === 'Roll'
     ) {
-        hargaSatuan =
-            50000;
+        hargaSatuan = 50000;
     }
 
     const multiplier =
         finishing ===
-        'Tanpa Potong'
+            'Tanpa Potong'
             ? 0.8
             : (
                 finishing ===
-                'Die Cut'
+                    'Die Cut'
                     ? 1.2
                     : 1.1
             );
@@ -1273,6 +1162,7 @@ function getStickerPricing(
         multiplier
     );
 }
+
 
 if (orderForm) {
     orderForm.addEventListener(
@@ -1296,12 +1186,8 @@ if (orderForm) {
 
             const totalBytes =
                 files.reduce(
-                    (
-                        sum,
-                        file
-                    ) =>
-                        sum +
-                        file.size,
+                    (sum, file) =>
+                        sum + file.size,
                     0
                 );
 
@@ -1396,8 +1282,7 @@ if (orderForm) {
 
                 if (
                     verifyError ||
-                    verified !==
-                        true
+                    verified !== true
                 ) {
                     alert(
                         '❌ Bayar di Tempat hanya tersedia untuk nomor WhatsApp siswa yang sudah terverifikasi.'
@@ -1409,11 +1294,8 @@ if (orderForm) {
                 }
             }
 
-            let detailText =
-                '';
-
-            let totalHarga =
-                0;
+            let detailText = '';
+            let totalHarga = 0;
 
             if (
                 kategori ===
@@ -1455,6 +1337,7 @@ if (orderForm) {
                             ? 'Meter'
                             : 'Lembar A3+'
                     } (${finishing}) - ${files.length} File`;
+
             } else {
                 const jumlahHalaman =
                     Number(
@@ -1507,8 +1390,7 @@ if (orderForm) {
                     ukuranKertasBase ===
                     'A3+'
                 ) {
-                    hargaPerHal *=
-                        2;
+                    hargaPerHal *= 2;
                 }
 
                 totalHarga =
@@ -1534,13 +1416,11 @@ if (orderForm) {
 
             document.getElementById(
                 'mNama'
-            ).innerText =
-                nama;
+            ).innerText = nama;
 
             document.getElementById(
                 'mPhone'
-            ).innerText =
-                phone;
+            ).innerText = phone;
 
             document.getElementById(
                 'mAmbil'
@@ -1552,15 +1432,10 @@ if (orderForm) {
             ).innerText =
                 `${detailText}\n\nFile:\n${files
                     .map(
-                        (
-                            file,
-                            i
-                        ) =>
+                        (file, i) =>
                             `${i + 1}. ${file.name}`
                     )
-                    .join(
-                        '\n'
-                    )}`;
+                    .join('\n')}`;
 
             document.getElementById(
                 'mTotal'
@@ -1591,6 +1466,7 @@ if (orderForm) {
     );
 }
 
+
 function closeConfirmModal() {
     document.getElementById(
         'confirmModal'
@@ -1598,10 +1474,12 @@ function closeConfirmModal() {
         'none';
 }
 
+
 const btnProceedInvoice =
     document.getElementById(
         'btnProceedInvoice'
     );
+
 
 if (btnProceedInvoice) {
     btnProceedInvoice.onclick =
@@ -1615,21 +1493,17 @@ if (btnProceedInvoice) {
             btnProceedInvoice.innerText =
                 "⏳ Mengunggah...";
 
-            const uploadedPaths =
-                [];
+            const uploadedPaths = [];
 
             try {
-                const uploadedFiles =
-                    [];
+                const uploadedFiles = [];
 
                 for (
                     const file of
                     tempOrderData.files
                 ) {
                     const fileNameCloud =
-                        `${Date.now()}_${crypto.randomUUID()}_${sanitizeFileName(
-                            file.name
-                        )}`;
+                        `${Date.now()}_${crypto.randomUUID()}_${sanitizeFileName(file.name)}`;
 
                     const {
                         error: uploadError
@@ -1648,9 +1522,7 @@ if (btnProceedInvoice) {
                                 }
                             );
 
-                    if (
-                        uploadError
-                    ) {
+                    if (uploadError) {
                         throw uploadError;
                     }
 
@@ -1658,19 +1530,20 @@ if (btnProceedInvoice) {
                         fileNameCloud
                     );
 
-                    uploadedFiles.push(
-                        {
-                            path:
-                                fileNameCloud,
-                            name:
-                                file.name,
-                            size:
-                                file.size,
-                            type:
-                                file.type ||
-                                'application/octet-stream'
-                        }
-                    );
+                    uploadedFiles.push({
+                        path:
+                            fileNameCloud,
+
+                        name:
+                            file.name,
+
+                        size:
+                            file.size,
+
+                        type:
+                            file.type ||
+                            'application/octet-stream'
+                    });
                 }
 
                 const firstFile =
@@ -1681,7 +1554,9 @@ if (btnProceedInvoice) {
                     error: dbError
                 } =
                     await supabaseClient
-                        .from('orders')
+                        .from(
+                            'orders'
+                        )
                         .insert([
                             {
                                 nama:
@@ -1731,6 +1606,9 @@ if (btnProceedInvoice) {
                     throw dbError;
                 }
 
+
+                // RLS sengaja tidak memberi SELECT langsung ke customer.
+                // Ambil nomor antrean terbaru lewat RPC tracking.
                 const {
                     data: latestOrders,
                     error: latestOrderError
@@ -1767,15 +1645,11 @@ if (btnProceedInvoice) {
                 const fileNamesText =
                     uploadedFiles
                         .map(
-                            (
-                                file,
-                                index
-                            ) =>
+                            (file, index) =>
                                 `${index + 1}. ${file.name}`
                         )
-                        .join(
-                            '\n'
-                        );
+                        .join('\n');
+
 
                 document.getElementById(
                     'invPhone'
@@ -1800,6 +1674,7 @@ if (btnProceedInvoice) {
                         'id-ID'
                     );
 
+
                 const invoiceQrisArea =
                     document.getElementById(
                         'invoiceQrisArea'
@@ -1819,6 +1694,7 @@ if (btnProceedInvoice) {
                     document.getElementById(
                         'invoiceTimer'
                     );
+
 
                 if (
                     tempOrderData.paymentMethod ===
@@ -1845,12 +1721,11 @@ if (btnProceedInvoice) {
                             'Bayar di Tempat';
                     }
 
-                    if (
-                        invoiceTimer
-                    ) {
+                    if (invoiceTimer) {
                         invoiceTimer.style.display =
                             'none';
                     }
+
                 } else {
                     if (
                         invoiceQrisArea
@@ -1873,17 +1748,13 @@ if (btnProceedInvoice) {
                             'Selesaikan Pembayaran';
                     }
 
-                    if (
-                        invoiceTimer
-                    ) {
+                    if (invoiceTimer) {
                         invoiceTimer.style.display =
                             'block';
                     }
 
                     const pesanWA =
-                        `Halo Admin KohanCopier, saya ingin konfirmasi pembayaran QRIS.\n\n*No Antrean:* ${noAntrian}\n*No WA:* ${tempOrderData.phone}\n*Nama:* ${tempOrderData.nama}\n*Waktu Ambil:* ${tempOrderData.waktuAmbil}\n*Detail:* ${tempOrderData.detailText}\n*File:* ${tempOrderData.files.length} file\n*Catatan:* ${tempOrderData.catatan}\n*Total:* Rp ${tempOrderData.totalHarga.toLocaleString(
-                            'id-ID'
-                        )}\n\nBerikut bukti pembayarannya:`;
+                        `Halo Admin KohanCopier, saya ingin konfirmasi pembayaran QRIS.\n\n*No Antrean:* ${noAntrian}\n*No WA:* ${tempOrderData.phone}\n*Nama:* ${tempOrderData.nama}\n*Waktu Ambil:* ${tempOrderData.waktuAmbil}\n*Detail:* ${tempOrderData.detailText}\n*File:* ${tempOrderData.files.length} file\n*Catatan:* ${tempOrderData.catatan}\n*Total:* Rp ${tempOrderData.totalHarga.toLocaleString('id-ID')}\n\nBerikut bukti pembayarannya:`;
 
                     document.getElementById(
                         'btnInvWA'
@@ -1894,7 +1765,9 @@ if (btnProceedInvoice) {
                         );
                 }
 
+
                 closeConfirmModal();
+
 
                 const navInvoice =
                     document.getElementById(
@@ -1906,6 +1779,7 @@ if (btnProceedInvoice) {
                         'bnav-invoice'
                     );
 
+
                 if (navInvoice) {
                     navInvoice.style.display =
                         'inline-block';
@@ -1916,6 +1790,7 @@ if (btnProceedInvoice) {
                         'flex';
                 }
 
+
                 if (
                     typeof window.switchPage ===
                     'function'
@@ -1924,6 +1799,7 @@ if (btnProceedInvoice) {
                         'invoice'
                     );
                 }
+
 
                 if (
                     tempOrderData.paymentMethod ===
@@ -1938,18 +1814,20 @@ if (btnProceedInvoice) {
                     );
                 }
 
+
                 orderForm.reset();
 
-                renderSelectedFiles(
-                    []
-                );
+                renderSelectedFiles([]);
 
                 handleKategoriChange();
+
                 updatePrice();
+
                 generateJadwalAmbil();
-            } catch (
-                err
-            ) {
+
+            } catch (err) {
+
+                // Clean up files if order insert failed after upload.
                 if (
                     uploadedPaths.length
                 ) {
@@ -1968,8 +1846,9 @@ if (btnProceedInvoice) {
 
                 alert(
                     '❌ Gagal menyimpan pesanan: ' +
-                        err.message
+                    err.message
                 );
+
             } finally {
                 btnProceedInvoice.disabled =
                     false;
@@ -1980,15 +1859,14 @@ if (btnProceedInvoice) {
         };
 }
 
+
 // --- LACAK PESANAN PAKAI NOMOR WHATSAPP ---
+
 async function lacakStatusPesanan() {
     const keyword =
-        document
-            .getElementById(
-                'trackInput'
-            )
-            .value
-            .trim();
+        document.getElementById(
+            'trackInput'
+        ).value.trim();
 
     const resultDiv =
         document.getElementById(
@@ -2008,6 +1886,7 @@ async function lacakStatusPesanan() {
     resultDiv.innerHTML =
         '<p style="color: #64748b; font-size: 13px; margin:0;">⏳ Mencari pesanan...</p>';
 
+
     const {
         data: found,
         error
@@ -2019,6 +1898,7 @@ async function lacakStatusPesanan() {
                     keyword
             }
         );
+
 
     if (error) {
         console.error(
@@ -2032,6 +1912,7 @@ async function lacakStatusPesanan() {
         return;
     }
 
+
     if (
         found &&
         found.length > 0
@@ -2039,25 +1920,22 @@ async function lacakStatusPesanan() {
         let html =
             '<div style="background:white; padding:12px; border-radius:8px; border:1px solid #cbd5e1; font-size:13px; color:#1e293b;">';
 
+
         found.forEach(
             o => {
                 const phone =
-                    o.phone ||
-                    '';
+                    o.phone || '';
 
                 const maskedPhone =
-                    phone.length >
-                    4
+                    phone.length > 4
                         ? phone.slice(
                             0,
                             -4
-                        ) +
-                          'XXXX'
+                        ) + 'XXXX'
                         : 'XXXX';
 
                 const status =
-                    o.status ||
-                    '-';
+                    o.status || '-';
 
                 const badgeBg =
                     status.includes(
@@ -2085,12 +1963,14 @@ async function lacakStatusPesanan() {
                                 : '#0284c7'
                         );
 
+
                 html += `
                     <div style="
                         margin-bottom:12px;
                         padding-bottom:8px;
                         border-bottom:1px solid #eee;
                     ">
+
                         <p style="margin:2px 0;">
                             <b>No Antrean:</b>
 
@@ -2102,11 +1982,14 @@ async function lacakStatusPesanan() {
                             </span>
                         </p>
 
+
                         <p style="margin:2px 0;">
                             <b>Pemesan:</b>
+
                             ${o.nama || '-'}
                             (${maskedPhone})
                         </p>
+
 
                         <p style="margin:2px 0;">
                             <b>Status:</b>
@@ -2123,6 +2006,7 @@ async function lacakStatusPesanan() {
                             </span>
                         </p>
 
+
                         <p style="
                             margin:2px 0;
                             color:#64748b;
@@ -2131,6 +2015,7 @@ async function lacakStatusPesanan() {
                             ${o.detail_cetak || '-'}
                         </p>
 
+
                         <p style="
                             margin:2px 0;
                             color:#64748b;
@@ -2138,6 +2023,7 @@ async function lacakStatusPesanan() {
                             <b>Ambil:</b>
                             ${o.waktu_ambil || '-'}
                         </p>
+
 
                         <p style="
                             margin:2px 0;
@@ -2152,34 +2038,39 @@ async function lacakStatusPesanan() {
                                 Rp ${
                                     Number(
                                         o.total_harga ||
-                                            0
+                                        0
                                     ).toLocaleString(
                                         'id-ID'
                                     )
                                 }
                             </span>
                         </p>
+
                     </div>
                 `;
             }
         );
 
-        html +=
-            '</div>';
+
+        html += '</div>';
 
         resultDiv.innerHTML =
             html;
+
     } else {
         resultDiv.innerHTML =
             '<p style="color: #dc2626; font-size: 13px; margin:0; background: #fee2e2; padding: 10px; border-radius: 6px;">❌ Tidak ada riwayat pesanan dengan Nomor WhatsApp tersebut.</p>';
     }
 }
 
+
 // --- FITUR FEEDBACK & RATING DENGAN FOTO PROFIL ---
+
 const feedbackForm =
     document.getElementById(
         'feedbackForm'
     );
+
 
 if (feedbackForm) {
     feedbackForm.addEventListener(
@@ -2188,29 +2079,21 @@ if (feedbackForm) {
             e.preventDefault();
 
             const nama =
-                document
-                    .getElementById(
-                        'fbNama'
-                    )
-                    .value
-                    .trim();
+                document.getElementById(
+                    'fbNama'
+                ).value.trim();
 
             const rating =
                 parseInt(
-                    document
-                        .getElementById(
-                            'fbRating'
-                        )
-                        .value
+                    document.getElementById(
+                        'fbRating'
+                    ).value
                 ) || 5;
 
             const komentar =
-                document
-                    .getElementById(
-                        'fbKomentar'
-                    )
-                    .value
-                    .trim();
+                document.getElementById(
+                    'fbKomentar'
+                ).value.trim();
 
             const fotoInput =
                 document.getElementById(
@@ -2228,9 +2111,11 @@ if (feedbackForm) {
             btn.innerText =
                 "Mengirim Ulasan...";
 
+
             try {
                 let fotoUrl =
                     null;
+
 
                 if (
                     fotoInput.files &&
@@ -2239,26 +2124,25 @@ if (feedbackForm) {
                     const fotoFile =
                         fotoInput.files[0];
 
+
                     if (
                         fotoFile.size >
                         2 *
-                            1024 *
-                            1024
+                        1024 *
+                        1024
                     ) {
                         throw new Error(
                             "Ukuran foto profil maksimal 2MB!"
                         );
                     }
 
+
                     const fileNameFoto =
-                        `avatar_${Date.now()}_${Math.random().toString(36).substring(
-                            2,
-                            7
-                        )}.${fotoFile.name.split('.').pop()}`;
+                        `avatar_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fotoFile.name.split('.').pop()}`;
+
 
                     const {
-                        error:
-                            uploadError
+                        error: uploadError
                     } =
                         await supabaseClient
                             .storage
@@ -2270,11 +2154,11 @@ if (feedbackForm) {
                                 fotoFile
                             );
 
-                    if (
-                        uploadError
-                    ) {
+
+                    if (uploadError) {
                         throw uploadError;
                     }
+
 
                     const {
                         data: urlData
@@ -2288,13 +2172,14 @@ if (feedbackForm) {
                                 fileNameFoto
                             );
 
+
                     fotoUrl =
                         urlData.publicUrl;
                 }
 
+
                 const {
-                    error:
-                        dbError
+                    error: dbError
                 } =
                     await supabaseClient
                         .from(
@@ -2310,26 +2195,27 @@ if (feedbackForm) {
                             }
                         ]);
 
-                if (
-                    dbError
-                ) {
+
+                if (dbError) {
                     throw dbError;
                 }
+
 
                 alert(
                     '✨ Terima kasih! Ulasan dan foto profil kamu berhasil dikirim.'
                 );
 
+
                 feedbackForm.reset();
 
                 loadFeedbackList();
-            } catch (
-                err
-            ) {
+
+            } catch (err) {
                 alert(
                     '❌ Gagal mengirim ulasan: ' +
-                        err.message
+                    err.message
                 );
+
             } finally {
                 btn.disabled =
                     false;
@@ -2341,6 +2227,7 @@ if (feedbackForm) {
     );
 }
 
+
 async function loadFeedbackList() {
     const container =
         document.getElementById(
@@ -2349,8 +2236,10 @@ async function loadFeedbackList() {
 
     if (!container) return;
 
+
     container.innerHTML =
         '<p style="color: var(--text-muted); font-size: 13px; text-align: center;">Memuat ulasan...</p>';
+
 
     const {
         data,
@@ -2370,6 +2259,7 @@ async function loadFeedbackList() {
             )
             .limit(10);
 
+
     if (error) {
         container.innerHTML =
             '<p style="color: #dc2626; font-size: 13px; text-align: center;">Gagal memuat ulasan.</p>';
@@ -2377,12 +2267,13 @@ async function loadFeedbackList() {
         return;
     }
 
+
     if (
         data &&
         data.length > 0
     ) {
-        let html =
-            '';
+        let html = '';
+
 
         data.forEach(
             item => {
@@ -2394,49 +2285,54 @@ async function loadFeedbackList() {
                 let avatarHtml =
                     '';
 
+
                 if (
                     item.foto_url
                 ) {
                     avatarHtml =
-                        `<img src="${item.foto_url}" alt="${item.nama}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary);">`;
+                        `<img src="${item.foto_url}" alt="${item.nama}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid var(--primary);">`;
+
                 } else {
                     let initial =
                         item.nama
                             ? item.nama
-                                  .charAt(
-                                      0
-                                  )
-                                  .toUpperCase()
+                                .charAt(
+                                    0
+                                )
+                                .toUpperCase()
                             : 'U';
 
                     avatarHtml =
-                        `<div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px;">${initial}</div>`;
+                        `<div style="width:40px;height:40px;border-radius:50%;background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:16px;">${initial}</div>`;
                 }
+
 
                 html += `
                     <div style="
-                        background: var(--box-bg);
-                        border: 1px solid var(--border-color);
-                        padding: 14px;
-                        border-radius: 12px;
-                        font-size: 13px;
-                        display: flex;
-                        gap: 12px;
-                        align-items: flex-start;
+                        background:var(--box-bg);
+                        border:1px solid var(--border-color);
+                        padding:14px;
+                        border-radius:12px;
+                        font-size:13px;
+                        display:flex;
+                        gap:12px;
+                        align-items:flex-start;
                     ">
+
                         <div>
                             ${avatarHtml}
                         </div>
 
-                        <div style="
-                            flex: 1;
-                        ">
+
+                        <div style="flex:1;">
+
                             <div style="
                                 display:flex;
                                 justify-content:space-between;
                                 align-items:center;
                                 margin-bottom:4px;
                             ">
+
                                 <b style="
                                     font-size:14px;
                                     color:var(--text-main);
@@ -2444,13 +2340,16 @@ async function loadFeedbackList() {
                                     ${item.nama}
                                 </b>
 
+
                                 <span style="
                                     color:#f59e0b;
                                     font-size:12px;
                                 ">
                                     ${starsHtml}
                                 </span>
+
                             </div>
+
 
                             <p style="
                                 margin:0;
@@ -2459,14 +2358,18 @@ async function loadFeedbackList() {
                             ">
                                 ${item.komentar}
                             </p>
+
                         </div>
+
                     </div>
                 `;
             }
         );
 
+
         container.innerHTML =
             html;
+
     } else {
         container.innerHTML =
             '<p style="color: var(--text-muted); font-size: 13px; text-align: center;">Belum ada ulasan. Jadilah yang pertama memberikan ulasan!</p>';

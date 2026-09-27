@@ -1,6 +1,6 @@
 // --- KONFIGURASI SUPABASE ---
 const SUPABASE_URL = "https://gputfcshhgppygipxzfh.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhc2UiLCJyZWYiOiJncHV0ZmNzaGhncHB5Z2lwaHh6ZiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzg5MTI0MTQzLCJleHAiOjIxMDQ3MDAxNDN9.vhd6pH6jkNsbnnZsjgonc8xGc7yk-rQIZSgegiXbmBs";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwdXRmY3NoaGdwcHln aXB4emZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxMjQxNDMsImV4cCI6MjEwNDcwMDE0M30.vhd6pH6jkNsbnnZsjgonc8xGc7yk-rQIZSgegiXbmBs";
 
 const supabaseClient = supabase.createClient(
     SUPABASE_URL,

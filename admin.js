@@ -1,6 +1,6 @@
 // --- KONFIGURASI SUPABASE ---
 const SUPABASE_URL = "https://gputfcshhgppygipxzfh.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_s_pTEbz1PXq9byGJu14RCw_ppa1gtlH";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwdXRmY3NoaGdwcHlnaXB4emZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxMjQxNDMsImV4cCI6MjEwNDcwMDE0M30.vhd6pH6jkNsbnnZsjgonc8xGc7yk-rQIZSgegiXbmBs";
 
 const supabaseClient = supabase.createClient(
     SUPABASE_URL,
@@ -36,7 +36,10 @@ async function checkAdminAccess() {
     } = await supabaseClient.rpc('is_admin');
 
     if (adminError) {
-        console.error('Gagal mengecek admin:', adminError);
+        console.error(
+            'Gagal mengecek admin:',
+            adminError
+        );
 
         await supabaseClient.auth.signOut();
         showLoginForm();
@@ -44,7 +47,9 @@ async function checkAdminAccess() {
         if (loginError) {
             loginError.innerText =
                 "❌ Gagal memverifikasi akses admin.";
-            loginError.style.display = 'block';
+
+            loginError.style.display =
+                'block';
         }
 
         return false;
@@ -57,7 +62,9 @@ async function checkAdminAccess() {
         if (loginError) {
             loginError.innerText =
                 "❌ Akses ditolak. Akun ini bukan admin.";
-            loginError.style.display = 'block';
+
+            loginError.style.display =
+                'block';
         }
 
         return false;
@@ -68,39 +75,56 @@ async function checkAdminAccess() {
 
 
 // --- CEK SESI LOGIN SAAT HALAMAN DIBUKA ---
-window.addEventListener('DOMContentLoaded', async () => {
-    const isAdmin = await checkAdminAccess();
+window.addEventListener(
+    'DOMContentLoaded',
+    async () => {
 
-    if (isAdmin) {
-        const {
-            data: { session }
-        } = await supabaseClient.auth.getSession();
+        const isAdmin =
+            await checkAdminAccess();
 
-        if (session) {
-            showDashboard(session.user);
+        if (isAdmin) {
+
+            const {
+                data: {
+                    session
+                }
+            } =
+                await supabaseClient.auth.getSession();
+
+            if (session) {
+                showDashboard(
+                    session.user
+                );
+            }
         }
     }
-});
+);
 
 
 function showLoginForm() {
+
     if (loginSection) {
-        loginSection.style.display = 'flex';
+        loginSection.style.display =
+            'flex';
     }
 
     if (dashboardSection) {
-        dashboardSection.style.display = 'none';
+        dashboardSection.style.display =
+            'none';
     }
 }
 
 
 function showDashboard(user) {
+
     if (loginSection) {
-        loginSection.style.display = 'none';
+        loginSection.style.display =
+            'none';
     }
 
     if (dashboardSection) {
-        dashboardSection.style.display = 'block';
+        dashboardSection.style.display =
+            'block';
     }
 
     if (adminUserLabel) {
@@ -114,108 +138,176 @@ function showDashboard(user) {
 
 // --- FUNGSI LOGIN SUPABASE AUTH ---
 if (loginForm) {
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
 
-        loginError.style.display = 'none';
+    loginForm.addEventListener(
+        'submit',
+        async (e) => {
 
-        btnLoginSubmit.disabled = true;
-        btnLoginSubmit.innerText = "⏳ Memverifikasi...";
+            e.preventDefault();
 
-        const email =
-            document.getElementById('adminEmail').value.trim();
+            loginError.style.display =
+                'none';
 
-        const password =
-            document.getElementById('adminPassword').value;
+            btnLoginSubmit.disabled =
+                true;
 
-        const {
-            data,
-            error
-        } = await supabaseClient.auth.signInWithPassword({
-            email,
-            password
-        });
+            btnLoginSubmit.innerText =
+                "⏳ Memverifikasi...";
 
-        if (error) {
-            console.error("Supabase login error:", error);
 
-            loginError.innerText =
-                `❌ ${error.message || "Email atau Password salah!"}`;
+            const email =
+                document
+                    .getElementById(
+                        'adminEmail'
+                    )
+                    .value
+                    .trim();
 
-            loginError.style.display = 'block';
 
-            btnLoginSubmit.disabled = false;
+            const password =
+                document
+                    .getElementById(
+                        'adminPassword'
+                    )
+                    .value;
+
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+
+            if (error) {
+
+                loginError.innerText =
+                    "❌ Email atau Password salah!";
+
+                loginError.style.display =
+                    'block';
+
+                btnLoginSubmit.disabled =
+                    false;
+
+                btnLoginSubmit.innerText =
+                    "Masuk ke Dasbor 🚀";
+
+                return;
+            }
+
+
+            // Login berhasil,
+            // sekarang cek apakah benar-benar admin
+            const isAdmin =
+                await checkAdminAccess();
+
+
+            if (!isAdmin) {
+
+                btnLoginSubmit.disabled =
+                    false;
+
+                btnLoginSubmit.innerText =
+                    "Masuk ke Dasbor 🚀";
+
+                return;
+            }
+
+
+            btnLoginSubmit.disabled =
+                false;
+
             btnLoginSubmit.innerText =
                 "Masuk ke Dasbor 🚀";
 
-            return;
+
+            showDashboard(
+                data.user
+            );
         }
-
-        // Login berhasil, sekarang cek apakah benar-benar admin
-        const isAdmin = await checkAdminAccess();
-
-        if (!isAdmin) {
-            btnLoginSubmit.disabled = false;
-            btnLoginSubmit.innerText =
-                "Masuk ke Dasbor 🚀";
-
-            return;
-        }
-
-        btnLoginSubmit.disabled = false;
-        btnLoginSubmit.innerText =
-            "Masuk ke Dasbor 🚀";
-
-        showDashboard(data.user);
-    });
+    );
 }
 
 
 // --- FUNGSI LOGOUT ---
 async function logoutAdmin() {
+
     if (
         confirm(
             "Apakah Anda yakin ingin keluar dari Dashboard Admin?"
         )
     ) {
-        await supabaseClient.auth.signOut();
+
+        await supabaseClient
+            .auth
+            .signOut();
+
         showLoginForm();
     }
 }
 
 
 // --- FILE DOWNLOAD HELPERS ---
-function extractStoragePath(fileUrl) {
-    if (!fileUrl) return null;
+function extractStoragePath(
+    fileUrl
+) {
+
+    if (!fileUrl) {
+        return null;
+    }
 
     const marker =
         '/storage/v1/object/public/kohan-files/';
 
+
     if (fileUrl.includes(marker)) {
+
         return decodeURIComponent(
             fileUrl.split(marker)[1]
         );
     }
 
+
     return fileUrl;
 }
 
 
-async function getSignedFileUrl(filePathOrUrl) {
-    const filePath =
-        extractStoragePath(filePathOrUrl);
+async function getSignedFileUrl(
+    filePathOrUrl
+) {
 
-    if (!filePath) return null;
+    const filePath =
+        extractStoragePath(
+            filePathOrUrl
+        );
+
+
+    if (!filePath) {
+        return null;
+    }
+
 
     const {
         data,
         error
-    } = await supabaseClient
-        .storage
-        .from('kohan-files')
-        .createSignedUrl(filePath, 300);
+    } =
+        await supabaseClient
+            .storage
+            .from(
+                'kohan-files'
+            )
+            .createSignedUrl(
+                filePath,
+                300
+            );
+
 
     if (error) {
+
         console.error(
             'Gagal membuat signed URL:',
             error
@@ -224,123 +316,181 @@ async function getSignedFileUrl(filePathOrUrl) {
         return null;
     }
 
+
     return data?.signedUrl || null;
 }
 
 
-function getOrderFiles(order) {
+function getOrderFiles(
+    order
+) {
+
     if (
-        Array.isArray(order?.files) &&
+        Array.isArray(
+            order?.files
+        ) &&
         order.files.length
     ) {
+
         return order.files
             .filter(
                 file =>
                     file &&
-                    (file.path || file.url)
+                    (
+                        file.path ||
+                        file.url
+                    )
             )
-            .map((file, index) => ({
-                path:
-                    file.path ||
-                    file.url,
+            .map(
+                (
+                    file,
+                    index
+                ) => ({
 
-                name:
-                    file.name ||
-                    `file-${index + 1}`
-            }));
+                    path:
+                        file.path ||
+                        file.url,
+
+                    name:
+                        file.name ||
+                        `file-${index + 1}`
+                })
+            );
     }
+
 
     if (order?.file_url) {
-        return [{
-            path: order.file_url,
-            name:
-                order.file_name ||
-                'file'
-        }];
+
+        return [
+            {
+                path:
+                    order.file_url,
+
+                name:
+                    order.file_name ||
+                    'file'
+            }
+        ];
     }
+
 
     return [];
 }
 
 
 async function ensureJSZip() {
+
     if (window.JSZip) {
         return window.JSZip;
     }
+
 
     if (jsZipLoadPromise) {
         return jsZipLoadPromise;
     }
 
-    jsZipLoadPromise = new Promise(
-        (resolve, reject) => {
-            const existing =
-                document.querySelector(
-                    'script[data-kohan-jszip]'
-                );
 
-            if (existing) {
-                existing.addEventListener(
-                    'load',
-                    () => resolve(window.JSZip)
-                );
+    jsZipLoadPromise =
+        new Promise(
+            (
+                resolve,
+                reject
+            ) => {
 
-                existing.addEventListener(
-                    'error',
-                    reject
-                );
-
-                return;
-            }
-
-            const script =
-                document.createElement('script');
-
-            script.src =
-                'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
-
-            script.async = true;
-
-            script.dataset.kohanJszip =
-                'true';
-
-            script.onload = () => {
-                if (window.JSZip) {
-                    resolve(window.JSZip);
-                } else {
-                    reject(
-                        new Error(
-                            'JSZip tidak tersedia.'
-                        )
+                const existing =
+                    document.querySelector(
+                        'script[data-kohan-jszip]'
                     );
+
+
+                if (existing) {
+
+                    existing.addEventListener(
+                        'load',
+                        () =>
+                            resolve(
+                                window.JSZip
+                            )
+                    );
+
+                    existing.addEventListener(
+                        'error',
+                        reject
+                    );
+
+                    return;
                 }
-            };
 
-            script.onerror = () => {
-                reject(
-                    new Error(
-                        'Gagal memuat modul ZIP.'
-                    )
+
+                const script =
+                    document.createElement(
+                        'script'
+                    );
+
+
+                script.src =
+                    'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+
+                script.async =
+                    true;
+
+                script.dataset.kohanJszip =
+                    'true';
+
+
+                script.onload =
+                    () =>
+                        window.JSZip
+                            ? resolve(
+                                window.JSZip
+                            )
+                            : reject(
+                                new Error(
+                                    'JSZip tidak tersedia.'
+                                )
+                            );
+
+
+                script.onerror =
+                    () =>
+                        reject(
+                            new Error(
+                                'Gagal memuat modul ZIP.'
+                            )
+                        );
+
+
+                document.head.appendChild(
+                    script
                 );
-            };
+            }
+        );
 
-            document.head.appendChild(script);
-        }
-    );
 
     try {
+
         return await jsZipLoadPromise;
+
     } finally {
-        jsZipLoadPromise = null;
+
+        jsZipLoadPromise =
+            null;
     }
 }
 
 
-async function downloadOrderFile(fileUrl) {
+async function downloadOrderFile(
+    fileUrl
+) {
+
     const signedUrl =
-        await getSignedFileUrl(fileUrl);
+        await getSignedFileUrl(
+            fileUrl
+        );
+
 
     if (!signedUrl) {
+
         alert(
             '❌ Gagal membuat akses aman ke file.'
         );
@@ -348,11 +498,19 @@ async function downloadOrderFile(fileUrl) {
         return;
     }
 
-    const anchor =
-        document.createElement('a');
 
-    anchor.href = signedUrl;
-    anchor.target = '_blank';
+    const anchor =
+        document.createElement(
+            'a'
+        );
+
+
+    anchor.href =
+        signedUrl;
+
+    anchor.target =
+        '_blank';
+
     anchor.rel =
         'noopener noreferrer';
 
@@ -360,14 +518,21 @@ async function downloadOrderFile(fileUrl) {
 }
 
 
-async function downloadAllOrderFiles(orderId) {
+async function downloadAllOrderFiles(
+    orderId
+) {
+
     const order =
         adminOrdersCache.get(
             String(orderId)
         ) ||
-        adminOrdersCache.get(orderId);
+        adminOrdersCache.get(
+            orderId
+        );
+
 
     if (!order) {
+
         alert(
             '❌ Data pesanan tidak ditemukan.'
         );
@@ -375,10 +540,15 @@ async function downloadAllOrderFiles(orderId) {
         return;
     }
 
+
     const files =
-        getOrderFiles(order);
+        getOrderFiles(
+            order
+        );
+
 
     if (!files.length) {
+
         alert(
             '❌ Pesanan ini tidak memiliki file.'
         );
@@ -386,91 +556,134 @@ async function downloadAllOrderFiles(orderId) {
         return;
     }
 
+
     const button =
         document.querySelector(
             `[data-download-order="${orderId}"]`
         );
 
+
     const originalText =
         button?.innerText ||
         '📥 Download File';
 
+
     if (button) {
-        button.disabled = true;
+
+        button.disabled =
+            true;
+
         button.innerText =
             '⏳ Menyiapkan...';
     }
 
+
     try {
 
-        // Satu file: download langsung
-        if (files.length === 1) {
+        // One file:
+        // direct download,
+        // no ZIP overhead.
+        if (
+            files.length ===
+            1
+        ) {
+
             const signedUrl =
                 await getSignedFileUrl(
                     files[0].path
                 );
 
+
             if (!signedUrl) {
+
                 throw new Error(
                     'Gagal membuat akses aman ke file.'
                 );
             }
 
-            const anchor =
-                document.createElement('a');
 
-            anchor.href = signedUrl;
+            const anchor =
+                document.createElement(
+                    'a'
+                );
+
+
+            anchor.href =
+                signedUrl;
 
             anchor.download =
                 files[0].name ||
                 'file';
 
-            anchor.target = '_blank';
+            anchor.target =
+                '_blank';
 
             anchor.rel =
                 'noopener noreferrer';
 
-            document.body.appendChild(anchor);
+
+            document.body.appendChild(
+                anchor
+            );
+
 
             anchor.click();
+
 
             anchor.remove();
 
             return;
         }
 
-        // Banyak file: ZIP
+
         const JSZip =
             await ensureJSZip();
+
 
         const zip =
             new JSZip();
 
-        let downloadedCount = 0;
 
-        for (const file of files) {
+        let downloadedCount =
+            0;
+
+
+        for (
+            const file
+            of files
+        ) {
+
             const signedUrl =
                 await getSignedFileUrl(
                     file.path
                 );
 
+
             if (!signedUrl) {
+
                 throw new Error(
                     `Gagal mengakses ${file.name || 'file'}.`
                 );
             }
 
+
             const response =
-                await fetch(signedUrl);
+                await fetch(
+                    signedUrl
+                );
+
 
             if (!response.ok) {
+
                 throw new Error(
                     `Gagal mengunduh ${file.name || 'file'}.`
                 );
             }
 
+
             const blob =
                 await response.blob();
+
 
             zip.file(
                 file.name ||
@@ -478,44 +691,70 @@ async function downloadAllOrderFiles(orderId) {
                 blob
             );
 
+
             downloadedCount++;
         }
 
+
         const zipBlob =
             await zip.generateAsync({
-                type: 'blob'
+                type:
+                    'blob'
             });
+
 
         const url =
             URL.createObjectURL(
                 zipBlob
             );
 
-        const anchor =
-            document.createElement('a');
 
-        anchor.href = url;
+        const anchor =
+            document.createElement(
+                'a'
+            );
+
+
+        anchor.href =
+            url;
 
         anchor.download =
-            `${order.no_antrian || `order-${order.id}`}.zip`;
+            `${
+                order.no_antrian ||
+                `order-${order.id}`
+            }.zip`;
 
-        document.body.appendChild(anchor);
+
+        document.body.appendChild(
+            anchor
+        );
+
 
         anchor.click();
 
+
         anchor.remove();
 
+
         setTimeout(
-            () => URL.revokeObjectURL(url),
+            () =>
+                URL.revokeObjectURL(
+                    url
+                ),
             1000
         );
+
 
         alert(
             `✅ ${downloadedCount} file berhasil dikemas dan didownload.`
         );
 
     } catch (err) {
-        console.error(err);
+
+        console.error(
+            err
+        );
+
 
         alert(
             '❌ Gagal download semua file: ' +
@@ -525,7 +764,10 @@ async function downloadAllOrderFiles(orderId) {
     } finally {
 
         if (button) {
-            button.disabled = false;
+
+            button.disabled =
+                false;
+
             button.innerText =
                 originalText;
         }
@@ -533,86 +775,328 @@ async function downloadAllOrderFiles(orderId) {
 }
 
 
-// --- MEMUAT DATA PESANAN DARI SUPABASE ---
-async function loadOrders() {
+// --- TAMBAHKAN KOLOM PEMBAYARAN KE HEADER TABEL ---
+// Tidak perlu mengubah admin.html:
+// kolom ini disisipkan otomatis sebelum kolom File.
+function ensurePaymentColumnHeader() {
+
     const tbody =
         document.getElementById(
             'adminTableBody'
         );
 
+
     if (!tbody) {
         return;
     }
 
+
+    const table =
+        tbody.closest(
+            'table'
+        );
+
+
+    if (!table) {
+        return;
+    }
+
+
+    const headerRow =
+        table.querySelector(
+            'thead tr'
+        );
+
+
+    if (
+        !headerRow ||
+        headerRow.dataset.paymentHeaderAdded ===
+            'true'
+    ) {
+
+        return;
+    }
+
+
+    const headerCells =
+        Array.from(
+            headerRow.cells
+        );
+
+
+    const alreadyExists =
+        headerCells.some(
+            cell =>
+                /pembayaran|payment/i.test(
+                    cell.textContent.trim()
+                )
+        );
+
+
+    if (alreadyExists) {
+
+        headerRow.dataset.paymentHeaderAdded =
+            'true';
+
+        return;
+    }
+
+
+    const totalIndex =
+        headerCells.findIndex(
+            cell =>
+                /total/i.test(
+                    cell.textContent.trim()
+                )
+        );
+
+
+    const th =
+        document.createElement(
+            'th'
+        );
+
+
+    th.innerText =
+        'Pembayaran';
+
+
+    th.style.cssText = [
+        'white-space:nowrap',
+        'text-align:center'
+    ].join(';');
+
+
+    if (
+        totalIndex >= 0 &&
+        headerCells[
+            totalIndex + 1
+        ]
+    ) {
+
+        headerRow.insertBefore(
+            th,
+            headerCells[
+                totalIndex + 1
+            ]
+        );
+
+    } else {
+
+        headerRow.appendChild(
+            th
+        );
+    }
+
+
+    headerRow.dataset.paymentHeaderAdded =
+        'true';
+}
+
+
+// --- FORMAT INFO PEMBAYARAN ---
+function getPaymentDisplay(
+    order
+) {
+
+    const method =
+        String(
+            order?.payment_method ||
+            ''
+        )
+            .trim()
+            .toUpperCase();
+
+
+    // Order lama sebelum
+    // payment_method ditambahkan
+    // dianggap sebagai QRIS
+    // karena pada saat itu hanya
+    // QRIS yang tersedia.
+    const paymentMethod =
+        method === 'COD'
+            ? 'COD'
+            : 'QRIS';
+
+
+    const status =
+        String(
+            order?.status ||
+            ''
+        )
+            .trim()
+            .toUpperCase();
+
+
+    if (
+        paymentMethod ===
+        'COD'
+    ) {
+
+        return {
+
+            methodLabel:
+                '🏪 COD',
+
+            statusLabel:
+                '💵 Bayar saat pickup',
+
+            methodStyle:
+                'background:#dcfce7;color:#166534;border:1px solid #86efac;',
+
+            statusStyle:
+                'color:#166534;'
+        };
+    }
+
+
+    const isUnpaid =
+        status.includes(
+            'UNPAID'
+        );
+
+
+    return {
+
+        methodLabel:
+            '💳 QRIS',
+
+        statusLabel:
+            isUnpaid
+                ? '⏳ Belum Bayar'
+                : '✅ Sudah Bayar',
+
+        methodStyle:
+            'background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;',
+
+        statusStyle:
+            isUnpaid
+                ? 'color:#b45309;'
+                : 'color:#15803d;'
+    };
+}
+
+
+// --- MEMUAT DATA PESANAN DARI SUPABASE ---
+async function loadOrders() {
+
+    ensurePaymentColumnHeader();
+
+
+    const tbody =
+        document.getElementById(
+            'adminTableBody'
+        );
+
+
+    if (!tbody) {
+        return;
+    }
+
+
     tbody.innerHTML =
-        '<tr><td colspan="10" style="text-align: center; padding: 20px;">⏳ Memuat data pesanan...</td></tr>';
+        '<tr><td colspan="11" style="text-align: center; padding: 20px;">⏳ Memuat data pesanan...</td></tr>';
+
 
     const {
         data: orders,
         error
-    } = await supabaseClient
-        .from('orders')
-        .select('*')
-        .order('id', {
-            ascending: false
-        });
+    } =
+        await supabaseClient
+            .from(
+                'orders'
+            )
+            .select('*')
+            .order(
+                'id',
+                {
+                    ascending:
+                        false
+                }
+            );
+
 
     if (error) {
+
         console.error(
             'Gagal memuat orders:',
             error
         );
 
+
         tbody.innerHTML =
-            '<tr><td colspan="10" style="text-align: center; color:#ef4444; padding: 20px;">❌ Gagal memuat data dari database.</td></tr>';
+            '<tr><td colspan="11" style="text-align: center; color:#ef4444; padding: 20px;">❌ Gagal memuat data dari database.</td></tr>';
+
 
         return;
     }
+
 
     adminOrdersCache =
         new Map(
-            (orders || []).map(
-                order => [
-                    String(order.id),
-                    order
-                ]
+            (
+                orders ||
+                []
             )
+                .map(
+                    order =>
+                        [
+                            String(
+                                order.id
+                            ),
+                            order
+                        ]
+                )
         );
+
 
     if (
         !orders ||
-        orders.length === 0
+        orders.length ===
+            0
     ) {
+
         tbody.innerHTML =
-            '<tr><td colspan="10" style="text-align: center; padding: 20px;">Belum ada pesanan masuk.</td></tr>';
+            '<tr><td colspan="11" style="text-align: center; padding: 20px;">Belum ada pesanan masuk.</td></tr>';
 
         return;
     }
 
-    let html = '';
 
-    orders.forEach(o => {
+    let html =
+        '';
 
-        const dateStr =
-            new Date(
-                o.created_at
-            ).toLocaleString(
-                'id-ID',
-                {
-                    dateStyle: 'short',
-                    timeStyle: 'short'
-                }
-            );
 
-        const isSafeToDelete =
-            o.status.includes(
-                'SELESAI'
-            ) ||
-            o.status.includes(
-                'SIAP'
-            );
+    orders.forEach(
+        o => {
 
-        html += `
+            const dateStr =
+                new Date(
+                    o.created_at
+                ).toLocaleString(
+                    'id-ID',
+                    {
+                        dateStyle:
+                            'short',
+                        timeStyle:
+                            'short'
+                    }
+                );
+
+
+            // Proteksi:
+            // Cek apakah status aman
+            // untuk dihapus
+            const isSafeToDelete =
+                o.status.includes(
+                    'SELESAI'
+                ) ||
+                o.status.includes(
+                    'SIAP'
+                );
+
+
+            html += `
             <tr>
 
                 <td style="
@@ -682,21 +1166,74 @@ async function loadOrders() {
                     color: #16a34a;
                     font-weight: bold;
                 ">
-                    Rp ${
-                        Number(
-                            o.total_harga
-                        ).toLocaleString(
-                            'id-ID'
-                        )
-                    }
+                    Rp ${Number(
+                        o.total_harga
+                    ).toLocaleString(
+                        'id-ID'
+                    )}
+                </td>
+
+                <td style="
+                    min-width:140px;
+                    text-align:center;
+                ">
+                    ${(() => {
+
+                        const payment =
+                            getPaymentDisplay(
+                                o
+                            );
+
+
+                        return `
+                            <div
+                                style="
+                                    display:inline-flex;
+                                    flex-direction:column;
+                                    align-items:center;
+                                    gap:4px;
+                                "
+                            >
+
+                                <span
+                                    style="
+                                        display:inline-block;
+                                        padding:4px 9px;
+                                        border-radius:999px;
+                                        font-size:11px;
+                                        font-weight:800;
+                                        white-space:nowrap;
+                                        ${payment.methodStyle}
+                                    "
+                                >
+                                    ${payment.methodLabel}
+                                </span>
+
+                                <span
+                                    style="
+                                        font-size:11px;
+                                        font-weight:700;
+                                        white-space:nowrap;
+                                        ${payment.statusStyle}
+                                    "
+                                >
+                                    ${payment.statusLabel}
+                                </span>
+
+                            </div>
+                        `;
+
+                    })()}
                 </td>
 
                 <td>
                     ${(() => {
 
                         const fileCount =
-                            getOrderFiles(o)
-                                .length;
+                            getOrderFiles(
+                                o
+                            ).length;
+
 
                         return fileCount
                             ? `
@@ -717,14 +1254,19 @@ async function loadOrders() {
                                     title="Download semua file pesanan"
                                 >
                                     📥 ${
-                                        fileCount > 1
+                                        fileCount >
+                                        1
                                             ? `Download Semua (${fileCount})`
                                             : 'Download File'
                                     }
                                 </button>
                               `
                             : `
-                                <span style="color:var(--text-muted);">
+                                <span
+                                    style="
+                                        color:var(--text-muted);
+                                    "
+                                >
                                     Tanpa File
                                 </span>
                               `;
@@ -840,9 +1382,12 @@ async function loadOrders() {
 
             </tr>
         `;
-    });
+        }
+    );
 
-    tbody.innerHTML = html;
+
+    tbody.innerHTML =
+        html;
 }
 
 
@@ -851,26 +1396,38 @@ async function updateStatus(
     id,
     newStatus
 ) {
+
     const {
         error
-    } = await supabaseClient
-        .from('orders')
-        .update({
-            status: newStatus
-        })
-        .eq('id', id);
+    } =
+        await supabaseClient
+            .from(
+                'orders'
+            )
+            .update({
+                status:
+                    newStatus
+            })
+            .eq(
+                'id',
+                id
+            );
+
 
     if (error) {
+
         console.error(
             'Gagal update status:',
             error
         );
+
 
         alert(
             '❌ Gagal mengubah status pesanan.'
         );
 
     } else {
+
         loadOrders();
     }
 }
@@ -881,6 +1438,7 @@ async function deleteOrder(
     id,
     status
 ) {
+
     const isSafe =
         status.includes(
             'SELESAI'
@@ -889,7 +1447,9 @@ async function deleteOrder(
             'SIAP'
         );
 
+
     if (!isSafe) {
+
         alert(
             '⚠️ Pesanan tidak dapat dihapus!\n\n' +
             'Untuk alasan keamanan, ubah status pesanan menjadi ' +
@@ -897,8 +1457,10 @@ async function deleteOrder(
             'sebelum menghapus.'
         );
 
+
         return;
     }
+
 
     if (
         confirm(
@@ -909,18 +1471,27 @@ async function deleteOrder(
 
         const {
             error
-        } = await supabaseClient
-            .from('orders')
-            .delete()
-            .eq('id', id);
+        } =
+            await supabaseClient
+                .from(
+                    'orders'
+                )
+                .delete()
+                .eq(
+                    'id',
+                    id
+                );
+
 
         if (error) {
+
             alert(
                 '❌ Gagal menghapus pesanan: ' +
                 error.message
             );
 
         } else {
+
             alert(
                 '✅ Pesanan berhasil dihapus.'
             );

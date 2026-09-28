@@ -789,31 +789,31 @@ function startInvoiceTimer(
 }
 
 
-// --- VERIFIKASI STATUS SISWA ---
+// --- VERIFIKASI KELAYAKAN COD ---
 
 const phoneInput =
     document.getElementById(
         'phone'
     );
 
-const btnCheckStudent =
-    document.getElementById(
-        'btnCheckStudent'
-    );
-
-const btnApplyStudent =
-    document.getElementById(
-        'btnApplyStudent'
-    );
-
-const studentVerificationStatus =
-    document.getElementById(
-        'studentVerificationStatus'
-    );
-
 const paymentMethodGroup =
     document.getElementById(
         'paymentMethodGroup'
+    );
+
+const codPaymentOption =
+    document.getElementById(
+        'codPaymentOption'
+    );
+
+const codRadio =
+    document.querySelector(
+        'input[name="paymentMethod"][value="COD"]'
+    );
+
+const codPaymentHint =
+    document.getElementById(
+        'codPaymentHint'
     );
 
 
@@ -829,278 +829,157 @@ function getSelectedPaymentMethod() {
 }
 
 
-function resetStudentVerificationUI() {
-    if (studentVerificationStatus) {
-        studentVerificationStatus.innerText =
-            '🎓 Status siswa: belum dicek.';
+function setCodAvailability(
+    isAvailable,
+    message = null
+) {
+    if (codRadio) {
+        codRadio.disabled =
+            !isAvailable;
 
-        studentVerificationStatus.style.color =
+        if (
+            !isAvailable &&
+            codRadio.checked
+        ) {
+            codRadio.checked =
+                false;
+
+            const qrisRadio =
+                document.querySelector(
+                    'input[name="paymentMethod"][value="QRIS"]'
+                );
+
+            if (qrisRadio) {
+                qrisRadio.checked =
+                    true;
+            }
+        }
+    }
+
+    if (codPaymentOption) {
+        codPaymentOption.style.opacity =
+            isAvailable
+                ? '1'
+                : '0.6';
+
+        codPaymentOption.style.cursor =
+            isAvailable
+                ? 'pointer'
+                : 'not-allowed';
+
+        codPaymentOption.style.borderColor =
+            isAvailable
+                ? '#16a34a'
+                : '#94a3b8';
+    }
+
+    if (codPaymentHint) {
+        codPaymentHint.innerText =
+            message ||
+            (
+                isAvailable
+                    ? '✅ Nomor ini sudah memenuhi syarat COD.'
+                    : 'COD tersedia setelah nomor ini menyelesaikan minimal 1 transaksi QRIS yang sudah diselesaikan admin.'
+            );
+
+        codPaymentHint.style.color =
+            isAvailable
+                ? '#16a34a'
+                : 'var(--text-muted)';
+    }
+}
+
+
+function resetCodAvailability() {
+    setCodAvailability(
+        false,
+        'Masukkan nomor WhatsApp dan tunggu pengecekan kelayakan COD.'
+    );
+}
+
+
+async function checkCodEligibility() {
+    const phone =
+        phoneInput
+            ? phoneInput.value.trim()
+            : '';
+
+    if (!phone) {
+        resetCodAvailability();
+        return false;
+    }
+
+    if (codPaymentHint) {
+        codPaymentHint.innerText =
+            '⏳ Mengecek riwayat transaksi QRIS...';
+
+        codPaymentHint.style.color =
             'var(--text-muted)';
     }
 
-    if (btnApplyStudent) {
-        btnApplyStudent.style.display =
-            'none';
-    }
-
-    if (paymentMethodGroup) {
-        paymentMethodGroup.style.display =
-            'none';
-    }
-
-    const qrisRadio =
-        document.querySelector(
-            'input[name="paymentMethod"][value="QRIS"]'
+    const {
+        data,
+        error
+    } =
+        await supabaseClient.rpc(
+            'can_use_cod',
+            {
+                p_phone:
+                    phone
+            }
         );
 
-    if (qrisRadio) {
-        qrisRadio.checked = true;
-    }
-}
-
-
-async function checkStudentStatus() {
-    const phone =
-        phoneInput
-            ? phoneInput.value.trim()
-            : '';
-
-    if (!phone) {
-        alert(
-            '❌ Masukkan nomor WhatsApp terlebih dahulu.'
-        );
-
-        return;
-    }
-
-    if (btnCheckStudent) {
-        btnCheckStudent.disabled =
-            true;
-
-        btnCheckStudent.innerText =
-            '⏳ Mengecek...';
-    }
-
-    try {
-        const {
-            data,
-            error
-        } =
-            await supabaseClient.rpc(
-                'is_verified_student_phone',
-                {
-                    p_phone: phone
-                }
-            );
-
-        if (error) {
-            throw error;
-        }
-
-        if (data === true) {
-            if (studentVerificationStatus) {
-                studentVerificationStatus.innerText =
-                    '🎓 Status siswa: ✅ Terverifikasi';
-
-                studentVerificationStatus.style.color =
-                    '#16a34a';
-            }
-
-            if (btnApplyStudent) {
-                btnApplyStudent.style.display =
-                    'none';
-            }
-
-            if (paymentMethodGroup) {
-                paymentMethodGroup.style.display =
-                    'block';
-            }
-
-        } else {
-            if (studentVerificationStatus) {
-                studentVerificationStatus.innerText =
-                    '🎓 Status siswa: belum terverifikasi.';
-
-                studentVerificationStatus.style.color =
-                    'var(--text-muted)';
-            }
-
-            if (btnApplyStudent) {
-                btnApplyStudent.style.display =
-                    'block';
-            }
-
-            if (paymentMethodGroup) {
-                paymentMethodGroup.style.display =
-                    'none';
-            }
-        }
-
-    } catch (err) {
+    if (error) {
         console.error(
-            'Gagal mengecek status siswa:',
-            err
-        );
-
-        alert(
-            '❌ Gagal mengecek status siswa. Silakan coba lagi.'
-        );
-
-    } finally {
-        if (btnCheckStudent) {
-            btnCheckStudent.disabled =
-                false;
-
-            btnCheckStudent.innerText =
-                '🔎 Cek Status Siswa';
-        }
-    }
-}
-
-
-async function applyStudentStatus() {
-    const phone =
-        phoneInput
-            ? phoneInput.value.trim()
-            : '';
-
-    if (!phone) {
-        alert(
-            '❌ Masukkan nomor WhatsApp terlebih dahulu.'
-        );
-
-        return;
-    }
-
-    if (btnApplyStudent) {
-        btnApplyStudent.disabled =
-            true;
-
-        btnApplyStudent.innerText =
-            '⏳ Mengirim...';
-    }
-
-    try {
-        const {
-            data,
+            'Gagal mengecek kelayakan COD:',
             error
-        } =
-            await supabaseClient.rpc(
-                'submit_student_verification',
-                {
-                    p_phone: phone
-                }
-            );
-
-        if (error) {
-            throw error;
-        }
-
-        if (
-            data?.status ===
-            'verified'
-        ) {
-            if (studentVerificationStatus) {
-                studentVerificationStatus.innerText =
-                    '🎓 Status siswa: ✅ Terverifikasi';
-
-                studentVerificationStatus.style.color =
-                    '#16a34a';
-            }
-
-            if (btnApplyStudent) {
-                btnApplyStudent.style.display =
-                    'none';
-            }
-
-            if (paymentMethodGroup) {
-                paymentMethodGroup.style.display =
-                    'block';
-            }
-
-        } else if (
-            data?.status ===
-            'pending'
-        ) {
-            if (studentVerificationStatus) {
-                studentVerificationStatus.innerText =
-                    '🎓 Status siswa: ⏳ Menunggu verifikasi admin';
-
-                studentVerificationStatus.style.color =
-                    '#d97706';
-            }
-
-            if (btnApplyStudent) {
-                btnApplyStudent.style.display =
-                    'none';
-            }
-
-            if (paymentMethodGroup) {
-                paymentMethodGroup.style.display =
-                    'none';
-            }
-
-            alert(
-                '✅ Pengajuan status siswa berhasil dikirim. Tunggu verifikasi admin.'
-            );
-
-        } else {
-            alert(
-                data?.message ||
-                '❌ Pengajuan tidak dapat diproses.'
-            );
-        }
-
-    } catch (err) {
-        console.error(
-            'Gagal mengajukan status siswa:',
-            err
         );
 
-        alert(
-            '❌ Gagal mengajukan status siswa: ' +
-            err.message
+        setCodAvailability(
+            false,
+            '⚠️ Kelayakan COD belum dapat dicek. Gunakan QRIS atau coba lagi.'
         );
 
-    } finally {
-        if (btnApplyStudent) {
-            btnApplyStudent.disabled =
-                false;
-
-            btnApplyStudent.innerText =
-                '🎓 Ajukan Status Siswa';
-        }
+        return false;
     }
+
+    const isEligible =
+        data === true;
+
+    setCodAvailability(
+        isEligible
+    );
+
+    return isEligible;
 }
 
 
-if (btnCheckStudent) {
-    btnCheckStudent.addEventListener(
-        'click',
-        checkStudentStatus
-    );
-}
-
-
-if (btnApplyStudent) {
-    btnApplyStudent.addEventListener(
-        'click',
-        applyStudentStatus
-    );
+if (paymentMethodGroup) {
+    paymentMethodGroup.style.display =
+        'block';
 }
 
 
 if (phoneInput) {
     phoneInput.addEventListener(
         'input',
-        resetStudentVerificationUI
+        () => {
+            resetCodAvailability();
+        }
     );
 
     phoneInput.addEventListener(
         'blur',
-        checkStudentStatus
+        () => {
+            checkCodEligibility();
+        }
     );
 }
+
+
+// Saat halaman/form pertama kali dibuka:
+// QRIS tetap tersedia, COD belum aktif sampai nomor dicek.
+resetCodAvailability();
 
 
 // --- SUBMIT FORM & UPLOAD KE SUPABASE ---
@@ -1269,11 +1148,11 @@ if (orderForm) {
                 'COD'
             ) {
                 const {
-                    data: verified,
-                    error: verifyError
+                    data: eligible,
+                    error: codError
                 } =
                     await supabaseClient.rpc(
-                        'is_verified_student_phone',
+                        'can_use_cod',
                         {
                             p_phone:
                                 phone
@@ -1281,14 +1160,14 @@ if (orderForm) {
                     );
 
                 if (
-                    verifyError ||
-                    verified !== true
+                    codError ||
+                    eligible !== true
                 ) {
                     alert(
-                        '❌ Bayar di Tempat hanya tersedia untuk nomor WhatsApp siswa yang sudah terverifikasi.'
+                        '❌ COD belum tersedia untuk nomor WhatsApp ini. Selesaikan minimal 1 transaksi QRIS terlebih dahulu dan tunggu admin mengubah statusnya menjadi SELESAI.'
                     );
 
-                    resetStudentVerificationUI();
+                    await checkCodEligibility();
 
                     return;
                 }

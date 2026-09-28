@@ -326,7 +326,7 @@
                 
                 <div class="form-group">
                     <label for="file" id="fileLabel">Upload File Dokumen (PDF/DOCX) *</label>
-                    <input type="file" id="file" accept=".pdf,.docx,.doc,.png,.jpg,.jpeg,.cdr" required>
+                    <input type="file" id="file" multiple accept=".pdf,.docx,.doc,.png,.jpg,.jpeg,.cdr" required>
                     <span id="fileHelper" style="font-size: 12px; color: var(--text-muted); display: block; margin-top: 4px;">Format: PDF (Auto-deteksi halaman), DOCX, Gambar, CDR. Maksimal 10MB.</span>
                 </div>
 
@@ -427,6 +427,27 @@
                 <div class="form-group">
                     <label for="phone">Nomor WhatsApp *</label>
                     <input type="tel" id="phone" placeholder="Contoh: 088123456789" required>
+                    <div id="studentVerificationBox" style="margin-top: 10px; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--box-bg);">
+                        <div id="studentVerificationStatus" style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">🎓 Status siswa: belum dicek.</div>
+                        <button type="button" id="btnCheckStudent" style="width:100%; background: var(--bg-surface); color: var(--primary); border: 1px solid var(--primary); padding: 9px 12px; border-radius: 8px; font-weight: 700; cursor: pointer;">🔎 Cek Status Siswa</button>
+                        <button type="button" id="btnApplyStudent" style="display:none; width:100%; margin-top:8px; background: var(--primary); color:white; border:none; padding:9px 12px; border-radius:8px; font-weight:700; cursor:pointer;">🎓 Ajukan Status Siswa</button>
+                    </div>
+                </div>
+
+                <div id="paymentMethodGroup" class="form-group" style="display:none; margin-top: 16px;">
+                    <label style="display:block; margin-bottom:8px;">Metode Pembayaran *</label>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <label style="flex:1; min-width:180px; border:1px solid var(--border-color); border-radius:10px; padding:12px; cursor:pointer; background:var(--bg-surface);">
+                            <input type="radio" name="paymentMethod" value="QRIS" checked>
+                            <b>💳 QRIS</b><br>
+                            <small style="color:var(--text-muted);">Bayar sebelum pesanan diproses.</small>
+                        </label>
+                        <label id="codPaymentOption" style="flex:1; min-width:180px; border:1px solid #16a34a; border-radius:10px; padding:12px; cursor:pointer; background:var(--bg-surface);">
+                            <input type="radio" name="paymentMethod" value="COD">
+                            <b style="color:#16a34a;">🏪 Bayar di Tempat</b><br>
+                            <small style="color:var(--text-muted);">Khusus siswa terverifikasi, bayar saat ambil.</small>
+                        </label>
+                    </div>
                 </div>
 
                 <div class="price-box" style="margin-top: 32px;">
@@ -462,13 +483,21 @@
             </div>
 
             <div class="payment-card">
-                <div class="payment-title">Selesaikan Pembayaran</div>
+                <div class="payment-title" id="invoicePaymentTitle">Selesaikan Pembayaran</div>
                 <div id="invoiceTimer" class="timer-badge">⏱️ 10:00</div>
-                <div class="qris-box">
-                    <img src="qris.jpeg" alt="QRIS KohanCopier" style="width: 100%; height: auto; border-radius: 6px; cursor: zoom-in;" onclick="openQrisModal()" title="Klik untuk perbesar">
+                <div id="invoiceQrisArea">
+                    <div class="qris-box">
+                        <img src="qris.jpeg" alt="QRIS KohanCopier" style="width: 100%; height: auto; border-radius: 6px; cursor: zoom-in;" onclick="openQrisModal()" title="Klik untuk perbesar">
+                    </div>
+                    <div class="payment-desc">Scan menggunakan M-Banking / E-Wallet<br>(Gopay, Dana, ShopeePay, dll)</div>
+                    <a id="btnInvWA" href="#" target="_blank" class="btn-wa">📱 Konfirmasi via WhatsApp</a>
                 </div>
-                <div class="payment-desc">Scan menggunakan M-Banking / E-Wallet<br>(Gopay, Dana, ShopeePay, dll)</div>
-                <a id="btnInvWA" href="#" target="_blank" class="btn-wa">📱 Konfirmasi via WhatsApp</a>
+                <div id="invoiceCodArea" style="display:none;">
+                    <div style="padding:16px; border-radius:12px; background:#f0fdf4; border:1px solid #86efac; color:#166534; line-height:1.6;">
+                        <b>🏪 Bayar di Tempat</b><br>
+                        Pesanan akan diproses. Pembayaran dilakukan langsung saat kamu mengambil pesanan di KohanCopier.
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -627,6 +656,7 @@
             <p style="margin: 3px 0;"><b>Waktu Ambil:</b> <span id="mAmbil">-</span></p>
             <p style="margin: 3px 0;"><b>Detail:</b> <span id="mDetail">-</span></p>
             <p style="margin: 3px 0; font-size: 15px;"><b>Total Pembayaran:</b> <span id="mTotal" style="color:var(--primary); font-weight:bold;">-</span></p>
+            <p style="margin: 3px 0;"><b>Metode Pembayaran:</b> <span id="mPaymentMethod">QRIS</span></p>
         </div>
         <div style="display: flex; gap: 10px;">
             <button type="button" onclick="closeConfirmModal()" style="flex: 1; background: #94a3b8; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">Batalkan</button>
